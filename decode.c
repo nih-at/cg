@@ -9,6 +9,8 @@
 
 #define BINHEX_TAG "(This file must be converted with BinHex 4.0)"
 
+static int decode_line(unsigned char *buf, char *line, int *table);
+
 enum enctype decode_mime(FILE *fin, FILE **foutp, char **fnamep,
 			 struct header *h);
 enum enctype decode_uu(FILE *fin, FILE *fout, int inp);
@@ -409,11 +411,11 @@ decode_binhex(FILE *fin, FILE **foutp, char **fn)
 
 
 
-int
+static int
 decode_line(unsigned char *buf, char *line, int *table)
 {
     static int rest, no;
-    int i;
+    int i, b;
 
     if (line == NULL) {
 	if (no != 0)
@@ -437,14 +439,14 @@ decode_line(unsigned char *buf, char *line, int *table)
 		}
 		else {
 		    rest = no = 0;
-		    return i | DEC_EOF | DEC_ILL;
+		    return i | DEC_EOF | DEC_ILLEGAL;
 		}
 	    case DEC_EQUAL:
 		switch (no) {
 		case 0:
 		case 1:
 		    rest = no = 0;
-		    return i | DEC_ILL;
+		    return i | DEC_ILLEGAL;
 		case 2:
 		    buf[i++] = rest >> 4;
 		    break;
@@ -457,7 +459,7 @@ decode_line(unsigned char *buf, char *line, int *table)
 		return i | DEC_EOF;
 	    default:
 		rest = no = 0;
-		return i | DEC_ILL;
+		return i | DEC_ILLEGAL;
 	    }
 	}
 
