@@ -7,19 +7,29 @@ AC_SUBST(LIBOBJS)
 # We want these before the checks, so the checks can modify their values.
 #test -z "$CFLAGS" && CFLAGS='-g -Wall' auto_cflags=1
 
+dnl programs
+
 AC_PROG_CC
 AM_PROG_LEX
 
 # covered by LEX test above
 # AC_DECL_YYTEXT
 
-AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
-AC_REPLACE_FUNCS(hstrerror)
+dnl libraries
+
+AC_CHECK_LIB(socket, main)
+AC_CHECK_LIB(nsl, main)
+AC_CHECK_LIB(resolv, main)
 
 # we need zlib for CRC32
 AC_CHECK_LIB(z, crc32, [], 
 	AC_MSG_ERROR([needed library zlib not found]))
 AC_CHECK_HEADER(zlib.h, [], 
 	AC_MSG_ERROR([needed include file for zlib not found]))
+
+dnl functions
+
+AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
+AC_REPLACE_FUNCS(hstrerror vasprintf)
 
 AC_OUTPUT(Makefile regress/Makefile)

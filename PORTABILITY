@@ -4,7 +4,7 @@ IRIX64		6.2	n
 NetBSD/i386 	1.4.2	y	10
 NetBSD/i386	1.5.2	y	10
 OSF1		4.0	n
-Solaris		2.7	n
+Solaris		2.7	y*	10
 SUSE Linux	fsmat	y	10
 
 IRIX
@@ -14,4 +14,4 @@ OSF1 4.0
 	compile failure: warnings, can't find zlib.h, yywrap unresolved
 
 Solaris
-	compile failure: -lnsl et al missing
+	compile problem: -R/usr/local/include needed

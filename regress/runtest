@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#  $NiH: runtest,v 1.4 2002/04/12 14:42:50 wiz Exp $
+#  $NiH: runtest,v 1.5 2002/04/14 21:53:38 dillo Exp $
 #
 #  runtest -- run regression tests
 #  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -53,7 +53,7 @@ fail() {
 }
 
 succeed() {
-	if [ ! -z ${VERBOSE} ]
+	if [ ! -z "${VERBOSE}" ]
 	then
 		echo "${TEST} -- passed";
 	fi
@@ -74,10 +74,10 @@ checkfile() {
 	then
 		fail "missing output file: '$2'"
 	else
-		diff -q "$1" "$2" > /dev/null
+		diff "$1" "$2" > /dev/null
 		if [ $? -ne 0 ]
 		then
-			if [ ! -z ${VERBOSE} ]
+			if [ ! -z "${VERBOSE}" ]
 			then
 				diff -u "$1" "$2"
 			fi
@@ -99,7 +99,7 @@ TEST=`echo $1 | sed 's/\.test$//'`
 shift
 
 DIR=${TEST}.d$$
-if [ -z ${srcdir} ]
+if [ -z "${srcdir}" ]
 then
     srcdir=..
 else
@@ -107,7 +107,7 @@ else
 	srcdir=../${srcdir}
 fi
 
-if [ -z ${TESTDEC} ]
+if [ -z "${TESTDEC}" ]
 then
     TESTDEC=../../testdec
 fi
@@ -122,7 +122,7 @@ cd ${DIR} || ( die "cannot cd to test directory ${DIR}" )
 read c RET
 check_in $c return
 
-if [ ! -z ${VERBOSE} ]
+if [ ! -z "${VERBOSE}" ]
 then
 	echo "running: ${TESTDEC} ${srcdir}/${TEST}.in*"
 fi
@@ -145,11 +145,11 @@ do
     checkfile ${srcdir}/${EXP} "${OUT}" "unexpected file content: '${OUT}'"
 done
 
-sort .files.need | diff -u - .files.got | grep '+' > .files.extra
+sort .files.need | diff - .files.got | grep '>' > .files.extra
 
 if [ `wc -l .files.extra | awk '{print $1}'` -ne 0 ]
 then
-	fail "unexpected files: `sed 's/+ \(.*\)/\1,/'`"
+	fail "unexpected files: `sed 's/> \(.*\)/\1,/'`"
 fi
 
 succeed
