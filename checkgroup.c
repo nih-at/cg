@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <getopt.h>
@@ -28,6 +29,7 @@ struct file {
     long *artno;
     int new;
     long size;
+    int part0;
 };
 
 #define MAX_PATTERNS 6
@@ -60,32 +62,34 @@ int mark_complete;
 
 FILE *conin, *conout, *dfile;
 
+volatile int save_and_quit;
+
 
 
 #include "config.h"
 
 char version_string[] = 
 PACKAGE " " VERSION "\n\
-Copyright (C) 1997 Dieter Baron, Thomas Klausner\n"
+Copyright (C) 1997, 2001 Dieter Baron, Thomas Klausner\n"
 PACKAGE " comes with ABSOLUTELY NO WARRANTY, to the extent permitted by law.\n\
 You may redistribute copies of\n"
 PACKAGE " under the terms of the GNU General Public License.\n\
 For more information about these matters, see the files named COPYING.\n";
 
 char usage_string[] = "\
-Usage: %s [-cm] [-s server] [-n rcfile] [-u user] [-p passwd] group ...\n";
+Usage: %s [-chmV] [-s server] [-n rcfile] [-u user] [-p passwd] group ...\n";
 
 char help_string[] = "\
 \n\
   -h, --help            display this help message\n\
   -V, --version         display version number\n\
 \n\
+  -c, --mark-complete   mark only parts of complete files as read\n\
   -m, --mac             call hexbin decoder\n\
   -n, --newsrc FILE     use FILE as newsrc file\n\
-  -u, --user USER       specify user for authentication\n\
   -p, --pass PASS       specify password for authentication\n\
   -s, --server SERVER   NNTP server\n\
-  -c, --mark-complete   mark only parts of complete files as read\n\
+  -u, --user USER       specify user for authentication\n\
 \n\
 Report bugs to <cg-bugs@giga.or.at>.\n";
 
@@ -122,6 +126,16 @@ void writegrouptorc (FILE *copy, char *compstr);
 
 
 
+void
+sighandle(int sigtype)
+{
+    save_and_quit = 1;
+
+    return;
+}
+
+
+
 int
 main(int argc, char **argv)
 {
@@ -144,6 +158,10 @@ main(int argc, char **argv)
     header_init();
 
     nntp_host = nntp_user = nntp_pass = NULL;
+
+    /* signal handling */
+    save_and_quit = 0;
+    signal(SIGINT, sighandle);
 
     opterr = 0;
     while ((c=getopt_long(argc, argv, OPTIONS, options, 0)) != EOF) {
@@ -305,9 +323,11 @@ main(int argc, char **argv)
 	gute=0;
 	
 	for (j=0; toget[j]!=-1;j++) {
-	    if (decode(todec[toget[j]]) == 0) {
+	    if (save_and_quit || (decode(todec[toget[j]]) == 0)) {
 		for (k=0; k<todec[toget[j]]->npart; k++)
 		    range_clear(rcmap, todec[toget[j]]->artno[k]);
+		if (todec[toget[j]]->part0 != -1)
+		    range_clear(rcmap, todec[toget[j]]->part0);
 	    }
 	    else
 		gute++;
@@ -329,6 +349,11 @@ main(int argc, char **argv)
 	if (verbose)
 	    printf("%s: %ld found, %ld chosen, %ld decoded\n",
 		   argv[i], no_complete, no_file, gute);
+
+	if (save_and_quit) {
+	    printf("quitting after interrupt signal\n");
+	    break;
+	}
     }
 
     exit(0);
@@ -511,7 +536,8 @@ parse(map *parts, FILE *f)
 	    if (regexec(&pattern[i], subj, 6, match, 0) == 0)
 		break;
 	}
-	
+
+	/* didn't match a pattern, judge by file size */
 	if (i == MAX_PATTERNS) {
 	    /* deep magic */
 	    if ((lines > 100) && ((size - 1024)/lines > 60)) {
@@ -543,20 +569,11 @@ parse(map *parts, FILE *f)
 	    else
 		npart = 1;
 	}
-	
-	if (part == 0) {
-	    /* XXX save info */
-	    free(key);
-	    free(comment);
-	    if (!mark_complete)
-		range_set(rcmap, artno);
-	    continue;
-	}
 
 	if ((npart == 0) || (npart > 10000) || (part > 10000)
 	    || (part > npart)) {
 	    /* DEBUG */ fprintf(dfile,"%s: ignored: part %d of %d\n",
-				subj, part, part);
+				subj, part, npart);
 	    free(key);
 	    free(comment);
 	    if (!mark_complete)
@@ -577,6 +594,7 @@ parse(map *parts, FILE *f)
 		val->artno[i] = -1;
 	    val->new=0;
 	    val->size = 0;
+	    val->part0 = -1;
 
 	    *valp = val;
 	}
@@ -584,6 +602,17 @@ parse(map *parts, FILE *f)
 	    val = *valp;
 	    free(key);
 	    free(comment);
+	}
+
+	/* make comment available for writing to .desc file */
+	if (part == 0) {
+	    /* take first appearing comment only */
+	    if (val->part0 == -1) {
+		val->part0 = artno;
+		if (!mark_complete)
+		    range_set(rcmap, artno);
+	    }
+	    continue;
 	}
 
 	if (val->artno[part-1] != -1 ) {
@@ -621,6 +650,33 @@ extract(char *s, regmatch_t m)
     t[m.rm_eo-m.rm_so] = '\0';
 
     return t;
+}
+
+
+
+void
+save_comment(FILE *fin)
+{
+    char *line;
+    char *fn;
+    FILE *fout;
+
+#if 0
+    while ((line=getline(fin))!=NULL) {
+	;
+    }
+    return;
+#endif
+    /* XXX: hm, from where do I get the filename? */
+    fn = NULL;
+
+    fout = fopen_uniq(&fn);
+    while ((line=getline(fin))!=NULL) {
+	fwrite(line, 1, strlen(line), fout);
+    }
+    fclose(fout);
+
+    return;
 }
 
 
@@ -693,6 +749,18 @@ decode(struct file *val)
 	errfilename[0] = '\0';
 	errpartno = 0;
 	return 0;
+    }
+
+    /* save comment */
+    if (val->part0 != -1) {
+	ret = nntp_put("article %ld", val->part0);
+ 	if (ret != 220 && ret != 224) {
+	    prerror(errpart, "article %ld [comment, ignored] failed: %s\n",
+		    val->part0, nntp_response);
+	}
+	else {
+	    save_comment(conin);
+	}
     }
 
     errfilename[0] = '\0';
