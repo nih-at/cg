@@ -1,5 +1,5 @@
 /*
-  $NiH: stream.c,v 1.3 2002/04/10 16:21:19 wiz Exp $
+  $NiH: stream.c,v 1.4 2002/04/10 16:23:32 wiz Exp $
 
   stream.c -- stream interface
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -27,7 +27,7 @@
 
 
 
-static token _tok_eof = { TOK_EOF, NULL };
+static token _tok_eof = { TOK_EOF, 0, NULL };
 token * TOKEN_EOF = &_tok_eof;
 
 
