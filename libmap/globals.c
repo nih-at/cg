@@ -34,8 +34,8 @@ char *map__strdup(const char *s);
 
 
 int map_def_size = 1024;
-int (*map_def_equal)(void *key1, void *key2) = strcmp;
+int (*map_def_equal)(void *key1, void *key2) = (int (*)())strcmp;
 unsigned int (*map_def_hash)(void *key, int size) = map_strhash;
-void *(*map_def_cpykey)(void *key) = strdup;
+void *(*map_def_cpykey)(void *key) = (void *(*)())strdup;
 void (*map_def_delkey)(void *key) = free;
 void (*map_def_delval)(void *value) = NULL;

@@ -22,7 +22,7 @@
 
 
 
-#define MAP_DFL -1
+#define MAP_DFL ((void (*)())-1)
 
 typedef struct map_entry {
     void *key, *value;

@@ -44,9 +44,12 @@ new_map2(int size,
 	return NULL;
 
     m->size = size ? size : map_def_size;
-    m->equal = (equal == MAP_DFL || equal == NULL) ? map_def_equal : equal;
-    m->hash = (hash == MAP_DFL || hash == NULL) ? map_def_hash : hash;
-    m->cpykey = (cpykey == MAP_DFL) ? map_def_cpykey : cpykey;
+    m->equal = (equal == (int (*)())MAP_DFL || equal == NULL)
+	? map_def_equal : equal;
+    m->hash = (hash == (unsigned int (*)())MAP_DFL || hash == NULL)
+	? map_def_hash : hash;
+    m->cpykey = (cpykey == (void *(*)())MAP_DFL)
+	? map_def_cpykey : cpykey;
     m->delkey = (delkey == MAP_DFL) ? map_def_delkey : delkey;
     m->delval = (delval == MAP_DFL) ? map_def_delval : delval;
 

@@ -29,9 +29,14 @@
 map_iter *
 map_start(map *m)
 {
-    map_iter *mi = (map_iter *)malloc(sizeof(map_iter));
+    map_iter *mi;
+
+    if ((mi=(map_iter *)malloc(sizeof(map_iter))) == NULL)
+	return NULL;
 
     mi->m = m;
     mi->index = -1;
     mi->entry = NULL;
+
+    return mi;
 }
