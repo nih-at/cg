@@ -263,7 +263,7 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 	else {
 	    end = 0;
 	    len2[1] = (line[0] - ' ');
-	    if ((strlen(line)-1+3)/4 == (len+2)/3) {
+	    if ((strlen(line)-1+3)/4 == (len2[1]+2)/3) {
 		if (len2[0] == 45) {
 		    strcpy(b2[1], line);
 		    inp = 1;
