@@ -557,18 +557,15 @@ extract(char *s, regmatch_t m)
 int
 decode(struct file *val)
 {
-    FILE *f;
+    enctype type, oldtype;
+    FILE *fout;
     char b[BUFSIZE], cmd[BUFSIZE*2], **fname, *s;
     int i, state, skip, l;
 
     printf("decoding `%s'\n", val->tag);
 
-    strcpy(cmd, decoder);
-    s = cmd+strlen(cmd);
-    if ((fname=(char **)malloc(sizeof(char *)*val->npart)) == NULL) {
-	fprintf(stderr, "%s: malloc failure\n", prg);
-	exit(1);
-    }
+    type = enc_unknown;
+    fout = NULL;
 
     for (i=0; i<val->npart; i++) {
 	nntp_put("article %ld", val->artno[i]);
@@ -578,57 +575,32 @@ decode(struct file *val)
 	    return 0;
 	}
 
-	sprintf(b, ".decode-%ld", val->artno[i]);
-	if ((f=fopen(b, "w")) == NULL) {
-	    fprintf(stderr, "%s: can't create %s: %s\n",
-		    prg, b, strerror(errno));
+	oldtype = type;
+	type = decodefile(conin, &fout, type);
+
+	switch(type) {
+	case enc_nodata:
+	case enc_error:
 	    return 0;
-	}
-	fname[i] = strdup(b);
-	sprintf(s, " %s", b);
-	s += strlen(s);
-	
-	state = 0;
-	while (fgets(b, BUFSIZE, conin)) {
-	    skip = 0;
-	    l=strlen(b);
 	    
-	    if (b[l-1] == '\n')
-		b[--l] = '\0';
-	    if (b[l-1] == '\r')
-		b[--l] = '\0';
-
-	    if (b[0] == '.') {
-		if (b[1] == '\0')
-		    break;
-		else if (b[1] == '.')
-		    skip = 1;
+	case enc_eof:
+	    if (i != val->npart-1) {
+		prerror("`%s': premature end of encoded data in part %d of %d",
+			val->tag, i+1, val->npart);
+		return 0;
 	    }
-
-	    if (state == 0) {
-		if (strncasecmp(b, "Subject: ", 8) == 0) {
-		    sprintf(b, "Subject: %s (%d/%d)",
-			    val->tag, i+1, val->npart);
-		}
-		else if (b[0] == '\n')
-		    state = 1;
-	    }
-
-	    fputs(b+skip, f);
-	    putc('\n', f);
+	    break;
+	default:
+	    break;
 	}
-
-	fclose(f);
     }
 
-    system(cmd);
-
-    for (i=0; i<val->npart; i++) {
-	unlink(fname[i]);
-	free(fname[i]);
+    if (oldtype != enc_base64 && type != enc_eof) {
+	prerror("`%s': end of encoded data not found",
+		val->tag);
+	return 0;
     }
-    free(fname);
-
+    
     return 1;
 }
 
