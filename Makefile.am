@@ -11,8 +11,7 @@ cg_SOURCES=checkgroup.c decode.c header.c mime.c newsrc.c \
 	stream_msg_multi.c stream_msg_partial.c stream_section.c \
 	stream_uuextract.c stream_yenc.c symbol.c tables.c token.c util.c 
 
-cg_LDADD=libmap/libmap.a @LIBOBJS@ @LEXLIB@ -lz
-LDADD=-lz
+cg_LDADD=libmap/libmap.a @LIBOBJS@ @LEXLIB@
 
 testdec_SOURCES=testdec.c decode.c util.c mime.c tables.c header.c symbol.c \
 	stream_fcat.c stream_decode.c stream.c stream_msg_multi.c token.c \
