@@ -30,7 +30,7 @@ map_strhash(void *key, int size)
     unsigned int i;
 
     for (i=0,s=(char *)key; *s; s++)
-	i += *(s++);
+	i += *s;
     
     return (((i*i)%size)*i)%size;
 }

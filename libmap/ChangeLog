@@ -1,0 +1,4 @@
+2003-02-23  Dieter Baron  <dillo@danbala.tuwien.ac.at>
+
+	* strhash.c (map_strhash): don't increase s twice.
+
