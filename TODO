@@ -1,3 +1,4 @@
+tone down on debugging info, turn off .debug file by default
 test cases: mime: unknown CTE, errors
 
 uuencode-base64 support
