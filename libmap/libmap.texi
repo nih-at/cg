@@ -341,6 +341,15 @@ The global variables and their values upon startup:
 On systems without @code{strdup}, a replacement function (with the same
 functionality but a different name) is included in the library and used
 in @code{map_def_cpykey}.
+
+Another global variable is included in libmap:
+
+@deftypevar {const char *} map_version
+This string contains both name and version of the library, in the form
+@code{"libmap (version @var{xxx})"}.
+@end deftypevar
+
+
 @iftex
 @page
 @end iftex

@@ -1,6 +1,6 @@
 F test program & check target
-F map_version
 ---------------------------------------------------------------- done
+F map_version
 C add email address to copyright notice
 C name internal objects and functions _map_* instead of map__*
 C rename {free,new}_map* to map_{free,new}*
