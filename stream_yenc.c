@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_yenc.c,v 1.3 2002/04/10 16:21:23 wiz Exp $
+  $NiH: stream_yenc.c,v 1.4 2002/04/10 16:23:37 wiz Exp $
 
   stream_yenc.c -- extract and decode yenc data
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -27,8 +27,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <zlib.h>
-
+#include "crc.h"
 #include "header.h"
 #include "stream.h"
 #include "stream_types.h"
@@ -200,8 +199,8 @@ yenc_get(struct stream_yenc *this)
 		    this->state = Y_DATA;
 
 		    this->pos += i;
-		    this->crc = crc32(this->crc, t->line, i);
-		    this->pcrc = crc32(this->pcrc, t->line, i);
+		    this->crc = crc_update(this->crc, t->line, i);
+		    this->pcrc = crc_update(this->pcrc, t->line, i);
 
 		    return token_set3(&this->st.tok, TOK_DATA, i, t->line);
 
@@ -299,7 +298,7 @@ _yenc_handle_begin(struct stream_yenc *this, char *ybegin, int firstp)
 
     if (firstp) {
 	this->part = 0;
-	this->crc = crc32(0, NULL, 0);
+	this->crc = crc_update(0, NULL, 0);
 	this->size = -1;
 	this->pos = 0;
 	this->name = NULL;
@@ -308,7 +307,7 @@ _yenc_handle_begin(struct stream_yenc *this, char *ybegin, int firstp)
     this->part++;
     this->pbegin = this->pos;
     this->pend = -1;
-    this->pcrc = crc32(0, NULL, 0);
+    this->pcrc = crc_update(0, NULL, 0);
 
     do {
 	ybegin = strchr(ybegin, ' ');

@@ -21,12 +21,6 @@ AC_CHECK_LIB(socket, main)
 AC_CHECK_LIB(nsl, main)
 AC_CHECK_LIB(resolv, main)
 
-# we need zlib for CRC32
-AC_CHECK_LIB(z, crc32, [], 
-	AC_MSG_ERROR([needed library zlib not found]))
-AC_CHECK_HEADER(zlib.h, [], 
-	AC_MSG_ERROR([needed include file for zlib not found]))
-
 dnl functions
 
 AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
