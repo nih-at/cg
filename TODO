@@ -1,3 +1,5 @@
+when articles go missing between selection and download, do not
+  download the parts of the articles that are still there
 add flag that saves XOVER records to file for remote debugging
 test cases: mime: unknown CTE, errors
 save additional file with meta information so that one can restart
