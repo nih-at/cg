@@ -8,16 +8,6 @@ It supports decoding data in the following formats:
 	 base64, quoted printable, x-uuencode)
    yEnc
 
-Comments in 0-parts or around the encoded data are saved in the file
-"filename.desc"; broken files (problems during decoding, missing parts
-due to expiration) are saved as "filename.broken".  Files are not
-overwritten, rather ".1", ".2", ... is appended to the filename to
-make it unique.
-
-The EDITOR and VISUAL environment variables are honored.
-Set the NNTPSERVER environment variable to choose your newsserver
-(which must support xover records), or use the "-s" flag.
-
 Start it with 'cg somenewsgroup'; `cg -h' offers a short help, should
 you need it.
 
