@@ -673,6 +673,7 @@ save_comment(FILE *fin)
     fout = fopen_uniq(&fn);
     while ((line=getline(fin))!=NULL) {
 	fwrite(line, 1, strlen(line), fout);
+	fputc('\n', fout);
     }
     fclose(fout);
 
