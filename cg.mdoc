@@ -1,4 +1,4 @@
-.\" $NiH$
+.\" $NiH: cg.mdoc,v 1.1 2002/04/16 22:47:26 wiz Exp $
 .\"
 .\" cg.mdoc -- mdoc man page for cg
 .\" Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -28,7 +28,7 @@
 .Nd semi-automatic newsgroup binary downloader
 .Sh SYNOPSIS
 .Nm
-.Op Fl -chmV
+.Op Fl chmV
 .Op Fl s Ar server
 .Op Fl n Ar rcfile
 .Op Fl u Ar user
@@ -43,7 +43,8 @@ editor for the user to choose which files he really wants.
 It supports decoding data in the following formats:
 .Bl -tag -width uuencode -compact -offset indent
 .It MIME
-All of the following are supported: multipart/mixed, message/partial;
+The following message formats are supported: multipart/mixed,
+message/partial; the following encodings are supported:
 base64, quoted printable, x-uuencode.
 .It uuencode
 Both single- and multi-posting binaries.
@@ -95,7 +96,7 @@ are decoded and saved in the current directory.
 .Pp
 Comments in 0-parts or around the encoded data are saved in the file
 .Dq filename.desc ;
-Broken files (problems during decoding, missing parts due to
+broken files (problems during decoding, missing parts due to
 expiration) are saved as
 .Dq filename.broken .
 Files are not overwritten, rather
