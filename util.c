@@ -271,3 +271,43 @@ debug(out_state *out, char *fmt, ...)
 
     free(s);
 }
+
+
+
+int
+append_file(char *t, char *s, char *sep)
+{
+    FILE *fin, *fout;
+    char b[8192];
+    int n, m, i;
+
+    if ((fin=fopen(s, "rb")) == NULL)
+	return EOF;
+    if ((fout=fopen(t, "ab")) == NULL) {
+	fclose(fin);
+	return EOF;
+    }
+
+    if (fputs(sep, fout) != 0) {
+	fclose(fin);
+	fclose(fout);
+	return EOF;
+    }
+
+    while ((n=fread(b, 1, 8192, fin)) > 0)
+	for (i=0; n>0; n-=m,i+=m)
+	    if ((m=fwrite(b+i, 1, n, fout)) <= 0) {
+		fclose(fin);
+		fclose(fout);
+		return EOF;
+	    }
+
+    if (ferror(fin)) {
+	fclose(fin);
+	fclose(fout);
+	return EOF;
+    }
+    
+    fclose(fin);
+    return fclose(fout);
+}

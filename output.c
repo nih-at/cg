@@ -7,6 +7,8 @@
 #include "output.h"
 #include "util.h"
 
+static void close_fdesc(out_state *out);
+
 
 
 out_state *
@@ -19,6 +21,8 @@ output_new()
     out->infile = out->warned = out->ndata = 0;
     out->do_debug = 1;
     out->do_fdesc = -1;
+    out->fdescnl = 0;
+    out->prev_fdesc = NULL;
     out->fout = out->debug = out->fdesc = NULL;
 
     return out;
@@ -32,8 +36,12 @@ output_free(out_state *out)
     if (!out)
 	return;
 
-    if (out->fout)
+    if (out->infile && out->fout)
 	fclose(out->fout);
+    close_fdesc(out);
+    free(out->prev_fdesc);
+    if (out->do_debug)
+	fclose(out->debug);
 
     free(out);
 }
@@ -70,24 +78,36 @@ output(out_state *out, token *t)
 	    if (out->fout)
 		fclose(out->fout);
 	}
-	outfilename = basename(t->line);
+	if (t->line)
+	    outfilename = basename(t->line);
+	else
+	    outfilename = NULL;
+	
 	if ((out->fout=fopen_uniq(&outfilename)) == NULL) {
 	    fprintf(stderr, "SYSERR: cannot create output file `%s': %s\n",
 		   t->line, strerror(errno));
+	    /* discard description */
+	    if (out->do_fdesc == 1)
+		remove(out->tempdesc);
 	}
-	out->infile = 1;
-	if ((out->do_fdesc != -1) && (outfilename != NULL)) {
-	    fdescname = xmalloc(strlen(outfilename)+6);
-	    sprintf(fdescname, "%s.desc", outfilename);
-	    if (rename(out->tempdesc, fdescname) != 0) {
-		fprintf(stderr, "SYSERR: can't rename `%s' to `%s': %s\n",
-			out->tempdesc, fdescname, strerror(errno));
-		/* XXX: remove(out->tempdesc); */
+	else {
+	    /* rename description file */
+	    if (out->do_fdesc != -1) {
+		fdescname = xmalloc(strlen(outfilename)+6);
+		sprintf(fdescname, "%s.desc", outfilename);
+		if (rename(out->tempdesc, fdescname) != 0) {
+		    fprintf(stderr, "SYSERR: can't rename `%s' to `%s': %s\n",
+			    out->tempdesc, fdescname, strerror(errno));
+		    /* XXX: remove(out->tempdesc); */
+		}
+		if (out->prev_fdesc)
+		    free(out->prev_fdesc);
+		out->prev_fdesc = fdescname;
 	    }
-	    free(fdescname);
-	}
-	if (outfilename != basename(t->line))
 	    free(outfilename);
+	}
+	close_fdesc(out);
+	out->infile = 1;
 	break;
 
     case TOK_DEBUG:
@@ -120,64 +140,75 @@ output(out_state *out, token *t)
 		    out->fout = NULL;
 		}
 	    }
-	    break;
 	}
-	
-	if ((t->line[0] != '\0') && (out->do_fdesc == -1) && !out->fdesc) {
-	    out->do_fdesc = 1;
-	    strcpy(out->tempdesc, "./tmpdesc.XXXXXX");
-	    if ((fd = mkstemp(out->tempdesc)) == -1) {
-		fprintf(stderr, "SYSERR: can't create temporary description "
-			"file: %s\n", strerror(errno));
-		out->do_fdesc = 0;
-	    }
-	    else {
-		out->fdesc = fdopen(fd, "w");
-	    }
-	}
-	
-	if ((out->do_fdesc == 1) && out->fdesc) {
-	    if (t->line[0] == '\0') {
-		/* save newline for later */
-		out->fdescnl++;
-	    } else {
-		/* print any saved newlines */
-		while(out->fdescnl > 0) {
-		    fputc('\n', out->fdesc);
-		    out->fdescnl--;
-		}
-		fprintf(out->fdesc, "%s\n", t->line);
-		if (ferror(out->fdesc)) {
-		    fprintf(stderr, "SYSERR: can't write to description file:"
-			    " %s\n", strerror(errno));
-		    /* XXX: remove file? */
+	else {
+	    if (t->line[0] != '\0' && out->do_fdesc == -1) {
+		out->do_fdesc = 1;
+		strcpy(out->tempdesc, "./tmpdesc.XXXXXX");
+		if ((fd = mkstemp(out->tempdesc)) == -1) {
+		    fprintf(stderr, "SYSERR: can't create "
+			    "temporary description file: %s\n",
+			    strerror(errno));
 		    out->do_fdesc = 0;
-		    fclose(out->fdesc);
-		    out->fdesc = NULL;
+		}
+		else {
+		    if ((out->fdesc=fdopen(fd, "w")) == NULL) {
+			fprintf(stderr, "SYSERR: cannot fdopen "
+				"temporary description file `%s': %s\n",
+				out->tempdesc, strerror(errno));
+			out->do_fdesc = 0;
+		    }
+		}
+	    }
+	
+	    if (out->do_fdesc == 1) {
+		if (t->line[0] == '\0') {
+		    /* save newline for later */
+		    out->fdescnl++;
+		}
+		else {
+		    /* print any saved newlines */
+		    while (out->fdescnl > 0) {
+			fputc('\n', out->fdesc);
+			out->fdescnl--;
+		    }
+		    
+		    fprintf(out->fdesc, "%s\n", t->line);
+		    if (ferror(out->fdesc)) {
+			fprintf(stderr, "SYSERR: can't write to "
+				"description file: %s\n",
+				strerror(errno));
+			/* XXX: remove file? */
+			out->do_fdesc = 0;
+			fclose(out->fdesc);
+			out->fdesc = NULL;
+		    }
 		}
 	    }
 	}
-	
 	break;
 
     case TOK_EOP:
-	printf(">%s\n", tname[t->type]);
-	if (out->fdesc) {
-	    fclose(out->fdesc);
+	if (out->do_fdesc == 1) {
+	    if (out->prev_fdesc) {
+		close_fdesc(out);
+
+		append_file(out->prev_fdesc, out->tempdesc,
+			    "\n[DATA]\n\n");
+	    }
 	    remove(out->tempdesc);
-	    out->fdesc = NULL;
 	}
-	out->do_fdesc = -1;
-	out->fdescnl = 0;
-	break;
+	free(out->prev_fdesc);
+	out->prev_fdesc = NULL;
+	close_fdesc(out);
+	
+	/* fallthrough */
 	
     case TOK_EOF:
 	printf(">%s\n", tname[t->type]);
 
-	if (out->fout) {
+	if (out->infile && out->fout)
 	    fclose(out->fout);
-	}
-	out->fout = NULL;
 	out->infile = out->warned = 0;
 	break;
 
@@ -186,11 +217,14 @@ output(out_state *out, token *t)
 	break;
 
     case TOK_DATA:
-	if (!out->infile && !out->warned) {
-	    fprintf(stderr, "ERROR: data while not in file (missing fname)");
-	    out->warned = 1;
+	if (!out->infile) {
+	    if (!out->warned) {
+		fprintf(stderr, "ERROR: data while not in file "
+			"(missing fname)");
+		out->warned = 1;
+	    }
 	}
-	if (out->fout) {
+	else if (out->fout) {
 	    if (fwrite(t->line, 1, t->n, out->fout) < t->n) {
 		fprintf(stderr, "SYSERR: can't write to output file: %s\n",
 			strerror(errno));
@@ -205,6 +239,17 @@ output(out_state *out, token *t)
 	break;
     }
 
-
     return 0;
+}
+
+
+
+static void
+close_fdesc(out_state *out)
+{
+    if (out->do_fdesc == 1)
+	fclose(out->fdesc);
+
+    out->fdescnl = 0;
+    out->do_fdesc = -1;
 }

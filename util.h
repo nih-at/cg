@@ -16,6 +16,7 @@ enum errtype {errnone, errfile, errpart, errline};
 
 
 
+int append_file(char *t, char *s, char *sep);
 void copy_stream(stream *in, out_state *out);
 void debug(out_state *out, char *fmt, ...);
 char *expand(char *path);
