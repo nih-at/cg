@@ -9,9 +9,11 @@
 
 #define BINHEX_TAG "(This file must be converted with BinHex 4.0)"
 
-enum enctype decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h);
+enum enctype decode_mime(FILE *fin, FILE **foutp, char **fnamep,
+			 struct header *h);
 enum enctype decode_uu(FILE *fin, FILE *fout, int inp);
 void decode_uu_line(FILE *fout, char *line);
+
 
 
 enum enctype
@@ -174,7 +176,7 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
 	if ((m=mime_parse(s)) != NULL) {
 	    for (i=0; m->option[i].name != NULL; i++)
 		if (m->option[i].name == MIME_CD_FILENAME) {
-		    filename = strdup(m->option[i].val);
+		    filename = strdup(m->option[i].value);
 		    break;
 		}
 	    mime_free(m);
@@ -186,7 +188,7 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
 	    if ((m=mime_parse(s)) != NULL) {
 		for (i=0; m->option[i].name != NULL; i++)
 		    if (m->option[i].name == MIME_CT_NAME) {
-			filename = strdup(m->option[i].val);
+			filename = strdup(m->option[i].value);
 			break;
 		    }
 		mime_free(m);

@@ -3,6 +3,18 @@
 
 #include "header.h"
 
+#define HDR_MAX 5
+
+char *hdr_string[HDR_MAX] = {
+    "Subject",
+    "Mime-Version",
+    "Content-Type",
+    "Content-Transfer-Encoding",
+    "Content-Disposition"
+};
+
+symbol hdr_sym[HDR_MAX];
+
 
 
 void
@@ -16,6 +28,7 @@ header_init(void)
 
 
 
+#if 0
 struct header *
 header_read(FILE *f, int dotp)
 {
@@ -23,6 +36,7 @@ header_read(FILE *f, int dotp)
 
     
 }
+#endif
 
 
 

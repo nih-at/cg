@@ -21,17 +21,7 @@ struct mime_opt {
 #define MIME_CD_FILENAME	mime_sym[3]
 #define MIME_CT_NAME		mime_sym[4]
 
-#define MIME_MAX 5
-
-char *mime_string[MIME_MAX] = {
-    "message/partial",
-    "message/multipart",
-    "base64",
-    "filename",
-    "name"
-};
-
-symbol mime_sym[MIME_MAX];
+extern symbol mime_sym[];
 
 
 

@@ -7,6 +7,18 @@ void _mime_lws(char **s);
 symbol _mime_token(char **s);
 char * _mime_value(char **s);
 
+#define MIME_MAX 5
+
+char *mime_string[MIME_MAX] = {
+    "message/partial",
+    "message/multipart",
+    "base64",
+    "filename",
+    "name"
+};
+
+symbol mime_sym[MIME_MAX];
+
 
 
 void
