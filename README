@@ -1,9 +1,32 @@
-checkgroup is a semi-automatic newsgroup binary downloader.
-It assembles parts based on subject headers and then offers
-them in an editor for the user to choose which files he really
-wants.
+cg is a semi-automatic newsgroup binary downloader.  It assembles
+parts based on subject headers and then offers them in an editor for
+the user to choose which files he really wants.
 
-For compilation it needs the libmap library.
+It supports decoding data in the following formats:
+   uuencode (both single- and multi-posting binaries)
+   MIME (multipart/mixed, message/partial;
+	 base64, quoted printable, x-uuencode)
+   yEnc
 
-Start it with 'cg somenewsgroup'; `cg -h' offers a short help,
-should you need it.
+Comments in 0-parts or around the encoded data are saved in the file
+"filename.desc"; broken files (problems during decoding, missing parts
+due to expiration) are saved as "filename.broken".  Files are not
+overwritten, rather ".1", ".2", ... is appended to the filename to
+make it unique.
+
+The EDITOR and VISUAL environment variables are honored.
+Set the NNTPSERVER environment variable to choose your newsserver
+(which must support xover records), or use the "-s" flag.
+
+Start it with 'cg somenewsgroup'; `cg -h' offers a short help, should
+you need it.
+
+If you make a binary distribution, please include a pointer to the
+distribution site:
+        ftp.giga.or.at /pub/nih/cg
+        http://ftp.giga.or.at/pub/nih/cg
+The latest version can always be found there and on the backup site:
+        sunsite.univie.ac.at /pub/nih/cg
+        http://sunsite.univie.ac.at/pub/nih/cg
+
+Mail suggestions and bug reports to <nih@giga.or.at>.
