@@ -1,7 +1,9 @@
 binhex support
 multipart/appledouble: better handling if filename same
 
+portability fixes
 test cases: mime: unknown CTE, errors
+IPv6
 stream_quot_print can't handle NUL chars (it returns TOK_LINEs)
 vasprintf replacement
 decode(): don't count broken files in return value
