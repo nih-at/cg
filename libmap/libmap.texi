@@ -95,7 +95,7 @@ arrays, implemented as hash tables with external linking.
 * Creating::            Creating and Destroying Maps
 * Manipulating::        Manipulating Maps
 * Iterating::           Iterating Through Maps
-* Configuration::       Configurability and Default Values
+* Defaults::            Default Values
 
 * Index::
 * Index of Functions::
@@ -106,7 +106,7 @@ arrays, implemented as hash tables with external linking.
 @c ================================================================
 @node Introduction
 @chapter Introduction
-@cindex Introduction
+@cindex introduction
 @cindex map
 @cindex hash table
 
@@ -119,7 +119,7 @@ key's hash, which acts like a fingerprint.  This is both easy to
 implement and efficient, if the function used to compute the hash value
 is fast and rarely generates the same value for different keys.
 
-There are different ways to handle collitions (two different keys with
+There are different ways to handle collisions (two different keys with
 the same hash value); one is to use linked lists as array elements, and
 to store the key/value pairs in these lists (one for each hash value).
 This method is not the fastest, but does not pose an arbitrary limit on
@@ -132,6 +132,10 @@ collisions), but space can be traded off for time.
 For a thorough discussion of hash tables, see @cite{The Art of Computer
 Programming, Vol. III: Searching and Sorting}, by Donald E. Knuth.
 
+Since C is a strongly typed language, care must be taken in the choice
+of types for keys and values.  In libmap, both are pointers to
+@code{void}.
+
 
 @c ================================================================
 @node Helper
@@ -140,40 +144,69 @@ Programming, Vol. III: Searching and Sorting}, by Donald E. Knuth.
 
 The functions used to compute hash values from keys and test keys on
 equality depend on the type of keys used.  To keep libmap general, such
-functions can be provided by the application, altough reasonable default
+functions can be provided by the application, although reasonable default
 functions are provided for the most common case: strings.
 
-Also, a handfull of housekeeping functions can be provided by the
-application.  These functiosn are collectively called helper functions,
+Also, a handful of housekeeping functions can be provided by the
+application.  These functions are collectively called helper functions,
 and can be specified per map.
+
+The helper functions are:
+
+@deftypefn {Helper Function} int equal (void *@var{key1}, void *@var{key2})
+Used to compare @var{key1} and @var{key2} for equality; it is expected
+to return 0 if the two keys are equal, non-zero otherwise.
+@c XXX: keys not neccecarily returned by cpykey
+
+Reasonable functions for strings are @code{strcmp} or @code{strcasecmp}.
+@end deftypefn
+
+@deftypefn {Helper Function} {unsigned int} hash (void *@var{key}, int @var{size})
+Used to compute @var{key}'s hash value; @var{size} is the size of the
+table.  The return value should be @var{key}'s hash value, which may be
+larger than @var{size} (@var{size} is provided mainly to allow for more
+efficient hash function implementations).
+
+A hash function for strings is provided by libmap: @code{map_strhash}
+@end deftypefn
+
+@deftypefn {Helper Function} {void *} cpykey (void *@var{key})
+Used to obtain a copy of @var{key} to place in the map, which is
+necessary, for example, if @code{map_insert} is called with keys that
+have automatic storage duration.  One could use @code{strdup} if keys
+are strings.
+
+If this member in a map is a null pointer, keys are placed in the map
+as they are passed to @code{map_insert}.
+@end deftypefn
+
+@deftypefn {Helper Function} void delkey (void *@var{key})
+Used to delete the copy of @var{key} obtained by @code{cpykey}.
+
+If this member in a map is a null pointer, no special action is taken to
+delete keys.
+@end deftypefn
+
+@deftypefn {Helper Function} void delval (void *@var{value})
+Used to delete @var{value} when @code{map_delete} or @code{free_map} is
+called with non-zero @var{delvaluep}.
+
+If this member in a map is a null pointer, no special action is taken to
+delete values (@var{delvaleup} has no effect).
+@end deftypefn
 
 @deftp {Data Type} map
 This is the type used to hold a map; a pointer to @code{map} is the first
 parameter of most functions in this library, specifying the map to
 operate on.
 
-It also holds pointers to the helper functions used by this map.
+It has one member for each helper function described above, with the
+same name, which holds a pointer to the functions used by this map.
+These can be set by the application; however, @code{hash}, @code{equal},
+and @code{cpykey} should not be changed once entries have been inserted.
+Changing @code{delkey} or @code{delval} in a non-empty map has the
+obvious effect: following deletes use the new functions.
 @end deftp
-
-The helper functions are:
-
-@deftypefn {Helper Function} int equal (void *@var{key1}, void *@var{key2})
-Used to compare keys for equality.  It is called with two keys and is
-expected to 
-@c XXX: not neccecarily 
-@end deftypefn
-
-@deftypefn {Helper Function} int hash (void *@var{key})
-@end deftypefn
-
-@deftypefn {Helper Function} {void *} cpykey (void *@var{key})
-@end deftypefn
-
-@deftypefn {Helper Function} void delkey (void *@var{key})
-@end deftypefn
-
-@deftypefn {Helper Function} void delval (void *@var{value})
-@end deftypefn
 
 
 @c ================================================================
@@ -193,8 +226,8 @@ creation fails.
 
 @deftypefun {map *} new_map2 (int @var{size}, int (*@var{equal})(), int (*@var{hash})(), void *(*@var{cpykey})(), void (*@var{delkey})(), void (*@var{delval})())
 The @code{new_map2} function is much like @code{map_new}, except that
-all helper functions are given as arguments.  If any of them is a null
-pointer, the corresponding default value is taken.
+all helper functions are given as arguments.  If any of them is
+@code{MAP_DFL}, the corresponding default value is taken.
 
 @code{new_map2} returns the newly created map, or a null pointer if
 creation fails.
@@ -215,12 +248,24 @@ map are deleted by the @code{delval} helper function.
 @cindex manipulating
 
 @deftypefun {void *} map_lookup (map *@var{m}, void *@var{key})
+Look up @var{key} in @var{m}.
+
+Returns the value associated with @var{key}, or a null pointer if
+@var{key} is not in @var{m}.
 @end deftypefun
 
 @deftypefun {void **} map_insert (map *@var{m}, void *@var{key})
+Look up @var{key} in @var{m}, creating a new entry if necessary.
+
+Returns a pointer to the value associated with @var{key} in @var{m}, or
+a pointer to a null pointer if there was no value; storing a new value
+at the location pointed to by the value returned associates it with
+@var{key}.
 @end deftypefun
 
 @deftypefun void map_delete (map *@var{m}, void *@var{key}, int @var{delvaluep})
+Delete entry with key @var{key} from @var{m}, deleting its value with
+@code{delval} if @var{delvaluep} is non-zero.
 @end deftypefun
 
 
@@ -229,21 +274,69 @@ map are deleted by the @code{delval} helper function.
 @chapter Iterating Through Maps
 @cindex iterating
 
+Some applications require a means to iterate over all entries in a map.
+Such a mechanism is provided, although the order in which the entries
+are processed is indeterminate.
+
+@deftp {Data Type} map_iter
+This type is used to record an iteration's state between calls to the
+iteration functions.
+
+Since this is kept separate from the map iterated through, multiple
+iterations through the same map can be made simultaneous.
+@end deftp
+
+If entries are added to or removed from a map while an iteration is in
+progress, entries may be lost or duplicated in the iteration.  If values
+of existing entries are changed, however, no such ill side effects will
+occur.
+
 @deftypefun {map_iter *} map_start (map *@var{m})
+This function starts an iteration through @var{m}.  A new @code{map_iter}
+is created and return; if creation failes, a null pointer is returned.
 @end deftypefun
 
-@deftypefun int map_next (map_iter *@var{iteratior}, void **@var{key}, void **@var{value})
+@deftypefun int map_next (map_iter *@var{iterator}, void **@var{key}, void **@var{value})
+@code{map_next} stores the next entry in @var{key} and @var{value}.
+
+It returns 0 if successful; if there are no more entries, it returns -1
+and leaves @var{key} and @var{value} unchanged.
 @end deftypefun
 
 @deftypefun void map_stop (map_iter *@var{iterator})
+This function is used to terminate an iteration and frees the storage
+used by the @code{map_iter} structure.
 @end deftypefun
 
 
 @c ================================================================
-@node Configuration
-@chapter Configurability and Default Values
+@node Defaults
+@chapter Default Values
+@cindex default values
 
+The default values used by @code{new_map} and @code{new_map2} are stored
+in global variables and can be changed by the application.
 
+The global variables and their values upon startup:
+
+@vtable @code
+@item map_def_size
+1024
+@item map_def_equal
+@code{strcmp}
+@item map_def_hash
+@code{map_strhash}
+@item map_def_cpykey
+@code{strdup}
+@item map_def_delkey
+@code{free}
+@item map_def_delval
+@code{NULL}
+@end vtable
+
+@code{map_def_size} specifies the default size of a map's hash table
+@pxref{Creating}.  For a description of the helper functions, see
+@ref{Helper}.
 @iftex
 @page
 @end iftex

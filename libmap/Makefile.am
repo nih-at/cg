@@ -5,8 +5,10 @@ VERSION=@VERSION@
 
 lib_LIBRARIES=map
 
-map_SOURCES=free-map.c map-delete.c map-insert.c map-iter.c \
-	map-lookup.c new-map.c priv-map-lookup.c
+map_SOURCES=new.c new2.c free.c lookup.c insert.c delete.c \
+	start.c next.c stop.c globals.c strhash.c lookup-int.c
+
+map_LIBADD=@LIBOBJS@
 
 include_HEADERS=map.h
 

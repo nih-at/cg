@@ -1,0 +1,38 @@
+/*
+  lookup -- find entry in map
+  Copyright (C) 1996 Dieter Baron
+
+  This file is part of libmap, a library for associative arrays.
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Library General Public
+  License as published by the Free Software Foundation; either
+  version 2 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Library General Public License for more details.
+
+  You should have received a copy of the GNU Library General Public
+  License along with this library; if not, write to the Free
+  Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
+
+
+#include <stddef.h>
+#include "map.h"
+
+map_entry *map__lookup(map *m, void *k);
+
+
+
+void *
+map_lookup(map *m, void *k)
+{
+    map_entry *me;
+	
+    me = map__lookup(m, k)->next;
+    return me ? me->value : NULL;
+}
