@@ -137,8 +137,16 @@ decode_mime(stream *in, out_state *out, struct header *h,
 	decode_file(in, out, decode_table_base64);
 	output(out, TOKEN_EOF);
     }
+    else if (filename) {
+	debug(out, "found: MIME %s", te->type);
+
+	output(out, token_set(&t, TOK_FNAME, filename));
+	copy_stream(in, out);
+	output(out, TOKEN_EOF);
+    }
     else
-	debug(out, "unknown MIME transfer encoding: %s", te->type);
+	debug(out, "no filename, unknown MIME transfer encoding: %s",
+	      te->type);
 
     return 0;
 }
