@@ -1,5 +1,5 @@
 /*
-  $NiH: testdec.c,v 1.8 2002/04/10 16:21:25 wiz Exp $
+  $NiH: testdec.c,v 1.9 2002/04/10 16:23:39 wiz Exp $
 
   testdec.c -- command line test program
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -53,7 +53,7 @@ main(int argc, char *argv[])
     st2 = stream_article_open(stm);
     out = output_new();
 
-    ret = decode(st2, out) ? 1 : 0;
+    ret = decode(st2, out) ? 0 : 1;
 
     output(out, token_set(&t, TOK_EOP, NULL));
 
