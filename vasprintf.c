@@ -1,5 +1,5 @@
 /*
-  $NiH: decode.c,v 1.33 2002/04/10 16:23:27 wiz Exp $
+  $NiH: vasprintf.c,v 1.1 2002/04/15 13:43:12 dillo Exp $
 
   vasprintf.c -- replacement function
   Copyright (C) 2002 Dieter Baron
@@ -35,21 +35,27 @@ vasprintf(char **s, const char *format, va_list ap)
 {
     int ret;
     char b[BS], *p;
+#if VASPRINTF_USE_VA_COPY
     va_list ap2;
 
     va_copy(ap2, ap);
+#endif
 
     ret = vsnprintf(b, BS, format, ap);
 
+#if VASPRINTF_USE_VA_COPY
     if (ret <= BS) {
+#endif
 	if ((p=strdup(b)) == NULL)
 	    return -1;
 	*s = p;
 	return (ret < 0 ? strlen(p)+1 : ret);
+#if VASPRINTF_USE_VA_COPY
     }
     
     if ((p=malloc(ret)) == NULL)
 	return -1;
     *s = p;
     return vsnprintf(p, ret, format, ap2);
+#endif
 }
