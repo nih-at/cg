@@ -10,7 +10,7 @@ struct mime_hdr {
 
 struct mime_opt {
     symbol name;
-    char *val;
+    char *value;
 };
 
 
@@ -35,7 +35,7 @@ symbol mime_sym[MIME_MAX];
 
 
 
-int mime_init(void);
+void mime_init(void);
 struct mime_hdr *mime_parse(char *header);
 void mime_free(struct mime_hdr *m);
 

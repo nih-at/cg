@@ -4,5 +4,6 @@
 typedef char *symbol;
 
 symbol intern(char *);
+symbol intern_lower(char *);
 
 #endif /* symbol.h */

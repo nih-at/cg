@@ -1,9 +1,11 @@
 #include <stdlib.h>
+#include <string.h>
 
-#include <mime.h>
+#include "mime.h"
 
 void _mime_lws(char **s);
 symbol _mime_token(char **s);
+char * _mime_value(char **s);
 
 
 
@@ -27,7 +29,7 @@ mime_free(struct mime_hdr *m)
 	return;
     
     for (i=0; m->option[i].name; i++)
-	free(m->option[i].val);
+	free(m->option[i].value);
 
     free(m->option);
     free(m);
@@ -40,7 +42,6 @@ mime_parse(char *h)
 {
     struct mime_hdr *m;
     struct mime_opt o[256];
-    char *s, *q, b[8192];
     int i;
  
     if ((m=(struct mime_hdr *)malloc(sizeof(struct mime_hdr))) == NULL)
@@ -93,7 +94,7 @@ _mime_token(char **s)
     p = *s+strcspn(*s, " \t()<>@,;:\\\"[]?=");
     c = *p;
     *p = '\0';
-    if (strlen(s) > 0)
+    if (strlen(*s) > 0)
 	m = intern_lower(*s);
     else
 	m = 0;
@@ -109,7 +110,7 @@ _mime_lws(char **s)
 {
     /* XXX: handle () comments */
     
-    *s += strspn(" \t");
+    *s += strspn(*s, " \t");
 }
 
 
