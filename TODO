@@ -1,5 +1,5 @@
-* make it possible to CTRL-C to quit, but save status of what has and
-  hasn't been decoded so far to rcfile
+* enforce minimum file size, e.g. >1k
+* progressbar?
 
 * check if errfilename is set 
 * skip rest of stream when filename can't be created (e.g. "xy on 7/8/99.mp3")
