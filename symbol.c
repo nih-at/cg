@@ -30,6 +30,9 @@ intern(char *s)
 	    if (strcmp(e->s, s) == 0)
 		return e->s;
 	}
+	if (strcmp(e->s, s) == 0)
+	    return e->s;
+	
 	if ((e->next=(struct entry *)malloc(sizeof(struct entry))) == NULL)
 	    return NULL;
 
