@@ -19,7 +19,7 @@ dnl Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 dnl init
 
-AC_INIT(new-map.c)
+AC_INIT(strhash.c)
 AC_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE(libmap, 0.1)
 AC_SUBST(LIBOBJS)
