@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_uuextract.c,v 1.4 2002/04/10 16:21:23 wiz Exp $
+  $NiH: stream_uuextract.c,v 1.5 2002/04/10 16:23:35 wiz Exp $
 
   stream_uuextract.c -- extrace uuencode data
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -75,7 +75,7 @@ static token *
 uux_get(struct stream_uux *this)
 {
     token *t;
-    int len, line_kept;
+    int len, line_kept, nbytes;
     enum uu_state state, old_state;
 
     old_state = this->state;
@@ -134,6 +134,9 @@ uux_get(struct stream_uux *this)
 			       "unexpected short line");
 		}
 		strcpy(this->buf, t->line+1);
+		/* some encoders output complete quadruples; truncate them */
+		nbytes = t->line[0] - ' ';
+		this->buf[nbytes/3*4 + nbytes%3+1] = '\0';
 		line_kept = 1;
 		break;
 

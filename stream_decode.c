@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_decode.c,v 1.2 2002/04/10 16:21:20 wiz Exp $
+  $NiH: stream_decode.c,v 1.3 2002/04/10 16:23:33 wiz Exp $
 
   stream_decode.c -- low-level decoding
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -43,6 +43,7 @@ struct stream_decode {
 };
 
 static int dec_close(struct stream_decode *st);
+static int dec_fill(struct stream_decode *this, int i, int no, int rest);
 static token *dec_get(struct stream_decode *st);
 
 
@@ -96,14 +97,19 @@ dec_get(struct stream_decode *this)
     case DS_OK:
 	t = stream_get(this->st.source);
 
-	/* XXX: return rest on EOF */
-
-	if (t->type != TOK_LINE)
-	    return t;
-
 	rest = this->rest;
 	no = this->no;
 	i = 0;
+
+	if (t->type != TOK_LINE) {
+	    if (no) {
+		i = dec_fill(this, 0, no, rest);
+		token_set3(stream_enqueue((stream *)this),
+			   TOK_DATA, i, this->buf);
+		this->rest = this->no = 0;
+	    }
+	    return t;
+	}
 
 	while (*t->line) {
 	    b = this->table[(unsigned char)*(t->line++)];
@@ -145,27 +151,7 @@ dec_get(struct stream_decode *this)
 	    }
 
 	    if (no == 4 || this->state != DS_OK) {
-		if (i+2 >= this->buf_alen) {
-		    this->buf_alen = (this->buf_alen ? this->buf_alen*2 : 64);
-		    this->buf = xrealloc(this->buf, this->buf_alen);
-		}
-
-		switch (no) {
-		case 2:
-		    this->buf[i++] = rest >> 4;
-		    break;
-
-		case 3:
-		    this->buf[i++] = rest >> 10;
-		    this->buf[i++] = (rest>>2) & 0xff;
-		    break;
-
-		case 4:
-		    this->buf[i++] = rest >> 16;
-		    this->buf[i++] = (rest>>8) & 0xff;
-		    this->buf[i++] = (rest & 0xff);
-		    break;
-		}
+		i += dec_fill(this, i, no, rest);
 		rest = no = 0;
 	    }
 	}
@@ -175,4 +161,34 @@ dec_get(struct stream_decode *this)
     this->no = no;
 
     return token_set3(&this->st.tok, TOK_DATA, i, this->buf);
+}
+
+
+
+static int
+dec_fill(struct stream_decode *this, int i, int no, int rest)
+{
+    if (i+2 >= this->buf_alen) {
+	this->buf_alen = (this->buf_alen ? this->buf_alen*2 : 64);
+	this->buf = xrealloc(this->buf, this->buf_alen);
+    }
+
+    switch (no) {
+    case 2:
+	this->buf[i++] = rest >> 4;
+	break;
+
+    case 3:
+	this->buf[i++] = rest >> 10;
+	this->buf[i++] = (rest>>2) & 0xff;
+	break;
+	
+    case 4:
+	this->buf[i++] = rest >> 16;
+	this->buf[i++] = (rest>>8) & 0xff;
+	this->buf[i++] = (rest & 0xff);
+	break;
+    }
+
+    return no-1;
 }
