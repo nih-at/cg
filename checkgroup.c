@@ -31,19 +31,20 @@ struct file {
 #define MAX_PATTERNS 5
 
 char *spattern[MAX_PATTERNS] = {  /* ! ( ! */
-    "(.*) - (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])]",  /* "c - n ()" */
-    "- (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])] *(.*)", /* "- n () c" mac groups */
-    "(.*)()[[(]([0-9]*)/([0-9]*)[])]",             /* "n ()" desperate */
+/*    "(.*) - (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])]",   /* "c - n ()" */
+    "(([^-]|-+[^ -])+)-+ (.*[^ ]) *[[(]([0-9]*)[/\\]([0-9]*)[])]", /* c - n () */
+    "- (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])] *(.*)",  /* "- n () c" mac groups */
+    "(.*)()[[(]([0-9]*)/([0-9]*)[])]",              /* "n ()" desperate */
     "(.*)[[( ]([0-9]+) of ([0-9]+)[]) ](.*)",       /* "c[x of y]n" */
-    "(.*)  *([^ ]*\\.[rst][a0-9][r0-9]) *$"        /* "c n.rar" */
+    "(.*)  *([^ ]*\\.[a-z0-9][a-z0-9][a-z0-9]) *$"  /* "c n.ext" */
 };
 
 regex_t pattern[MAX_PATTERNS]; 
 
-int pat_key[MAX_PATTERNS] =     { 2, 1, 1, 2, 2 };
-int pat_comment[MAX_PATTERNS] = { 1, 4, 2, 4, 1 };
-int pat_part[MAX_PATTERNS] =    { 3, 2, 3, 1, 0 };
-int pat_npart[MAX_PATTERNS] =   { 4, 3, 4, 3, 0 };
+int pat_key[MAX_PATTERNS] =     {/* 2 */ 3, 1, 1, 2, 2 };
+int pat_comment[MAX_PATTERNS] = {/* 1 */ 1, 4, 2, 4, 1 };
+int pat_part[MAX_PATTERNS] =    {/* 3 */ 4, 2, 3, 1, 0 };
+int pat_npart[MAX_PATTERNS] =   {/* 4 */ 5, 3, 4, 3, 0 };
 
 char *prg;
 char *nntp_response;
