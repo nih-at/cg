@@ -145,7 +145,7 @@ main(int argc, char **argv)
 	    newsrc = optarg;
 	    break;
 	case 'c':
-	    mark_complete = 0;
+	    mark_complete = 1;
 	    break;
 	case 'h':
 	    printf(usage_string, prg);
@@ -434,7 +434,7 @@ parse(map *parts, FILE *f)
     struct file *val, **valp;
     char *key, *s, *subj, *comment;
     char b[8192];
-    int npart, part, i, end, l;
+    int npart, part, i, end, l, lines;
     long artno, no_file, size;
 
     end = 0;
@@ -465,7 +465,7 @@ parse(map *parts, FILE *f)
 
 	s = strtok(NULL, "\t");
 	while (s != NULL && s[0] == '<')
-	    s = strtok(NULL, "\t");
+	    s = strtok(NULL, "\t"); /* message-ID & references */
 	if (s == NULL) {
 	    /* DEBUG */ fprintf(dfile,
 				"%s: xover for article %ld is weird\n",
@@ -474,8 +474,16 @@ parse(map *parts, FILE *f)
 	}
 	else {
 	    size = strtol(s, NULL, 10);
-	    /* lines = */ strtok(NULL, "\t");
-	    /* xref = */ strtok(NULL, "\t");
+	    if ((s=strtok(NULL, "\t")) == NULL) {
+		/* DEBUG */ fprintf(dfile,
+				    "%s: xover for article %ld is weird\n",
+				    prg, artno);
+		lines = 0;
+	    }
+	    else {
+		lines = strtol(s, NULL, 10);
+		/* xref = */ strtok(NULL, "\t");
+	    }
 	}
 
 	for (i=0; i<MAX_PATTERNS; i++) {
@@ -484,26 +492,36 @@ parse(map *parts, FILE *f)
 	}
 	
 	if (i == MAX_PATTERNS) {
-	    /* DEBUG */	fprintf(dfile, "%s\n", subj);
-	    continue;
+	    /* deep magic */
+	    if ((lines > 100) && ((size - 1024)/lines > 60)) {
+		key = strdup(subj);
+		comment = NULL;
+		part = 1;
+		npart = 1;
+	    }
+	    else {
+		/* DEBUG */	fprintf(dfile, "%s\n", subj);
+		continue;
+	    }
 	}
-
-	key = extract(subj, match[pat_key[i]]);
-	comment = extract(subj, match[pat_comment[i]]);
-	if (pat_part[i]) {
-	    s = extract(subj, match[pat_part[i]]);
-	    part = atoi(s);
-	    free(s);
+	else {
+	    key = extract(subj, match[pat_key[i]]);
+	    comment = extract(subj, match[pat_comment[i]]);
+	    if (pat_part[i]) {
+		s = extract(subj, match[pat_part[i]]);
+		part = atoi(s);
+		free(s);
+	    }
+	    else
+		part = 1;
+	    if (pat_npart[i]) {
+		s = extract(subj, match[pat_npart[i]]);
+		npart = atoi(s);
+		free(s);
+	    }
+	    else
+		npart = 1;
 	}
-	else
-	    part = 1;
-	if (pat_npart[i]) {
-	    s = extract(subj, match[pat_npart[i]]);
-	    npart = atoi(s);
-	    free(s);
-	}
-	else
-	    npart = 1;
 	
 	if (part == 0) {
 	    /* XXX save info */
