@@ -1,10 +1,17 @@
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "decode.h"
 #include "header.h"
 #include "mime.h"
+#include "util.h"
 
+#define BINHEX_TAG "(This file must be converted with BinHex 4.0)"
+
+enum enctype decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h);
+enum enctype decode_uu(FILE *fin, FILE *fout, int inp);
+void decode_uu_line(FILE *fout, char *line);
 
 
 enum enctype
@@ -14,7 +21,7 @@ decode(FILE *fin, FILE **foutp, enum enctype type)
     struct header *h;
     struct mime_hdr *m;
     char *s, *line, *descname, b[8192], *filename;
-    int nel;
+    int nel, i;
 
     if ((h=header_read(fin, 1)) == NULL)
 	return enc_eof;
@@ -31,7 +38,7 @@ decode(FILE *fin, FILE **foutp, enum enctype type)
 		    mime_free(m);
 		    header_free(h);
 		    if ((h=header_read(fin, 1)) == NULL) {
-			error("mime message/partial, but no second header");
+			prerror("mime message/partial, but no second header");
 			return enc_error;
 		    }
 		    type = decode_mime(fin, foutp, &filename, h);
@@ -78,13 +85,13 @@ decode(FILE *fin, FILE **foutp, enum enctype type)
 		    type = enc_uu;
 		    s = strdup(s+1);
 		    filename = s;
-		    if ((fout = fopen_uniq(&filename)) == NULL) {
-			error("can't create %s: %s", filename,
+		    if ((*foutp = fopen_uniq(&filename)) == NULL) {
+			prerror("can't create %s: %s", filename,
 			      strerror(errno));
 			type = enc_error;
 		    }
 		    else
-			type = decode_uu(fin, *foutp);
+			type = decode_uu(fin, *foutp, 1);
 		    if (filename != s)
 			free(s);
 		}
@@ -102,7 +109,7 @@ decode(FILE *fin, FILE **foutp, enum enctype type)
 		if (descname == NULL) {
 		    descname = ".desc";
 		    if ((fdesc=fopen_uniq(&descname)) == NULL)
-			error("can't create %s: %s", descname,
+			prerror("can't create %s: %s", descname,
 			      strerror(errno));
 		}
 		else {
@@ -110,12 +117,12 @@ decode(FILE *fin, FILE **foutp, enum enctype type)
 			putc('\n', fdesc);
 		    nel = 0;
 		}
-		fprints(fdesc, "%s\n", line);
+		fprintf(fdesc, "%s\n", line);
 	    }
 	}
 	if (fdesc) {
 	    if (fclose(fdesc) != 0)
-		error("can't close %s: %s", descname, strerror(errno));
+		prerror("can't close %s: %s", descname, strerror(errno));
 	    switch (type) {
 	    case enc_error:
 	    case enc_nodata:
@@ -124,7 +131,7 @@ decode(FILE *fin, FILE **foutp, enum enctype type)
 	    default:
 		sprintf(b, "%s.desc", filename);
 		if (rename(descname, b) != 0) {
-		    error("can't rename %s to %s: %s", descname, b,
+		    prerror("can't rename %s to %s: %s", descname, b,
 			  strerror(errno));
 		}
 		break;
@@ -136,7 +143,7 @@ decode(FILE *fin, FILE **foutp, enum enctype type)
 	/* not first part */
 	switch (type) {
 	case enc_uu:
-	    type = decode_uu(fin, *foutp);
+	    type = decode_uu(fin, *foutp, 0);
 	    return type;
 	case enc_binhex:
 	    type = decode_binhex(fin, foutp, NULL);
@@ -145,7 +152,7 @@ decode(FILE *fin, FILE **foutp, enum enctype type)
 	    type = decode_base64(fin, *foutp);
 	    return type;
 	default:
-	    error("can't happen: decode called with invalid encoding type %d",
+	    prerror("can't happen: decode called with invalid encoding type %d",
 		  type);
 	    return enc_error;
 	}
@@ -158,12 +165,12 @@ enum enctype
 decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
 {
     char *s, *filename;
-    struct mime *m;
+    struct mime_hdr *m;
     int i;
 
     filename = NULL;
 
-    if (s=header_get(h, HDR_CONTENT_DISP)) {
+    if ((s=header_get(h, HDR_CONTENT_DISP))) {
 	if ((m=mime_parse(s)) != NULL) {
 	    for (i=0; m->option[i].name != NULL; i++)
 		if (m->option[i].name == MIME_CD_FILENAME) {
@@ -175,7 +182,7 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
     }
 		    
     if (filename == NULL) {
-	if (s=header_get(h, HDR_CONTENT_TYPE)) {
+	if ((s=header_get(h, HDR_CONTENT_TYPE))) {
 	    if ((m=mime_parse(s)) != NULL) {
 		for (i=0; m->option[i].name != NULL; i++)
 		    if (m->option[i].name == MIME_CT_NAME) {
@@ -189,7 +196,7 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
 
     *fnamep = filename;
     if ((*foutp=fopen_uniq(fnamep)) == NULL) {
-	error("can't create %s: %s", filename,
+	prerror("can't create %s: %s", filename,
 	      strerror(errno));
 	return enc_error;
     }
@@ -197,7 +204,7 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
     if (*fnamep != filename)
 	free(filename);
 
-    return decode_base64(fin, *fout);
+    return decode_base64(fin, *foutp);
 }
 
 
@@ -205,8 +212,8 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
 enum enctype
 decode_uu(FILE *fin, FILE *fout, int inp)
 {
-    char *line, b[2][62], b[45], *s;
-    int len0, len1, end, i, j;
+    char *line, b0[62], b1[62], b[45];
+    int len, len0, len1, end, i, j;
     long l;
     
 
@@ -234,11 +241,11 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 	    len1 = (line[0] - ' ');
 	    if (strlen(line)-1 == ((len1+2)/3)*4) {
 		if (len0 == 45) {
-		    strcpy(b[1], line);
+		    strcpy(b1, line);
 		    inp = 1;
 		}
 		else {
-		    strcpy(b[0], line);
+		    strcpy(b0, line);
 		    len0 = len1;
 		    len1 = 0;
 		}
@@ -248,9 +255,9 @@ decode_uu(FILE *fin, FILE *fout, int inp)
     }
 
     if (len0) {
-	decode_uu_line(fout, b[0]);
+	decode_uu_line(fout, b0);
 	if (len1)
-	    decode_uu_line(fout, b[1]);
+	    decode_uu_line(fout, b1);
     }
 
     if (end)
@@ -291,7 +298,7 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 	    l = ((line[j]&0x3f)<<18)
 		| ((line[j+1]&0x3f)<<12)
 		| ((line[j+2]&0x3f)<<6)
-		| line[j+3]&0x3f;
+		| (line[j+3]&0x3f);
 	    b[i++] = l >> 16;
 	    b[i++] = (l>>8) & 0xff;
 	    b[i++] = l & 0xff;
@@ -302,6 +309,7 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 
 
 
+void
 decode_uu_line(FILE *fout, char *line)
 {
     int len, i, j;
@@ -314,7 +322,7 @@ decode_uu_line(FILE *fout, char *line)
 	l = ((line[j]&0x3f)<<18)
 	    | ((line[j+1]&0x3f)<<12)
 	    | ((line[j+2]&0x3f)<<6)
-	    | line[j+3]&0x3f;
+	    | (line[j+3]&0x3f);
 	b[i++] = l >> 16;
 	b[i++] = (l>>8) & 0xff;
 	b[i++] = l & 0xff;

@@ -64,3 +64,50 @@ expand(char *path)
 
     return p;
 }
+
+
+
+void
+prerror(char *fmt, ...)
+{
+    va_list argp;
+
+    fprintf(stderr, "%s: ", prg);
+    va_start(argp, fmt);
+    vfprintf(stderr, fmt, argp);
+    va_end(argp);
+    fputc('\n', stderr);
+}
+
+
+
+FILE *
+fopen_uniq(char **fnp)
+{
+    char *s;
+    int fd;
+    FILE *f;
+
+    s=*fnp;
+    if (s == NULL) {
+	
+    }
+    for (;;) {
+	    
+	if ((fd=open(s, O_CREAT | O_EXCL, 0666)) >= 0) {
+	    if ((f=fdopen(fd, "wb")) != NULL) {
+		return f;
+	    }
+	    else {
+		close(fd);
+		return NULL;
+	    }
+	}
+	else
+	    if (errno != EEXIST) {
+		return NULL;
+	    }
+			
+	
+    
+}

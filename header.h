@@ -1,7 +1,7 @@
 #include "symbol.h"
 
 struct header {
-    strucht header *next;
+    struct header *next;
     symbol type;
     char *value;
 };
