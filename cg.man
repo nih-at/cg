@@ -1,4 +1,4 @@
-.\" $NiH: cg.mdoc,v 1.3 2002/04/17 18:02:04 wiz Exp $
+.\" $NiH: cg.mdoc,v 1.4 2002/04/19 01:00:11 wiz Exp $
 .\"
 .\" cg.mdoc \-\- mdoc man page for cg
 .\" Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -74,7 +74,7 @@ as password for authentication.
 \fB\-s\fR, \fB\-\-server\fR \fBSERVER\fR
 Use
 \fBSERVER\fR
-as NNTP server.
+as NNTP server.  Both IPv4 and IPv6 are supported.
 .TP 22
 \fB\-u\fR, \fB\-\-user\fR \fBUSER\fR
 Use
@@ -122,6 +122,6 @@ Set the
 environment variable to choose your newsserver (which must support
 xover records), or use the
 \fB\-s\fR
-flag.
+flag.  Both IPv4 and IPv6 are supported.
 .SH "BUGS"
 Mail suggestions and bug reports to <nih@giga.or.at>.
