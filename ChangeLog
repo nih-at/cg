@@ -1,3 +1,13 @@
+2004-07-10  Thomas Klausner  <wiz@danbala.tuwien.ac.at>
+
+	* output.h: add statusflag variable.
+	* output.c: add statusflag variable.
+	(output): write out information about current file if statusflag
+	is set.
+
+	* checkgroup.c (sighandle): handle SIGINFO.
+	(main): add SIGINFO handler when SIGINFO is defined.
+
 2003-12-06  Thomas Klausner  <wiz@danbala.tuwien.ac.at>
 
 	* checkgroup.c (nntp_put): add newline to error message.

@@ -2,7 +2,7 @@
 #define _HAD_OUTPUT_H
 
 /*
-  $NiH: output.h,v 1.9 2002/04/10 16:23:30 wiz Exp $
+  $NiH: output.h,v 1.10 2002/04/16 22:46:09 wiz Exp $
 
   output.h -- output part of the decoder
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -47,9 +47,13 @@ typedef struct out_state out_state;
 
 
 
+/* set when handling SIGINFO */
+extern volatile int statusflag;
+
+
+
 int output(out_state *out, token *t);
 void output_free(out_state *out);
 out_state *output_new();
-
 
 #endif /* output.h */

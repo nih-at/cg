@@ -1,5 +1,5 @@
 /*
-  $NiH: output.c,v 1.19 2002/04/16 22:46:09 wiz Exp $
+  $NiH: output.c,v 1.20 2002/05/10 21:09:19 wiz Exp $
 
   output.c -- output part of the decoder
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -37,6 +37,8 @@ static void rename_fdesc(out_state *out);
 #define FDESC_NOTYET	0
 #define FDESC_OPEN	1
 #define FDESC_ERROR	-1
+
+volatile int statusflag;
 
 
 
@@ -98,6 +100,16 @@ output(out_state *out, token *t)
     char *outfilename;
     char *brokenfilename;
     int fd;
+
+    if (statusflag) {
+	statusflag = 0;
+	if (out->infile)
+	    fprintf(stderr, "%s: in file `%s'%s at position %ld\n",
+		    prg, out->filename ? out->filename : "(unknown)",
+		    out->broken ? " (broken) " : "", out->size);
+	else
+	    fprintf(stderr, "%s: currently not in any file\n", prg);
+    }
 
     if (t->type == TOK_DATA)
 	out->ndata++;

@@ -1,5 +1,5 @@
 /*
-  $NiH: checkgroup.c,v 1.48 2003/12/04 19:44:15 wiz Exp $
+  $NiH: checkgroup.c,v 1.49 2003/12/06 08:45:48 wiz Exp $
 
   checkgroup.c -- main program
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -140,7 +140,12 @@ void writegrouptorc(FILE *copy, char *compstr);
 void
 sighandle(int sigtype)
 {
-    save_and_quit = 1;
+    if (sigtype == SIGINT)
+	save_and_quit = 1;
+#if defined(SIGINFO)
+    else if (sigtype == SIGINFO)
+	statusflag = 1;
+#endif
 
     return;
 }
@@ -332,6 +337,9 @@ main(int argc, char **argv)
 	/* signal handling */
 	save_and_quit = 0;
 	signal(SIGINT, sighandle);
+#if defined(SIGINFO)
+	signal(SIGINFO, sighandle);
+#endif
 
 	ndecoded = 0;
 	out = output_new();
