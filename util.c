@@ -171,7 +171,7 @@ getline(FILE *f)
 	len += strlen(b+bsize-BUFSIZE);
     }
 
-    if (b[len-2] != '\r')
+    if (b[len-2] == '\r')
 	b[len-2] = '\0';
     else
 	b[len-1] = '\0';
