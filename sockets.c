@@ -1,5 +1,5 @@
 /*
-  $NiH: sockets.c,v 1.2 2002/04/10 16:21:18 wiz Exp $
+  $NiH: sockets.c,v 1.3 2002/04/10 16:23:31 wiz Exp $
 
   sockets.c -- auxiliary socket functions
   Copyright (C) 1996, 1997 Dieter Baron
@@ -33,10 +33,16 @@
 #include <netinet/in.h>
 #include <errno.h>
 
+#include "config.h"
+
 extern char *prg;
 
 #ifndef H_ERRNO_DECLARED
 extern int h_errno;
+#endif
+
+#ifndef HAVE_HSTRERROR
+char *hstrerror(int);
 #endif
 
 

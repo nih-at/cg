@@ -14,5 +14,6 @@ AM_PROG_LEX
 # AC_DECL_YYTEXT
 
 AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
+AC_REPLACE_FUNCS(hstrerror)
 
 AC_OUTPUT(Makefile regress/Makefile)

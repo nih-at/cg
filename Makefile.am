@@ -5,7 +5,7 @@ SUBDIRS=libmap regress
 bin_PROGRAMS=cg
 noinst_PROGRAMS=testdec
 
-cg_SOURCES=checkgroup.c decode.c header.c hstrerror.c mime.c newsrc.c \
+cg_SOURCES=checkgroup.c decode.c header.c mime.c newsrc.c \
 	output.c parserc.l ranges.c sockets.c stream.c stream_article.c \
 	stream_cat.c stream_decode.c stream_file.c stream_quot_print.c \
 	stream_msg_multi.c stream_msg_partial.c stream_section.c \
