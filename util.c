@@ -84,30 +84,38 @@ prerror(char *fmt, ...)
 FILE *
 fopen_uniq(char **fnp)
 {
-    char *s;
+    char *s, b[8192];
     int fd;
     FILE *f;
 
     s=*fnp;
     if (s == NULL) {
-	
+	s = "UNKNOWN";
+	strcpy(b, "UNKNOWN.001");
+	i = 1;
     }
+    else {
+	strcpy(b, s);
+	i = 0;
+    }
+    
     for (;;) {
-	    
-	if ((fd=open(s, O_CREAT | O_EXCL, 0666)) >= 0) {
-	    if ((f=fdopen(fd, "wb")) != NULL) {
-		return f;
-	    }
-	    else {
-		close(fd);
-		return NULL;
-	    }
-	}
-	else
+	if ((fd=open(b, O_CREAT | O_EXCL, 0666)) < 0) {
 	    if (errno != EEXIST) {
 		return NULL;
 	    }
-			
+	}
+	else {
+	    if ((f=fdopen(fd, "wb")) == NULL) {
+		close(fd);
+		return NULL;
+	    }
+	    *fnp = strdup(b);
+	    return f;
+	}
+
+	sprintf(b, (*fmp) ? "%s.%d" : "%s.%03d", s, ++i);
+    }
 	
     
 }
