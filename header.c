@@ -28,15 +28,78 @@ header_init(void)
 
 
 
-#if 0
 struct header *
 header_read(FILE *f, int dotp)
 {
-    struct header *h;
+    struct header h, *act;
+    char *line, *p;
+    static char *b;
+    static int bsize;
 
+    act = &h;
+    h.next = NULL;
+    h.value = NULL;
+    h.type = NULL;
+    
+    
+/*    if (bsize == 0) {
+	bsize=BUFSIZE;
+	b=(char *)xmalloc(bsize);
+	} */
+
+    while ((line=getline(f)) != NULL) {
+	if (line[0] == '\0')
+	    break;
+	else if (line[0] == ' ') {
+	    /* continued header */
+	    if (act->value)
+		act->value = (char *)xrealloc(act->value, strlen(act->value)+
+					      strlen(line));
+	    else {
+		if (act != &h) {
+		    act->value = (char *)xmalloc(strlen(act->value)+
+						 strlen(line));
+		}
+		else
+		    break;
+	    }
+	}
+
+	for (p=line; (*p > ' ') && (*p < 127); p++) {
+	    if (*p == ':') {
+		if ((*(p+1) == ' ') || (*(p+1) == '\t')) {
+		    *p = '\0';
+		    /* make room for symbol */
+		    act->next = (struct header *)xmalloc(sizeof(struct header));
+		    act = act->next;
+		    if ((act.type=intern_caps(line)) == NULL) {
+			/* XXX: better handling */
+			break;
+		    }
+		    p = p + strspn (p, " \t");
+		    if (strlen(p) > 0)
+			if ((act->value=strdup(p)) == NULL) {
+			    error("strdup failure");
+			    exit(1);
+			}
+		    break;
+		}
+		else {
+		    /* not really a header after all */
+		    break;
+		}
+	    }
+	}
+    }
+	
+	    
+
+
+    }
+
+    return h;
     
 }
-#endif
 
 
 
