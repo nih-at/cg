@@ -70,7 +70,7 @@ header_read(FILE *f, int dotp)
 	for (p=line; (*p > ' ') && (*p < 127); p++) {
 	    if (*p == ':') {
 		if ((*(p+1) == ' ') || (*(p+1) == '\t')) {
-		    *p = '\0';
+		    *(p++) = '\0';
 		    act->next
 			= (struct header *)xmalloc(sizeof(struct header));
 		    act = act->next;
