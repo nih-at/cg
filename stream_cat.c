@@ -58,6 +58,9 @@ cat_get(struct stream_cat *this)
 	    close_current(this);
 	    return TOKEN_EOF;
 	}
+	/* skip part 0 if it doesn't exist */
+	if (this->i == 0 && this->file->artno[0] == -1)
+	    i++;
 	ret = nntp_put("article %ld", this->file->artno[this->i++]);
 	if (ret != 220 && ret != 224) {
 	    token_set3(stream_enqueue((stream *)this),
