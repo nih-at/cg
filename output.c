@@ -71,7 +71,7 @@ output(out_state *out, token *t)
 
     switch (t->type) {
     case TOK_FNAME:
-	printf(">%s: %s\n", tname[t->type], t->line);
+	printf(">%s: %s\n", tname[t->type], t->line ? t->line : "(null)");
 
 	if (out->infile) {
 	    fprintf(stderr, "ERROR: fname while in file (missing EOF)\n");
