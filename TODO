@@ -3,6 +3,7 @@ man page or similar
 test cases: mime: unknown CTE, errors
 
 IPv6
+uuencode-base64 support
 binhex support
 multipart/appledouble: better handling if filename same
 
