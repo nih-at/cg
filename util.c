@@ -184,3 +184,12 @@ getline(FILE *f)
     }
     return b;    
 }
+
+
+
+void
+skip_rest(FILE *f)
+{
+    while (getline(f) != NULL)
+	;
+}

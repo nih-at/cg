@@ -13,11 +13,13 @@ enum enctype decode_mime(FILE *fin, FILE **foutp, char **fnamep,
 			 struct header *h);
 enum enctype decode_uu(FILE *fin, FILE *fout, int inp);
 void decode_uu_line(FILE *fout, char *line);
+enum enctype decode_base64(FILE *fin, FILE *fout);
+enum enctype decode_binhex(FILE *fin, FILE **foutp, char **fn);
 
 
 
 enum enctype
-decode(FILE *fin, FILE **foutp, enum enctype type)
+decodefile(FILE *fin, FILE **foutp, enum enctype type)
 {
     FILE *fdesc;
     struct header *h;
@@ -262,9 +264,10 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 	    decode_uu_line(fout, b1);
     }
 
-    if (end)
+    if (end) {
+	skip_rest(fin);
 	return enc_eof;
-
+    }
     for (;;) {
 	if ((line=getline(fin)) == NULL)
 	    return enc_uu;
@@ -272,6 +275,7 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 	if (line[0] == 'M') {
 	    if (strlen(line) != 61) {
 		/* XXX: wrong line */
+		skip_rest(fin);
 		return enc_uu;
 	    }
 	    len = 45;
@@ -282,16 +286,20 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 	    end = 0;
 	    if (strlen(line)-1 != ((len+2)/3)*4) {
 		/* XXX: wrong line */
+		skip_rest(fin);
 		return enc_uu;
 	    }
 	}
 	if (line[0] == ' ' || line[0] == '`')
 	    end = 1;
 	else if (strcmp(line, "end") == 0) {
-	    if (end)
+	    if (end) {
+		skip_rest(fin);
 		return enc_eof;
+	    }
 	    else {
 		/* XXX: wrong line */
+		skip_rest(fin);
 		return enc_uu;
 	    }
 	}
@@ -330,4 +338,22 @@ decode_uu_line(FILE *fout, char *line)
 	b[i++] = l & 0xff;
     }
     fwrite(b, 1, 3, fout);
+}
+
+
+
+enum enctype
+decode_base64(FILE *fin, FILE *fout)
+{
+    skip_rest(fin);
+    return enc_base64;
+}
+
+
+
+enum enctype
+decode_binhex(FILE *fin, FILE **foutp, char **fn)
+{
+    skip_rest(fin);
+    return enc_binhex;
 }

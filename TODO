@@ -7,3 +7,5 @@
 * NNTPSERVER from environment
 * xref handling
 * reconnect upon timeout
+
+* read socket empty, don't hang

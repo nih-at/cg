@@ -12,3 +12,4 @@ char *expand(char *path);
 char *getline(FILE *f);
 FILE *fopen_uniq(char **s);
 void prerror(char *fmt, ...);
+void skip_rest(FILE *f);
