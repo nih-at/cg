@@ -109,7 +109,7 @@ output(out_state *out, token *t)
 
     case TOK_DEBUG:
 	prdebug(DEBUG_TOK, ">debug: %s", t->line);
-	prdebug(DEBUG_DEBUG, "(%s)", t->line);
+	prdebug(DEBUG_DEBUG, "%s", t->line);
 	break;
 	
     case TOK_LINE:
