@@ -1,3 +1,6 @@
+* check if errfilename is set 
+
+
 * better error messages (partno, lineno, etc.)
 * remove/move broken files
 

@@ -83,7 +83,7 @@ header_read(FILE *f, int dotp)
 		    p = p + strspn (p, " \t");
 		    if (strlen(p) > 0)
 			if ((act->value=strdup(p)) == NULL) {
-			    prerror("strdup failure");
+			    prerror(errnone, "strdup failure");
 			    exit(1);
 			}
 		    break;

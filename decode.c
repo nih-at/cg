@@ -13,14 +13,14 @@
 
 enum enctype decode_mime(FILE *fin, FILE **foutp, char **fnamep,
 			 struct header *h);
-enum enctype decode_uu(FILE *fin, FILE *fout, int inp, char *filename);
+enum enctype decode_uu(FILE *fin, FILE *fout, int inp);
 enum enctype decode_base64(FILE *fin, FILE *fout);
 enum enctype decode_binhex(FILE *fin, FILE **foutp, char **fn);
 
 
 
 enum enctype
-decode_file(FILE *fin, FILE **foutp, enum enctype type, char **filenamep)
+decode_file(FILE *fin, FILE **foutp, enum enctype type)
 {
     FILE *fdesc;
     struct header *h;
@@ -43,11 +43,11 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type, char **filenamep)
 		    mime_free(m);
 		    header_free(h);
 		    if ((h=header_read(fin, 1)) == NULL) {
-			prerror("mime message/partial, but no second header");
+			prerror(errfile, "mime message/partial, but no"
+				" second header");
 			return enc_error;
 		    }
-		    type = decode_mime(fin, foutp, &filename, h);
-		    *filenamep = filename;
+		    type = decode_mime(fin, foutp, NULL, h);
 		    header_free(h);
 		    return type;
 		}
@@ -68,8 +68,7 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type, char **filenamep)
 		    
 		    mime_free(m);
 
-		    type = decode_mime(fin, foutp, &filename, h);
-		    *filenamep = filename;
+		    type = decode_mime(fin, foutp, NULL, h);
 		    header_free(h);
 		    
 		    if (type == enc_base64)
@@ -98,12 +97,12 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type, char **filenamep)
 		    s = strdup(s+1);
 		    filename = s;
 		    if ((*foutp = fopen_uniq(&filename)) == NULL) {
-			prerror("can't create %s: %s", filename,
-			      strerror(errno));
+			prerror(errnone, "can't create %s: %s", filename,
+				strerror(errno));
 			type = enc_error;
 		    }
 		    else
-			type = decode_uu(fin, *foutp, 1, filename);
+			type = decode_uu(fin, *foutp, 1);
 		    if (filename != s)
 			free(s);
 		}
@@ -121,7 +120,7 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type, char **filenamep)
 		if (descname == NULL) {
 		    descname = ".desc";
 		    if ((fdesc=fopen_uniq(&descname)) == NULL)
-			prerror("can't create %s: %s", descname,
+			prerror(errnone, "can't create %s: %s", descname,
 			      strerror(errno));
 		}
 		else {
@@ -134,7 +133,8 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type, char **filenamep)
 	}
 	if (fdesc) {
 	    if (fclose(fdesc) != 0)
-		prerror("can't close %s: %s", descname, strerror(errno));
+		prerror(errnone, "can't close %s: %s", descname,
+			strerror(errno));
 	    switch (type) {
 	    case enc_error:
 	    case enc_nodata:
@@ -143,21 +143,21 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type, char **filenamep)
 	    default:
 		sprintf(b, "%s.desc", filename);
 		if (rename(descname, b) != 0) {
-		    prerror("can't rename %s to %s: %s", descname, b,
-			  strerror(errno));
+		    prerror(errnone, "can't rename %s to %s: %s", descname,
+			    b, strerror(errno));
 		}
 		break;
 	    }
 	}
 	/* XXX: descname not freed */
-	*filenamep = filename;
+	free(filename);
 	return type;
     }	
     else {
 	/* not first part */
 	switch (type) {
 	case enc_uu:
-	    type = decode_uu(fin, *foutp, 0, filename);
+	    type = decode_uu(fin, *foutp, 0);
 	    return type;
 	case enc_binhex:
 	    type = decode_binhex(fin, foutp, NULL);
@@ -166,9 +166,8 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type, char **filenamep)
 	    type = decode_base64(fin, *foutp);
 	    return type;
 	default:
-	    prerror("can't happen: decode called with invalid encoding "
-		    "type %d",
-		    type);
+	    prerror(errpart, "can't happen: decode called with invalid"
+		    " encoding type %d", type);
 	    return enc_error;
 	}
     }
@@ -211,23 +210,30 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
 	}
     }
 
-    *fnamep = filename;
-    if ((*foutp=fopen_uniq(fnamep)) == NULL) {
-	prerror("can't create %s: %s", filename,
-	      strerror(errno));
+    *s = filename;
+    strncpy(errfilename, filename, ERRFILESIZE);
+    if ((*foutp=fopen_uniq(&filename)) == NULL) {
+	prerror(errnone, "can't create %s: %s", filename,
+		strerror(errno));
+	free(filename);
 	return enc_error;
     }
 
-    if (*fnamep != filename)
-	free(filename);
+    if (s != filename)
+	free(s);
 
+    if (fnamep != NULL)
+	*fnamep = filename;
+    else
+	free(filename);
+    
     return decode_base64(fin, *foutp);
 }
 
 
 
 enum enctype
-decode_uu(FILE *fin, FILE *fout, int inp, char *filename)
+decode_uu(FILE *fin, FILE *fout, int inp)
 {
     unsigned char *line, b2[2][90], b[8192];
     int len, len2[2], end, err, i;
@@ -236,7 +242,7 @@ decode_uu(FILE *fin, FILE *fout, int inp, char *filename)
     end = len2[0] = 0;
     while (!inp) {
 	if ((line=getline(fin)) == NULL) {
-	    prerror("%s: no uu data found", filename);
+	    prerror(errpart, "no uu data found");
 	    return enc_nodata;
 	}
 	
@@ -277,7 +283,7 @@ decode_uu(FILE *fin, FILE *fout, int inp, char *filename)
 	if (len2[0] && len2[i]) {
 	    err = decode_line(b, b2[i]+1, decode_table_uuencode);
 	    if (err & DEC_ERRMASK) {
-		prerror("%s: illegal char in uu data", filename);
+		prerror(errline, "illegal char in uu data");
 		skip_rest(fin);
 		return enc_error;
 	    }
@@ -285,7 +291,7 @@ decode_uu(FILE *fin, FILE *fout, int inp, char *filename)
 		len = err & ~DEC_ERRMASK;
 	    if (fwrite(b, 1, len2[i], fout) != len2[i]) {
 		/* XXX: handle disc full */
-		prerror("write error: %s\n", strerror(errno));
+		prerror(errfile, "write error: %s\n", strerror(errno));
 		skip_rest(fin);
 		return enc_error;
 	    }
@@ -332,7 +338,7 @@ decode_uu(FILE *fin, FILE *fout, int inp, char *filename)
 
 		if (len != 0 && fwrite(b, 1, len, fout) != len) {
 		    /* XXX: handle disc full */
-		    prerror("write error: %s\n", strerror(errno));
+		    prerror(errfile, "write error: %s\n", strerror(errno));
 		    skip_rest(fin);
 		    return enc_error;
 		}
@@ -354,7 +360,7 @@ decode_uu(FILE *fin, FILE *fout, int inp, char *filename)
 
 	err = decode_line(b, line+1, decode_table_uuencode);
 	if (err & DEC_ERRMASK) {
-	    prerror("%s: illegal character in uu data", filename);
+	    prerror(errline, "illegal character in uu data");
 	    skip_rest(fin);
 	    return enc_error;
 	}
@@ -362,7 +368,7 @@ decode_uu(FILE *fin, FILE *fout, int inp, char *filename)
 	    len = err & ~DEC_ERRMASK;
 	if (fwrite(b, 1, len, fout) != len) {
 	    /* XXX: handle disc full */
-	    prerror("write error: %s\n", strerror(errno));
+	    prerror(errfile, "write error: %s\n", strerror(errno));
 	    skip_rest(fin);
 	    return enc_error;
 	}
@@ -385,7 +391,7 @@ decode_base64(FILE *fin, FILE *fout)
 
 	if (fwrite(b, 1, n, fout) != n) {
 	    /* XXX: handle disc full */
-	    prerror("write error: %s\n", strerror(errno));
+	    prerror(errfile, "write error: %s\n", strerror(errno));
 	    skip_rest(fin);
 	    return enc_error;
 	}

@@ -123,12 +123,14 @@ main(int argc, char **argv)
     char b[BUFSIZE];
     struct file **todec;
     FILE *fp;
-    
+
     prg = argv[0];
 
     nntp_group = NULL;
     newsrc = DEFAULT_NEWSRC;
     mark_complete = 0;
+    errfilename[0] = '\0';
+    errpartno = errlineno = 0;
 
     mime_init();
     header_init();
@@ -181,19 +183,20 @@ main(int argc, char **argv)
 
     if ((nntp_host=getenv("NNTPSERVER")) == NULL) {
 	if ((fp=fopen(NNTPHOSTFILE, "r")) == NULL) {
-	    prerror("can't open %s: %s", NNTPHOSTFILE, strerror(errno));
+	    prerror(errnone, "can't open %s: %s", NNTPHOSTFILE,
+		    strerror(errno));
 	    exit(7);
 	}
 	if (fgets(b, BUFSIZE, fp) == NULL) {
-	    prerror("can't read newsserver from %s: %s", NNTPHOSTFILE,
-		    strerror(errno));
+	    prerror(errnone, "can't read newsserver from %s: %s",
+		    NNTPHOSTFILE, strerror(errno));
 	    exit(7);
 	}
 	fclose(fp);
 	if (b[strlen(b)-1]=='\n')
 	    b[strlen(b)-1]='\0';
 	if ((nntp_host=strdup(b)) == NULL) {
-	    prerror("can't strdup nntp_host from `%s': shoot me", b);
+	    prerror(errnone, "can't strdup nntp_host from `%s': shoot me", b);
 	    exit(77);
 	}
     }
@@ -600,44 +603,52 @@ decode(struct file *val)
 {
     enum enctype type, oldtype;
     FILE *fout;
-    char *filename, b[60];
+    char b[60];
     int i;
 
     printf("decoding `%s'\n", val->tag);
-
+    sprintf(errfilename, "[%s]", val->tag);
+    
     decode_line(b, NULL, NULL);
 
     type = enc_unknown;
     fout = NULL;
-    filename = NULL;
 
     for (i=0; i<val->npart; i++) {
+	errpartno = i+1;
 	if (nntp_put("article %ld", val->artno[i]) != 220) {
-	    fprintf(stderr, "%s: article %ld failed: %s\n",
-		    prg, val->artno[i], nntp_response);
+	    prerror(errpart, "article %ld failed: %s\n",
+		    val->artno[i], nntp_response);
+	    errfilename[0] = '\0';
+	    errpartno = 0;
 	    return 0;
 	}
+	errlineno = 0;
 
 	oldtype = type;
-	type = decode_file(conin, &fout, type, &filename);
+	type = decode_file(conin, &fout, type);
 
 	switch(type) {
 	case enc_nodata:
-	    prerror("%s: no data found", filename);
+	    prerror(errpart, "no encoded data found");
+	    
 	case enc_error:
 	    if (fout)
 		fclose(fout);
-	    prerror("%s: decoding failed", filename);
-	    free(filename);
+	    /* XXX: next line should be removed when error handling below ok */
+	    prerror(errpart, "decoding failed");
+	    errfilename[0] = '\0';
+	    errpartno = 0;
 	    return 0;
 	    
 	case enc_eof:
 	    if (i != val->npart-1) {
-		prerror("`%s': premature end of encoded data in part %d of %d",
-			val->tag, i+1, val->npart);
+		prerror(errpart, "premature end of encoded data (%d"
+			"parts expected)", val->npart);
 		if (fout)
 		    fclose(fout);
-		free(filename);
+		errfilename[0] = '\0';
+		errpartno = 0;
 		return 0;
 	    }
 	    break;
@@ -650,14 +661,14 @@ decode(struct file *val)
 	fclose(fout);
     
     if (oldtype != enc_base64 && type != enc_eof) {
-	prerror("`%s': end of encoded data not found",
-		val->tag);
-	free(filename);
+	prerror(errfile, "end of encoded data not found");
+	errfilename[0] = '\0';
+	errpartno = 0;
 	return 0;
     }
 
-    free(filename);
-    
+    errfilename[0] = '\0';
+    errpartno = 0;
     return 1;
 }
 

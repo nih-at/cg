@@ -12,6 +12,9 @@
 
 #define HOUSENUMBER 102400
 
+char errfilename[ERRFILESIZE+1];
+int errpartno, errlineno;
+
 
 
 void *
@@ -86,11 +89,24 @@ expand(char *path)
 
 
 void
-prerror(char *fmt, ...)
+prerror(enum errtype type, char *fmt, ...)
 {
     va_list argp;
 
     fprintf(stderr, "%s: ", prg);
+
+    if (type >= errfile) {
+	if (errfilename) {
+	    fprintf(stderr, "%s", errfilename);
+	    if (type >= errpart) {
+		fprintf(stderr, ":%d", errpartno);
+		if (type == errline)
+		    fprintf(stderr, ":%d", errlineno);
+	    }
+	    fprintf(stderr, ": ");
+	}
+    }
+
     va_start(argp, fmt);
     vfprintf(stderr, fmt, argp);
     va_end(argp);
@@ -160,7 +176,7 @@ getline(FILE *f)
 	/* line too long */
 	bsize += BUFSIZE;
 	if (bsize >= HOUSENUMBER) {
-	    prerror("line longer than %d", HOUSENUMBER);
+	    prerror(errline, "line longer than %d", HOUSENUMBER);
 	    bsize -= BUFSIZE;
 	    return b;
 	}
