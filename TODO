@@ -1,3 +1,7 @@
+* better error messages (partno, lineno, etc.)
+* signature to desc file
+* remove/move broken files
+
 * save part 0
 * user interface
 * newsreader

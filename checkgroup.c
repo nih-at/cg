@@ -579,12 +579,16 @@ decode(struct file *val)
 {
     enum enctype type, oldtype;
     FILE *fout;
+    char *filename, b[60];
     int i;
 
     printf("decoding `%s'\n", val->tag);
 
+    decode_line(b, NULL, NULL);
+
     type = enc_unknown;
     fout = NULL;
+    filename = NULL;
 
     for (i=0; i<val->npart; i++) {
 	nntp_put("article %ld", val->artno[i]);
@@ -595,13 +599,16 @@ decode(struct file *val)
 	}
 
 	oldtype = type;
-	type = decode_file(conin, &fout, type);
+	type = decode_file(conin, &fout, type, &filename);
 
 	switch(type) {
 	case enc_nodata:
+	    prerror("%s: no data found", filename);
 	case enc_error:
 	    if (fout)
 		fclose(fout);
+	    prerror("%s: decoding failed", filename);
+	    free(filename);
 	    return 0;
 	    
 	case enc_eof:
@@ -610,6 +617,7 @@ decode(struct file *val)
 			val->tag, i+1, val->npart);
 		if (fout)
 		    fclose(fout);
+		free(filename);
 		return 0;
 	    }
 	    break;
@@ -624,9 +632,12 @@ decode(struct file *val)
     if (oldtype != enc_base64 && type != enc_eof) {
 	prerror("`%s': end of encoded data not found",
 		val->tag);
+	free(filename);
 	return 0;
     }
 
+    free(filename);
+    
     return 1;
 }
 

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "decode.h"
 #include "header.h"
@@ -9,19 +10,17 @@
 
 #define BINHEX_TAG "(This file must be converted with BinHex 4.0)"
 
-static int decode_line(unsigned char *buf, char *line, int *table);
 
 enum enctype decode_mime(FILE *fin, FILE **foutp, char **fnamep,
 			 struct header *h);
-enum enctype decode_uu(FILE *fin, FILE *fout, int inp);
-void decode_uu_line(FILE *fout, unsigned char *line);
+enum enctype decode_uu(FILE *fin, FILE *fout, int inp, char *filename);
 enum enctype decode_base64(FILE *fin, FILE *fout);
 enum enctype decode_binhex(FILE *fin, FILE **foutp, char **fn);
 
 
 
 enum enctype
-decode_file(FILE *fin, FILE **foutp, enum enctype type)
+decode_file(FILE *fin, FILE **foutp, enum enctype type, char **filenamep)
 {
     FILE *fdesc;
     struct header *h;
@@ -48,7 +47,7 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type)
 			return enc_error;
 		    }
 		    type = decode_mime(fin, foutp, &filename, h);
-		    free(filename);
+		    *filenamep = filename;
 		    header_free(h);
 		    return type;
 		}
@@ -70,7 +69,7 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type)
 		    mime_free(m);
 
 		    type = decode_mime(fin, foutp, &filename, h);
-		    free(filename);
+		    *filenamep = filename;
 		    header_free(h);
 		    
 		    if (type == enc_base64)
@@ -104,7 +103,7 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type)
 			type = enc_error;
 		    }
 		    else
-			type = decode_uu(fin, *foutp, 1);
+			type = decode_uu(fin, *foutp, 1, filename);
 		    if (filename != s)
 			free(s);
 		}
@@ -150,13 +149,15 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type)
 		break;
 	    }
 	}
+	/* XXX: descname not freed */
+	*filenamep = filename;
 	return type;
     }	
     else {
 	/* not first part */
 	switch (type) {
 	case enc_uu:
-	    type = decode_uu(fin, *foutp, 0);
+	    type = decode_uu(fin, *foutp, 0, filename);
 	    return type;
 	case enc_binhex:
 	    type = decode_binhex(fin, foutp, NULL);
@@ -226,17 +227,18 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
 
 
 enum enctype
-decode_uu(FILE *fin, FILE *fout, int inp)
+decode_uu(FILE *fin, FILE *fout, int inp, char *filename)
 {
-    unsigned char *line, b0[62], b1[62], b[45];
-    int len, len0, len1, end, i, j;
-    long l;
+    unsigned char *line, b2[2][90], b[8192];
+    int len, len2[2], end, err, i;
     
 
-    end = len0 = 0;
+    end = len2[0] = 0;
     while (!inp) {
-	if ((line=getline(fin)) == NULL)
+	if ((line=getline(fin)) == NULL) {
+	    prerror("%s: no uu data found", filename);
 	    return enc_nodata;
+	}
 	
 	if (line[0] == ' ' || line[0] == '`') {
 	    end = 1;
@@ -246,50 +248,67 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 		inp = 1;
 	    }
 	    else
-		len0 = 0;
+		len2[0] = 0;
 	}
 	else if (line[0] < '!' || line[0] > 'M') {
 	    end = 0;
-	    len0 = 0;
+	    len2[0] = 0;
 	}
 	else {
 	    end = 0;
-	    len1 = (line[0] - ' ');
-	    if (strlen(line)-1 == ((len1+2)/3)*4) {
-		if (len0 == 45) {
-		    strcpy(b1, line);
+	    len2[1] = (line[0] - ' ');
+	    if ((strlen(line)-1+3)/4 == (len+2)/3) {
+		if (len2[0] == 45) {
+		    strcpy(b2[1], line);
 		    inp = 1;
 		}
 		else {
-		    strcpy(b0, line);
-		    len0 = len1;
-		    len1 = 0;
+		    strcpy(b2[0], line);
+		    len2[0] = len2[1];
+		    len2[1] = 0;
 		}
 	    }
 	    else
-		len0 = 0;
+		len2[0] = 0;
 	}
     }
 
-    if (len0) {
-	decode_uu_line(fout, b0);
-	if (len1)
-	    decode_uu_line(fout, b1);
-    }
+    for (i=0; i<2; i++)
+	if (len2[0] && len2[i]) {
+	    err = decode_line(b, b2[i]+1, decode_table_uuencode);
+	    if (err & DEC_ERRMASK) {
+		prerror("%s: illegal char in uu data", filename);
+		skip_rest(fin);
+		return enc_error;
+	    }
+	    if (len != 45 && (err & ~DEC_ERRMASK) < len)
+		len = err & ~DEC_ERRMASK;
+	    if (fwrite(b, 1, len2[i], fout) != len2[i]) {
+		/* XXX: handle disc full */
+		prerror("write error: %s\n", strerror(errno));
+		skip_rest(fin);
+		return enc_error;
+	    }
+	}
 
     if (end) {
 	skip_rest(fin);
 	return enc_eof;
     }
+
     for (;;) {
 	if ((line=getline(fin)) == NULL)
 	    return enc_uu;
 
 	if (line[0] == 'M') {
 	    if (strlen(line) != 61) {
-		/* XXX: wrong line */
-		skip_rest(fin);
-		return enc_uu;
+		if (iscntrl(line[61]) && line[62] == '\0')
+		    line[61] = '\0';
+		else {
+		    /* XXX: wrong line */
+		    skip_rest(fin);
+		    return enc_uu;
+		}
 	    }
 	    len = 45;
 	    end = 0;
@@ -297,7 +316,7 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 	else if (line[0] > ' ' && line[0] < 'M') {
 	    len = line[0] - ' ';
 	    end = 0;
-	    if (strlen(line)-1 != ((len+2)/3)*4) {
+	    if ((strlen(line)-1+3)/4 != (len+2)/3) {
 		/* XXX: wrong line */
 		skip_rest(fin);
 		return enc_uu;
@@ -309,6 +328,15 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 	}
 	else if (strcmp(line, "end") == 0) {
 	    if (end) {
+		len = (decode_line(b, NULL, NULL) & ~DEC_ERRMASK);
+
+		if (len != 0 && fwrite(b, 1, len, fout) != len) {
+		    /* XXX: handle disc full */
+		    prerror("write error: %s\n", strerror(errno));
+		    skip_rest(fin);
+		    return enc_error;
+		}
+		
 		skip_rest(fin);
 		return enc_eof;
 	    }
@@ -324,40 +352,21 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 	    return enc_uu;
 	}
 
-	for (j=1,i=0; i<len; j+=4) {
-	    l = (((line[j]-' ')&0x3f)<<18)
-		| (((line[j+1]-' ')&0x3f)<<12)
-		| (((line[j+2]-' ')&0x3f)<<6)
-		| ((line[j+3]-' ')&0x3f);
-	    b[i++] = l >> 16;
-	    b[i++] = (l>>8) & 0xff;
-	    b[i++] = l & 0xff;
+	err = decode_line(b, line+1, decode_table_uuencode);
+	if (err & DEC_ERRMASK) {
+	    prerror("%s: illegal character in uu data", filename);
+	    skip_rest(fin);
+	    return enc_error;
 	}
-	fwrite(b, 1, len, fout);
+	if (len != 45 && (err & ~DEC_ERRMASK) < len)
+	    len = err & ~DEC_ERRMASK;
+	if (fwrite(b, 1, len, fout) != len) {
+	    /* XXX: handle disc full */
+	    prerror("write error: %s\n", strerror(errno));
+	    skip_rest(fin);
+	    return enc_error;
+	}
     }
-}
-
-
-
-void
-decode_uu_line(FILE *fout, unsigned char *line)
-{
-    int len, i, j;
-    long l;
-    unsigned char b[45];
-    
-    len = line[0] - ' ';
-
-    for (j=1,i=0; i<len; j+=4) {
-	l = (((line[j]-' ')&0x3f)<<18)
-	    | (((line[j+1]-' ')&0x3f)<<12)
-	    | (((line[j+2]-' ')&0x3f)<<6)
-	    | ((line[j+3]-' ')&0x3f);
-	b[i++] = l >> 16;
-	b[i++] = (l>>8) & 0xff;
-	b[i++] = l & 0xff;
-    }
-    fwrite(b, 1, len, fout);
 }
 
 
@@ -370,7 +379,9 @@ decode_base64(FILE *fin, FILE *fout)
     int n, err;
     
     while ((line=getline(fin))) {
-	n = (err=decode_line(b, line, decode_table_base64)) & ~DEC_ERRMASK;
+	err = decode_line(b, line, decode_table_base64);
+	n = err & ~DEC_ERRMASK;
+
 
 	if (fwrite(b, 1, n, fout) != n) {
 	    /* XXX: handle disc full */
@@ -411,17 +422,30 @@ decode_binhex(FILE *fin, FILE **foutp, char **fn)
 
 
 
-static int
+int
 decode_line(unsigned char *buf, char *line, int *table)
 {
     static int rest, no;
     int i, b;
 
     if (line == NULL) {
-	if (no != 0)
-	    i =  DEC_INCOMPLETE;
-	else
-	    i =  0;
+	switch (no) {
+	case 0:
+	    i = 0;
+	    break;
+	case 1:
+	    i = DEC_INCOMPLETE;
+	    break;
+	case 2:
+	    buf[0] = (rest >> 4) & 0xff;
+	    i = 1 | DEC_INCOMPLETE;
+	    break;
+	case 3:
+	    buf[0] = (rest >> 10) & 0xff;
+	    buf[1] = (rest >> 2) & 0xff;
+	    i = 2 | DEC_INCOMPLETE;
+	    break;
+	}
 	no = rest = 0;
 	return i;
     }
