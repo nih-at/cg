@@ -602,7 +602,10 @@ parse(map *parts, FILE *f)
 	    if (!range_isin(rcmap, artno))
 		val->new=1;
 
-	    val->size += 3*size/4;
+	    if (strcasestr(subj, "yenc") != NULL)
+		val->size += size*98/100;
+	    else
+		val->size += size*3/4;
 	}
 	
 	if (!mark_complete)

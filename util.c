@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -227,6 +228,28 @@ xstrdup(char *s)
     strcpy(t, s);
 
     return t;
+}
+
+
+
+char *
+strcasestr(const char *big, const char *little)
+{
+    const char *p, *q, *r;
+
+    /* XXX: more efficient implementation, and sync with gtunes */
+
+    for (p=big; *p; p++) {
+        for (q=p, r=little; *q && *r; q++, r++) {
+            if (tolower(*q) != tolower(*r))
+                break;
+        }
+        if (!*r)
+            return (char *)p;
+    }
+
+    return NULL;
+
 }
 
 

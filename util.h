@@ -41,6 +41,7 @@ int rename_uniq(const char *from, char **to);
 void skip_rest(FILE *f);
 token *skip_to(stream *in, enum token_type type);
 int str2hex(char *s);
+char *strcasestr(const char *big, const char *little);
 char *our_basename(char *name);
 void *xmalloc(size_t size);
 void *xrealloc(void *p, size_t size);
