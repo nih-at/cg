@@ -486,6 +486,7 @@ choose (struct file **todec, long no_complete, char *group)
     chosen=(long *)malloc(sizeof(long)*(no_complete+1));
     
     while (fgets(b, BUFSIZE, temp) != NULL) {
+	j = 0;
 	sscanf(b,"%ld",&j);
 	if (j != 0)
 	    chosen[i++]=j-1;
