@@ -1,5 +1,5 @@
 /*
-  $NiH$
+  $NiH: snprintf.c,v 1.1 2002/04/16 16:16:01 dillo Exp $
 
   This file provides replacements for the following library functions:
   	snprintf
@@ -49,16 +49,18 @@
  *
  *  Dieter Baron <dillo@giga.or.at> 04/16/02 for cg 0.4
  *    Add vasprintf front end, and the ability to resize the buffer on
- *    demand.
+ *    demand.  Make the test program compilable on systems that provide
+ *    snprintf, and add string format tests.
  **************************************************************/
 
 #include "config.h"
 
-#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || !defined(HAVE_VASPRINTF)
+#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || !defined(HAVE_VASPRINTF) || defined(TEST_SNPRINTF)
 
-#include <string.h>
-# include <ctype.h>
 #include <sys/types.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* varargs declarations: */
 
@@ -131,7 +133,7 @@ static void fmtstr (struct buf *buf,
 #define MAX(p,q) ((p >= q) ? p : q)
 
 static void
-dopr(struct buffer *buf, const char *format, va_list args)
+dopr(struct buf *buf, const char *format, va_list args)
 {
     char ch;
     long value;
@@ -145,14 +147,14 @@ dopr(struct buffer *buf, const char *format, va_list args)
     
   state = DP_S_DEFAULT;
   flags = cflags = min = 0;
-  buf->currlen = 0; /* XXX: init here? */
+  buf->currlen = 0;
   max = -1;
   ch = *format++;
 
   while (state != DP_S_DONE)
   {
-    if ((ch == '\0') || (currlen >= maxlen)) 
-      state = DP_S_DONE;
+    if ((ch == '\0') || (buf->currlen >= buf->maxlen && !buf->resize)) 
+    state = DP_S_DONE;
 
     switch(state) 
     {
@@ -327,8 +329,6 @@ dopr(struct buffer *buf, const char *format, va_list args)
 	break;
       case 's':
 	strvalue = va_arg (args, char *);
-	if (max < 0) 
-	  max = maxlen; /* ie, no max */
 	fmtstr (buf, strvalue, flags, min, max);
 	break;
       case 'p':
@@ -340,19 +340,19 @@ dopr(struct buffer *buf, const char *format, va_list args)
 	{
 	  short int *num;
 	  num = va_arg (args, short int *);
-	  *num = currlen;
+	  *num = buf->currlen;
         } 
 	else if (cflags == DP_C_LONG) 
 	{
 	  long int *num;
 	  num = va_arg (args, long int *);
-	  *num = currlen;
+	  *num = buf->currlen;
         } 
 	else 
 	{
 	  int *num;
 	  num = va_arg (args, int *);
-	  *num = currlen;
+	  *num = buf->currlen;
         }
 	break;
       case '%':
@@ -378,47 +378,52 @@ dopr(struct buffer *buf, const char *format, va_list args)
       break; /* some picky compilers need this */
     }
   }
-  /* XXX: update */
-  if (currlen < maxlen - 1) 
-    buffer[currlen] = '\0';
+  if (buf->currlen >= buf->maxlen) {
+      if (buf->resize) {
+	  if (buf_grow(buf) < 0)
+	      return;
+      }
+      else
+	  buf->buffer[buf->maxlen-1] = '\0';
+  }
   else 
-    buffer[maxlen - 1] = '\0';
+    buf->buffer[buf->currlen] = '\0';
 }
 
 
 
 static void
-fmtstr (struct buf *buf, char *value, int flags, int min, int max)
+fmtstr(struct buf *buf, char *value, int flags, int min, int max)
 {
-  int padlen, strln;     /* amount to pad */
-  int cnt = 0;
+  int padlen;     /* amount to pad */
+  int cnt;
   
   if (value == 0)
   {
     value = "(null)";
   }
 
-  strln = strlen(value);
-  padlen = min - strln;
+  cnt = 0;
+  padlen = min - strlen(value);
   if (padlen < 0) 
     padlen = 0;
   if (flags & DP_F_MINUS) 
     padlen = -padlen; /* Left Justify */
 
-  while ((padlen > 0) && (cnt < max)) 
+  while ((padlen > 0) && (max < 0 ||  cnt < max)) 
   {
-    dopr_outch (buffer, currlen, maxlen, ' ');
+    dopr_outch (buf, ' ');
     --padlen;
     ++cnt;
   }
-  while (*value && (cnt < max)) 
+  while (*value && (max < 0 || cnt < max)) 
   {
-    dopr_outch (buffer, currlen, maxlen, *value++);
+    dopr_outch (buf, *value++);
     ++cnt;
   }
-  while ((padlen < 0) && (cnt < max)) 
+  while ((padlen < 0) && (max < 0 || cnt < max)) 
   {
-    dopr_outch (buffer, currlen, maxlen, ' ');
+    dopr_outch (buf, ' ');
     ++padlen;
     ++cnt;
   }
@@ -429,7 +434,7 @@ fmtstr (struct buf *buf, char *value, int flags, int min, int max)
 /* Have to handle DP_F_NUM (ie 0x and 0 alternates) */
 
 static void
-fmtint(struct *buf, long value, int base, int min, int max, int flags)
+fmtint(struct buf *buf, long value, int base, int min, int max, int flags)
 {
   int signvalue = 0;
   unsigned long uvalue;
@@ -489,31 +494,31 @@ fmtint(struct *buf, long value, int base, int min, int max, int flags)
   /* Spaces */
   while (spadlen > 0) 
   {
-    dopr_outch (buffer, currlen, maxlen, ' ');
+    dopr_outch (buf, ' ');
     --spadlen;
   }
 
   /* Sign */
   if (signvalue) 
-    dopr_outch (buffer, currlen, maxlen, signvalue);
+    dopr_outch (buf, signvalue);
 
   /* Zeros */
   if (zpadlen > 0) 
   {
     while (zpadlen > 0)
     {
-      dopr_outch (buffer, currlen, maxlen, '0');
+      dopr_outch (buf, '0');
       --zpadlen;
     }
   }
 
   /* Digits */
   while (place > 0) 
-    dopr_outch (buffer, currlen, maxlen, convert[--place]);
+    dopr_outch (buf, convert[--place]);
   
   /* Left Justified spaces */
   while (spadlen < 0) {
-    dopr_outch (buffer, currlen, maxlen, ' ');
+    dopr_outch (buf, ' ');
     ++spadlen;
   }
 }
@@ -657,45 +662,45 @@ fmtfp(struct buf *buf, long double fvalue, int min, int max, int flags)
   {
     if (signvalue) 
     {
-      dopr_outch (buffer, currlen, maxlen, signvalue);
+      dopr_outch (buf, signvalue);
       --padlen;
       signvalue = 0;
     }
     while (padlen > 0)
     {
-      dopr_outch (buffer, currlen, maxlen, '0');
+      dopr_outch (buf, '0');
       --padlen;
     }
   }
   while (padlen > 0)
   {
-    dopr_outch (buffer, currlen, maxlen, ' ');
+    dopr_outch (buf, ' ');
     --padlen;
   }
   if (signvalue) 
-    dopr_outch (buffer, currlen, maxlen, signvalue);
+    dopr_outch (buf, signvalue);
 
   while (iplace > 0) 
-    dopr_outch (buffer, currlen, maxlen, iconvert[--iplace]);
+    dopr_outch (buf, iconvert[--iplace]);
 
   /*
    * Decimal point.  This should probably use locale to find the correct
    * char to print out.
    */
-  dopr_outch (buffer, currlen, maxlen, '.');
+  dopr_outch (buf, '.');
 
   while (fplace > 0) 
-    dopr_outch (buffer, currlen, maxlen, fconvert[--fplace]);
+    dopr_outch (buf, fconvert[--fplace]);
 
   while (zpadlen > 0)
   {
-    dopr_outch (buffer, currlen, maxlen, '0');
+    dopr_outch (buf, '0');
     --zpadlen;
   }
 
   while (padlen < 0) 
   {
-    dopr_outch (buffer, currlen, maxlen, ' ');
+    dopr_outch (buf, ' ');
     ++padlen;
   }
 }
@@ -706,9 +711,10 @@ static void
 dopr_outch (struct buf *buf, char c)
 {
     if (buf->currlen >= buf->maxlen) {
-	if (buf->resize)
+	if (buf->resize) {
 	    if (buf_grow(buf) < 0)
 		return;
+	}
 	else
 	    return;
     }
@@ -739,6 +745,8 @@ buf_grow(struct buf *buf)
 
 #endif /* !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) */
 
+
+
 #ifndef HAVE_VASPRINTF
 int
 vasprintf (char **strp, const char *fmt, va_list args)
@@ -757,8 +765,16 @@ vasprintf (char **strp, const char *fmt, va_list args)
 }
 #endif
 
-#ifndef HAVE_VSNPRINTF
-int vsnprintf (char *str, size_t count, const char *fmt, va_list args)
+
+
+#if !defined(HAVE_VSNPRINTF) || defined(TEST_SNPRINTF)
+
+#if defined(TEST_SNPRINTF)
+#define vsnprintf my_vsnprintf
+#endif
+
+int
+vsnprintf(char *str, size_t count, const char *fmt, va_list args)
 {
   struct buf buf;
   
@@ -769,9 +785,17 @@ int vsnprintf (char *str, size_t count, const char *fmt, va_list args)
   dopr(&buf, fmt, args);
   return(strlen(str));
 }
-#endif /* !HAVE_VSNPRINTF */
+#endif /* !HAVE_VSNPRINTF || TEST_SNPRINTF */
 
-#ifndef HAVE_SNPRINTF
+
+
+#if !defined(HAVE_SNPRINTF) || defined(TEST_SNPRINTF)
+
+#if defined(TEST_SNPRINTF)
+#define snprintf my_snprintf
+#define vsnprintf my_vsnprintf
+#endif
+
 /* VARARGS3 */
 #ifdef HAVE_STDARGS
 int snprintf (char *str,size_t count,const char *fmt,...)
@@ -795,11 +819,22 @@ int snprintf (va_alist) va_dcl
   return(strlen(str));
 }
 
+#if defined(TEST_SNPRINTF)
+#undef snprintf
+#undef vsnprintf
+#endif
+
+#endif /* !HAVE_SNPRINTF || TEST_SNPRINTF */
+
+
+
 #ifdef TEST_SNPRINTF
 #ifndef LONG_STRING
 #define LONG_STRING 1024
 #endif
-int main (void)
+
+int
+main (void)
 {
   char buf1[LONG_STRING];
   char buf2[LONG_STRING];
@@ -832,6 +867,24 @@ int main (void)
     NULL
   };
   long int_nums[] = { -1, 134, 91340, 341, 0203, 0};
+  char *str_fmt[] = {
+      "%s",
+      "%5s",
+      "%.5s",
+      "%5.5s",
+      "%5.10s",
+      "%-5.10s",
+      "%10s",
+      "%-10s",
+      "%10.10s",
+      "%-10.10s",
+      "%10.5s",
+      "%-10.5s",
+      "foo: %s :bar",
+      NULL
+  };
+  char *str = "0123456";
+  
   int x, y;
   int fail = 0;
   int num = 0;
@@ -841,7 +894,7 @@ int main (void)
   for (x = 0; fp_fmt[x] != NULL ; x++)
     for (y = 0; fp_nums[y] != 0 ; y++)
     {
-      snprintf (buf1, sizeof (buf1), fp_fmt[x], fp_nums[y]);
+      my_snprintf (buf1, sizeof (buf1), fp_fmt[x], fp_nums[y]);
       sprintf (buf2, fp_fmt[x], fp_nums[y]);
       if (strcmp (buf1, buf2))
       {
@@ -855,7 +908,7 @@ int main (void)
   for (x = 0; int_fmt[x] != NULL ; x++)
     for (y = 0; int_nums[y] != 0 ; y++)
     {
-      snprintf (buf1, sizeof (buf1), int_fmt[x], int_nums[y]);
+      my_snprintf (buf1, sizeof (buf1), int_fmt[x], int_nums[y]);
       sprintf (buf2, int_fmt[x], int_nums[y]);
       if (strcmp (buf1, buf2))
       {
@@ -865,8 +918,23 @@ int main (void)
       }
       num++;
     }
+
+  for (x = 0; int_fmt[x] != NULL ; x++)
+  {
+    my_snprintf (buf1, sizeof (buf1), str_fmt[x], str);
+    sprintf (buf2, str_fmt[x], str);
+    if (strcmp (buf1, buf2))
+    {
+      printf("snprintf doesn't match Format: %s\n\tsnprintf = %s\n\tsprintf  = %s\n", 
+	     str_fmt[x], buf1, buf2);
+      fail++;
+    }
+    num++;
+  }
+  
   printf ("%d tests failed out of %d.\n", fail, num);
+
+  exit(0);
 }
 #endif /* SNPRINTF_TEST */
 
-#endif /* !HAVE_SNPRINTF */
