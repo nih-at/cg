@@ -270,6 +270,7 @@ decode_yenc(stream *in, out_state *out, char *ybegin)
 
     stm = stream_yenc_open(in, ybegin);
     copy_stream(stm, out);
+    output(out, TOKEN_EOF);
     stream_close(stm);
 
     return 1;
