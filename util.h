@@ -25,6 +25,7 @@ char *getline(FILE *f);
 void prerror(enum errtype, char *fmt, ...);
 void skip_rest(FILE *f);
 token *skip_to(stream *in, enum token_type type);
+char *our_basename(char *name);
 void *xmalloc(size_t size);
 void *xrealloc(void *p, size_t size);
 char *xstrdup(char *s);

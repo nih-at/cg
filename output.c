@@ -78,10 +78,7 @@ output(out_state *out, token *t)
 	    if (out->fout)
 		fclose(out->fout);
 	}
-	if (t->line)
-	    outfilename = basename(t->line);
-	else
-	    outfilename = NULL;
+	outfilename = our_basename(t->line);
 	
 	if ((out->fout=fopen_uniq(&outfilename)) == NULL) {
 	    fprintf(stderr, "SYSERR: cannot create output file `%s': %s\n",

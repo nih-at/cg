@@ -311,3 +311,20 @@ append_file(char *t, char *s, char *sep)
     fclose(fin);
     return fclose(fout);
 }
+
+
+
+char *
+our_basename(char *name)
+{
+    char *p;
+
+    if (name == NULL)
+	return NULL;
+
+    if ((p=strrchr(name, '/')))
+	return p+1;
+    if ((p=strrchr(name, '\\')))
+	return p+1;
+    return name;
+}
