@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include <errno.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <pwd.h>
 
@@ -85,7 +88,7 @@ FILE *
 fopen_uniq(char **fnp)
 {
     char *s, b[8192];
-    int fd;
+    int fd, i;
     FILE *f;
 
     s=*fnp;
@@ -114,7 +117,7 @@ fopen_uniq(char **fnp)
 	    return f;
 	}
 
-	sprintf(b, (*fmp) ? "%s.%d" : "%s.%03d", s, ++i);
+	sprintf(b, (*fnp) ? "%s.%d" : "%s.%03d", s, ++i);
     }
 	
     
