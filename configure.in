@@ -24,6 +24,7 @@ AC_CHECK_LIB(resolv, main)
 dnl functions
 
 AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
-AC_REPLACE_FUNCS(hstrerror vasprintf)
+AC_CHECK_FUNCS(snprintf vsnprintf vasprintf, , [LIBOBJS="$LIBOBJS snprintf.o"])
+AC_REPLACE_FUNCS(hstrerror)
 
 AC_OUTPUT(Makefile regress/Makefile)
