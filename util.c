@@ -340,3 +340,16 @@ prdebug_init(int do_file, int do_stdout)
     do_debug_file = do_file;
     do_debug_stdout = do_stdout;
 }
+
+
+
+int
+str2hex(char *s)
+{
+#define HEX_DIGIT(x)  ((x) >= '0' && (x) <= '9' ? (x)-'0' \
+		       : (x) >= 'a' && (x) <= 'f' ? (x)-'a'+10 \
+		       : (x) >= 'A' && (x) <= 'F' ? (x)-'A'+10 : 0)
+		       
+    return (HEX_DIGIT(s[0])<<4) | HEX_DIGIT(s[1]);
+#undef HEX_DIGIT
+}

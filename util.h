@@ -36,6 +36,7 @@ void prdebug(int level, char *fmt, ...);
 void prdebug_init(int do_file, int do_stdout);
 void skip_rest(FILE *f);
 token *skip_to(stream *in, enum token_type type);
+int str2hex(char *s);
 char *our_basename(char *name);
 void *xmalloc(size_t size);
 void *xrealloc(void *p, size_t size);

@@ -131,6 +131,7 @@ decode_mime(stream *in, out_state *out, struct header *h,
     token t;
     char *s, *filename;
     struct mime_hdr *cd;
+    struct stream *stm;
     int ret;
 
     filename = NULL;
@@ -157,10 +158,17 @@ decode_mime(stream *in, out_state *out, struct header *h,
     }
     else if (filename) {
 	debug(out, "found: MIME %s", te->type);
-
 	output(out, token_set(&t, TOK_FNAME, filename));
-	copy_stream(in, out);
+
+	if (te->type == MIME_TE_QUOT_PRINT) {
+	    stm = stream_quot_print_open(in);
+	    copy_stream(stm, out);
+	    stream_close(stm);
+	}
+	else
+	    copy_stream(in, out);
 	output(out, TOKEN_EOF);
+
 	ret = decode_acum_ret(ret, 1);
     }
     else
