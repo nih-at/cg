@@ -1,5 +1,5 @@
 /*
-  $NiH: snprintf.c,v 1.1 2002/04/16 16:16:01 dillo Exp $
+  $NiH: snprintf.c,v 1.2 2002/04/17 00:31:26 dillo Exp $
 
   This file provides replacements for the following library functions:
   	snprintf
@@ -130,7 +130,7 @@ static void fmtstr (struct buf *buf,
 #define DP_C_LDOUBLE 3
 
 #define char_to_int(p) (p - '0')
-#define MAX(p,q) ((p >= q) ? p : q)
+#define MAXX(p,q) (((p) >= (q)) ? (p) : (q))
 
 static void
 dopr(struct buf *buf, const char *format, va_list args)
@@ -475,12 +475,12 @@ fmtint(struct buf *buf, long value, int base, int min, int max, int flags)
   convert[place] = 0;
 
   zpadlen = max - place;
-  spadlen = min - MAX (max, place) - (signvalue ? 1 : 0);
+  spadlen = min - MAXX(max, place) - (signvalue ? 1 : 0);
   if (zpadlen < 0) zpadlen = 0;
   if (spadlen < 0) spadlen = 0;
   if (flags & DP_F_ZERO)
   {
-    zpadlen = MAX(zpadlen, spadlen);
+    zpadlen = MAXX(zpadlen, spadlen);
     spadlen = 0;
   }
   if (flags & DP_F_MINUS) 
