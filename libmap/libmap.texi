@@ -1,0 +1,130 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename libmap.info
+@settitle libmap
+@setchapternewpage odd
+@c %**end of header
+
+@include version.texi
+
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+* libmap: (libmap).             Associative arrays
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
+@ifinfo
+This file documents libmap @value{VERSION}
+
+Copyright 1996 Dieter Baron
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries copying permission
+notice identical to this one except for the removal of this paragraph
+
+
+@end ignore
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the
+entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation
+approved by the Free Software Foundation.
+@end ifinfo
+
+
+@titlepage
+@title libmap -- A Library for Associative Arrays
+@subtitle For version @value{VERSION}, @value{UPDATED}
+@c copyright page
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1996 Dieter Baron
+@sp 2
+This is a draft edition of the libmap documentation,@*
+and is consistent with libmap @value{VERSION}.@*
+@sp 2
+@ignore
+Published by the Free Software Foundation @*
+59 Template Place - Suite 330, @*
+Boston, MA 02111-1307 USA @*
+
+@end ignore
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation
+approved by the Free Software Foundation.
+@end titlepage
+
+@ifinfo
+@node Top, Introduction, (dir), (dir)
+@comment  node-name,  next,  previous,  up
+@top libmap
+
+This file documents libmap, a library for associative arrays.  This
+edition documents version @value{VERSION}.
+
+libmap is a library that provides highly customizable associative
+arrays, implemented as hash tables with external linking.
+
+@menu
+* Introduction::	Design philosophy of libmap
+* Functions::           A detailed description of each function
+@end menu
+
+@node Introduction
+@chapter Introduction
+
+@node Functions
+@chap Functions
+
+@menu
+Creating and deleting maps:
+
+* new_map::             Create a new map
+* free_map::            Delete a map
+
+Manipulating maps:
+
+* map_lookup::          Find element in map
+* map_insert::          Insert element into map
+* map_delete::          Remove element from map
+
+Iterating through maps:
+
+* map_start::           Start iteration
+* map_next::            Iterate
+* map_stop::            Terminate iteration
+@end menu
+
+map *new_map(int size, int (*equal)(), int (*hash)(), void *(*cpykey)(),
+	     void (*delkey)(), void (*delval)());
+void free_map(map *m);
+void *map_lookup(map *m, void *k);
+void **map_insert(map *m, void *k);
+void map_delete(map *m, void *k);
+map_iter *map_start(map *m);
+int map_next(map_iter *mi, void **key, void **value);
+void map_stop(map_iter *mi);
+
+@contents
+@bye
