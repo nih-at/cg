@@ -23,7 +23,5 @@ TESTS=testmap
 
 
 version.c: configure.in
-	echo 'const char map_version[] = "$(PACAKGE) (version $(VERSION))";' \
+	echo 'const char map_version[] = "$(PACKAGE) (version $(VERSION))";' \
 		> version.c
-
-
