@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#  $NiH: runtest,v 1.6 2002/04/15 13:43:16 dillo Exp $
+#  $NiH: runtest,v 1.7 2002/04/16 22:46:47 wiz Exp $
 #
 #  runtest -- run regression tests
 #  Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -22,7 +22,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-# runtest TESTNAME EXIT-CODE OUTPUT-FILENAMES
+# runtest TESTNAME
 #
 # files: 
 #   TESTNAME.test: test scenario
