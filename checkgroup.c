@@ -583,7 +583,7 @@ decode(struct file *val)
 	}
 
 	oldtype = type;
-	type = decodefile(conin, &fout, type);
+	type = decode_file(conin, &fout, type);
 
 	switch(type) {
 	case enc_nodata:

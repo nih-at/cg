@@ -19,7 +19,7 @@ enum enctype decode_binhex(FILE *fin, FILE **foutp, char **fn);
 
 
 enum enctype
-decodefile(FILE *fin, FILE **foutp, enum enctype type)
+decode_file(FILE *fin, FILE **foutp, enum enctype type)
 {
     FILE *fdesc;
     struct header *h;
@@ -47,15 +47,20 @@ decodefile(FILE *fin, FILE **foutp, enum enctype type)
 		    }
 		    type = decode_mime(fin, foutp, &filename, h);
 		    free(filename);
+		    header_free(h);
 		    return type;
 		}
 		else if (m->type == MIME_CT_MSG_MULTI) {
 		    /* XXX: message/multipart */
+
+		mime_free(m);
+		header_free(h);
+		return enc_eof;
 		}
 		mime_free(m);
 	    }
 	}
-	else if ((s=header_get(h, HDR_CONTENT_TRENC))) {
+	if ((s=header_get(h, HDR_CONTENT_TRENC))) {
 	    if ((m=mime_parse(s)) != NULL) {
 		if (m->type == MIME_TE_BASE64) {
                      /* mime base64 (single part) */
@@ -64,6 +69,7 @@ decodefile(FILE *fin, FILE **foutp, enum enctype type)
 
 		    type = decode_mime(fin, foutp, &filename, h);
 		    free(filename);
+		    header_free(h);
 		    
 		    if (type == enc_base64)
 			return enc_eof;
@@ -157,8 +163,9 @@ decodefile(FILE *fin, FILE **foutp, enum enctype type)
 	    type = decode_base64(fin, *foutp);
 	    return type;
 	default:
-	    prerror("can't happen: decode called with invalid encoding type %d",
-		  type);
+	    prerror("can't happen: decode called with invalid encoding "
+		    "type %d",
+		    type);
 	    return enc_error;
 	}
     }
@@ -172,6 +179,8 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
     char *s, *filename;
     struct mime_hdr *m;
     int i;
+
+    /* XXX: check cte */
 
     filename = NULL;
 
@@ -354,7 +363,30 @@ decode_uu_line(FILE *fout, unsigned char *line)
 enum enctype
 decode_base64(FILE *fin, FILE *fout)
 {
-    skip_rest(fin);
+    char *line;
+    unsigned char b[8192];
+    int n, err;
+    
+    while ((line=getline(fin))) {
+	n = (err=decode_line(b, line, decode_table_base64)) & ~DEC_ERRMASK;
+
+	if (fwrite(b, 1, n, fout) != n) {
+	    /* XXX: handle disc full */
+	    prerror("write error: %s\n", strerror(errno));
+	    skip_rest(fin);
+	    return enc_error;
+	}
+	if (err & DEC_ERRMASK) {
+	    if (err & DEC_EOF) {
+		skip_rest(fin);
+		return enc_eof;
+	    }
+
+	    skip_rest(fin);
+	    return enc_error;
+	}
+    }
+
     return enc_base64;
 }
 
@@ -399,14 +431,19 @@ decode_line(unsigned char *buf, char *line, int *table)
 	if (b < 0) {
 	    switch (b) {
 	    case DEC_COLON:
-		if (no == 0) 
+		if (no == 0) {
+		    rest = no = 0;
 		    return i | DEC_EOF;
-		else
+		}
+		else {
+		    rest = no = 0;
 		    return i | DEC_EOF | DEC_ILL;
+		}
 	    case DEC_EQUAL:
 		switch (no) {
 		case 0:
 		case 1:
+		    rest = no = 0;
 		    return i | DEC_ILL;
 		case 2:
 		    buf[i++] = rest >> 4;
@@ -414,9 +451,12 @@ decode_line(unsigned char *buf, char *line, int *table)
 		case 3:
 		    buf[i++] = rest >> 10;
 		    buf[i++] = (rest>>2) & 0xff;
+		    break;
 		}
+		rest = no = 0;
 		return i | DEC_EOF;
 	    default:
+		rest = no = 0;
 		return i | DEC_ILL;
 	    }
 	}

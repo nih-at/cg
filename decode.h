@@ -3,5 +3,5 @@ enum enctype {
     enc_uu, enc_binhex, enc_base64
 };
 
-enum enctype decodefile(FILE *fin, FILE **foutp, enum enctype type);
+enum enctype decode_file(FILE *fin, FILE **foutp, enum enctype type);
 
