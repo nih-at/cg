@@ -1,4 +1,4 @@
-dnl  $NiH: acinclude.m4,v 1.6 2001/12/13 21:14:49 dillo Exp $
+dnl  $NiH: acinclude.m4,v 1.1 2002/04/17 17:46:28 dillo Exp $
 dnl
 dnl  acinclude.m4 -- test for autoconf
 dnl  Copyright (C) 2000, 2001 Dieter Baron
@@ -22,7 +22,7 @@ dnl  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 dnl Usage:
 dnl NIH_CHECK_DECL(includes, variable, a-if-fnd, a-if-not-fnd)
-AC_DEFUN(NIH_CHECK_DECL,
+AC_DEFUN([NIH_CHECK_DECL],
 [AC_MSG_CHECKING(for declaration of $2)
 AC_CACHE_VAL(nih_cv_check_decl_$2,
 [AC_TRY_COMPILE([$1], [$2 = 0;],
