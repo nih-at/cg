@@ -10,6 +10,7 @@
 #include <map.h>
 #include "ranges.h"
 #include "util.h"
+#include "decode.h"
 
 #define NNTPHOST "news.tuwien.ac.at"
 #define DEFAULTEDITOR "vi"
@@ -114,7 +115,7 @@ int
 main(int argc, char **argv)
 {
     map *parts;
-    int err, fd, verbose, i, c;
+    int err, fd, verbose, i, c, k;
     long no_art, lower, upper, no_complete, *toget, gute, j, no_file;
     char b[BUFSIZE];
     struct file **todec;
@@ -250,8 +251,15 @@ main(int argc, char **argv)
 	
 	gute=0;
 	
-	for (j=0; toget[j]!=-1;j++)
-	    gute+=decode(todec[toget[j]]);
+	for (j=0; toget[j]!=-1;j++) {
+	    if (decode(todec[toget[j]]) == 0) {
+		for (k=0; k<todec[toget[j]]->npart; k++)
+		    range_clear(rcmap, todec[toget[j]]->artno[k]);
+	    }
+	    else
+		gute++;
+	}
+		
 	no_file = j;
 
 	for (j=0; j<no_complete; j++) {
@@ -557,10 +565,9 @@ extract(char *s, regmatch_t m)
 int
 decode(struct file *val)
 {
-    enctype type, oldtype;
+    enum enctype type, oldtype;
     FILE *fout;
-    char b[BUFSIZE], cmd[BUFSIZE*2], **fname, *s;
-    int i, state, skip, l;
+    int i;
 
     printf("decoding `%s'\n", val->tag);
 
