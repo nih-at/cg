@@ -74,8 +74,10 @@ mime_parse(char *h)
 	    break;
 	}
 	_mime_lws(&h);
-	if (*h == '=')
+	if (*h == '=') {
+	    h++;
 	    o[i].value = _mime_value(&h);
+	}
 	else
 	    o[i].value = NULL;
 
