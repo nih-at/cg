@@ -1,8 +1,8 @@
 /*
-  $NiH: mime.c,v 1.15 2002/04/10 16:21:16 wiz Exp $
+  $NiH: mime.c,v 1.16 2002/04/10 16:23:28 wiz Exp $
 
   mime.c -- MIME header parsing
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

@@ -1,8 +1,8 @@
 /*
-  $NiH: checkgroup.c,v 1.41 2002/04/10 16:23:26 wiz Exp $
+  $NiH: checkgroup.c,v 1.42 2002/04/16 02:26:07 dillo Exp $
 
   checkgroup.c -- main program
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

@@ -2,10 +2,10 @@
 #define _HAD_MIME_H
 
 /*
-  $NiH: mime.h,v 1.9 2002/04/10 16:21:16 wiz Exp $
+  $NiH: mime.h,v 1.10 2002/04/10 16:23:29 wiz Exp $
 
   mime.h -- MIME header parsing
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

@@ -1,10 +1,10 @@
 /* -*- c -*- */
 
 /*
-  $NiH: parserc.l,v 1.6 2002/04/15 19:19:41 wiz Exp $
+  $NiH: parserc.l,v 1.7 2002/04/16 02:26:08 dillo Exp $
 
   parserc.l -- parse .newsrc
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

@@ -2,10 +2,10 @@
 #define _HAD_UTIL_H
 
 /*
-  $NiH: util.h,v 1.21 2002/04/10 16:21:26 wiz Exp $
+  $NiH: util.h,v 1.22 2002/04/10 16:23:40 wiz Exp $
 
   util.h -- miscellaneous functions
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

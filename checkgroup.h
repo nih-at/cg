@@ -2,10 +2,10 @@
 #define _HAD_CHECKGROUP_H
 
 /*
-  $NiH: checkgroup.h,v 1.4 2002/04/10 16:21:13 wiz Exp $
+  $NiH: checkgroup.h,v 1.5 2002/04/10 16:23:26 wiz Exp $
 
   checkgroup.h -- global header
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

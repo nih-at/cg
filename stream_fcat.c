@@ -1,8 +1,8 @@
 /*
-  $NiH: stream_fcat.c,v 1.2 2002/04/10 16:21:20 wiz Exp $
+  $NiH: stream_fcat.c,v 1.3 2002/04/10 16:23:33 wiz Exp $
 
   stream_fcat.c -- concatenate files
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

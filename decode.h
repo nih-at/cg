@@ -2,10 +2,10 @@
 #define _HAD_DECODE_H
 
 /*
-  $NiH: decode.h,v 1.10 2002/04/10 16:21:14 wiz Exp $
+  $NiH: decode.h,v 1.11 2002/04/10 16:23:27 wiz Exp $
 
   decode.h -- main decode logic
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

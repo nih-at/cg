@@ -1,8 +1,8 @@
 /*
-  $NiH: newsrc.c,v 1.6 2002/04/10 16:21:16 wiz Exp $
+  $NiH: newsrc.c,v 1.7 2002/04/10 16:23:29 wiz Exp $
 
   newsrc.c -- .newsrc handling
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

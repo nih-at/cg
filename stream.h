@@ -2,10 +2,10 @@
 #define _HAD_STREAM_H
 
 /*
-  $NiH: stream.h,v 1.3 2002/04/10 16:21:19 wiz Exp $
+  $NiH: stream.h,v 1.4 2002/04/10 16:23:32 wiz Exp $
 
   stream.h -- stream interface
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

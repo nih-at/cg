@@ -1,8 +1,8 @@
 /*
-  $NiH: util.c,v 1.24 2002/04/10 16:23:39 wiz Exp $
+  $NiH: util.c,v 1.25 2002/04/15 11:19:25 dillo Exp $
 
   util.c -- miscellaneous functions
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

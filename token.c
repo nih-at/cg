@@ -1,8 +1,8 @@
 /*
-  $NiH: token.c,v 1.2 2002/04/10 16:21:25 wiz Exp $
+  $NiH: token.c,v 1.3 2002/04/10 16:23:39 wiz Exp $
 
   token.c -- token handling
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

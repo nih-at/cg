@@ -2,10 +2,10 @@
 #define HAD_CRC_H
 
 /*
-  $NiH$
+  $NiH: crc.h,v 1.1 2002/04/15 18:55:24 wiz Exp $
 
   crc.h -- CRC functions
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

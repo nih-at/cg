@@ -1,8 +1,8 @@
 /*
-  $NiH: testdec.c,v 1.9 2002/04/10 16:23:39 wiz Exp $
+  $NiH: testdec.c,v 1.10 2002/04/11 10:55:02 dillo Exp $
 
   testdec.c -- command line test program
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

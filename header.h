@@ -2,10 +2,10 @@
 #define _HAD_HEADER_H
 
 /*
-  $NiH: header.h,v 1.6 2002/04/10 16:21:15 wiz Exp $
+  $NiH: header.h,v 1.7 2002/04/10 16:23:28 wiz Exp $
 
   header.h -- RFC822 header parsing
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

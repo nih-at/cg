@@ -1,8 +1,8 @@
 /*
-  $NiH: stream_yenc.c,v 1.5 2002/04/15 18:55:24 wiz Exp $
+  $NiH: stream_yenc.c,v 1.6 2002/04/16 02:26:08 dillo Exp $
 
   stream_yenc.c -- extract and decode yenc data
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

@@ -2,10 +2,10 @@
 #define _HAD_OUTPUT_H
 
 /*
-  $NiH: output.h,v 1.8 2002/04/10 16:21:17 wiz Exp $
+  $NiH: output.h,v 1.9 2002/04/10 16:23:30 wiz Exp $
 
   output.h -- output part of the decoder
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

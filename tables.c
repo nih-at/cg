@@ -2,10 +2,10 @@
 #include "decode.h"
 
 /*
-  $NiH: tables.c,v 1.3 2002/04/10 16:21:24 wiz Exp $
+  $NiH: tables.c,v 1.4 2002/04/10 16:23:38 wiz Exp $
 
   tables.c -- decoding tables
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

@@ -1,8 +1,8 @@
 /*
-  $NiH: stream_msg_partial.c,v 1.3 2002/04/10 16:21:22 wiz Exp $
+  $NiH: stream_msg_partial.c,v 1.4 2002/04/10 16:23:34 wiz Exp $
 
   stream_msg_partial.c -- assemble MIME partial message
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>

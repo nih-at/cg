@@ -1,8 +1,8 @@
 /*
-  $NiH: stream.c,v 1.4 2002/04/10 16:23:32 wiz Exp $
+  $NiH: stream.c,v 1.5 2002/04/11 08:22:30 dillo Exp $
 
   stream.c -- stream interface
-  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+  Copyright (C) 2002 Dieter Baron and Thomas Klausner
 
   This file is part of cg, a program to assemble and decode binary Usenet
   postings.  The authors can be contacted at <nih@giga.or.at>
