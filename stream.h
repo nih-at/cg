@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 enum token_type { TOK_EOF = -1, TOK_LINE, TOK_DATA,
-		  TOK_EOS, TOK_EOH, TOK_EOA,
+		  TOK_EOS, TOK_EOH, TOK_EOA, TOK_EOP,
 		  TOK_FNAME, TOK_DEBUG, TOK_ERR };
 
 struct token {

@@ -686,6 +686,7 @@ do_decode(struct file *val, out_state *out)
 {
     int err;
     stream *stm, *st2;
+    token t;
 
     printf("decoding `%s'\n", val->tag);
 
@@ -694,7 +695,9 @@ do_decode(struct file *val, out_state *out)
     err = decode(st2, out);
     stream_close(st2);
     stream_close(stm);
-    
+
+    output(out, token_set(&t, TOK_EOP, NULL));
+
     return err;
 
 #if 0
