@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream_yenc.c,v 1.3 2002/04/10 16:21:23 wiz Exp $
+
   stream_yenc.c -- extract and decode yenc data
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -106,7 +106,7 @@ stream_yenc_open(struct stream *source, char *ybegin)
 	_yenc_init();
 
     _yenc_handle_begin(this, ybegin, 1);
-    
+
     return (stream *)this;
 }
 
@@ -116,7 +116,7 @@ static int
 yenc_close(struct stream_yenc *this)
 {
     /* XXX: skip to EOF? */
-      
+
     stream_free((stream *)this);
 
     return 0;
@@ -158,7 +158,7 @@ yenc_get(struct stream_yenc *this)
 			       "unexpected =ypart line");
 		    break;
 		}
-		
+
 		_yenc_handle_part(this, t->line);
 
 		state = Y_DATA;
@@ -171,7 +171,7 @@ yenc_get(struct stream_yenc *this)
 		}
 
 		_yenc_handle_end(this, t->line);
-		
+
 		state = Y_POST;
 
 		if (this->pos == this->size)
@@ -207,12 +207,12 @@ yenc_get(struct stream_yenc *this)
 
 		default:
 		    break;
-		    
+
 		}
 		break;
 	    }
 	    break;
-	    
+
 	case TOK_EOA:
 	    if (old_state != Y_POST)
 		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
@@ -224,7 +224,7 @@ yenc_get(struct stream_yenc *this)
 	    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
 		       "missing =yend in yenc stream");
 	    return TOKEN_EOF;
-	    
+
 	case TOK_EOH:
 	    state = Y_PRE;
 	    break;
@@ -250,7 +250,7 @@ _yenc_get_hex(char *s)
     if (errno == ERANGE || (*p & !isspace(*p))) {
 	/* XXX: error handling */
     }
-    
+
     return l;
 }
 
@@ -313,7 +313,7 @@ _yenc_handle_begin(struct stream_yenc *this, char *ybegin, int firstp)
     do {
 	ybegin = strchr(ybegin, ' ');
 	s = _yenc_parse(&ybegin);
-	
+
 	if (s == YENC_PART) {
 	    if (_yenc_get_int(ybegin) != this->part) {
 		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
@@ -335,9 +335,9 @@ _yenc_handle_begin(struct stream_yenc *this, char *ybegin, int firstp)
 	    while (strchr("\" \t", *p))
 		--p;
 	    p[1] = '\0';
-		
+
 	    if (firstp) {
-		
+
 		this->name = xstrdup(ybegin);
 		token_set(stream_enqueue((stream *)this), TOK_FNAME, ybegin);
 	    }
@@ -364,7 +364,7 @@ _yenc_handle_end(struct stream_yenc *this, char *line)
     do {
 	line = strchr(line, ' ');
 	s = _yenc_parse(&line);
-	
+
 	if (s == YENC_PART) {
 	    if (_yenc_get_int(line) != this->part) {
 		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
@@ -408,7 +408,7 @@ _yenc_handle_part(struct stream_yenc *this, char *line)
     do {
 	line = strchr(line, ' ');
 	s = _yenc_parse(&line);
-	
+
 	if (s == YENC_BEGIN) {
 	    if (this->pbegin != _yenc_get_int(line)-1) {
 		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
@@ -445,7 +445,7 @@ _yenc_parse(char **linep)
 
     if (q == NULL)
 	return NULL;
-    q += strspn(q, " \t");    
+    q += strspn(q, " \t");
 
     if ((p=strchr(q, '=')) == NULL)
 	return NULL;

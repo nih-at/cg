@@ -2,8 +2,8 @@
 #define _HAD_RANGES_H
 
 /*
-  $NiH$
-  
+  $NiH: ranges.h,v 1.3 2002/04/10 16:21:18 wiz Exp $
+
   ranges.h -- internal .newsrc format handling
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

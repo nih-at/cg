@@ -2,8 +2,8 @@
 #define HAD_NEWSRC_H
 
 /*
-  $NiH$
-  
+  $NiH: newsrc.h,v 1.2 2002/04/10 16:21:17 wiz Exp $
+
   newsrc.h -- .newsrc handling
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

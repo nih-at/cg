@@ -2,8 +2,8 @@
 #define _HAD_SYMBOL_H
 
 /*
-  $NiH$
-  
+  $NiH: symbol.h,v 1.4 2002/04/10 16:21:24 wiz Exp $
+
   symbol.h -- simple symbol table
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

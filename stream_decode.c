@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream_decode.c,v 1.2 2002/04/10 16:21:20 wiz Exp $
+
   stream_decode.c -- low-level decoding
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -70,7 +70,7 @@ static int
 dec_close(struct stream_decode *this)
 {
     /* XXX: skip to EOF? */
-      
+
     stream_free((stream *)this);
 
     return 0;
@@ -100,11 +100,11 @@ dec_get(struct stream_decode *this)
 
 	if (t->type != TOK_LINE)
 	    return t;
-	
+
 	rest = this->rest;
 	no = this->no;
 	i = 0;
-	
+
 	while (*t->line) {
 	    b = this->table[(unsigned char)*(t->line++)];
 	    if (b < 0) {
@@ -117,7 +117,7 @@ dec_get(struct stream_decode *this)
 		    else
 			this->state = DS_ILL;
 		    break;
-		    
+
 		case DEC_PAD:
 		    if (this->state == DS_OK) {
 			switch (no) {
@@ -132,7 +132,7 @@ dec_get(struct stream_decode *this)
 			}
 		    }
 		    break;
-		    
+
 		default:
 		    /* XXX: recover, don't abort decoding */
 		    no = 0;
@@ -149,7 +149,7 @@ dec_get(struct stream_decode *this)
 		    this->buf_alen = (this->buf_alen ? this->buf_alen*2 : 64);
 		    this->buf = xrealloc(this->buf, this->buf_alen);
 		}
-		
+
 		switch (no) {
 		case 2:
 		    this->buf[i++] = rest >> 4;
@@ -159,7 +159,7 @@ dec_get(struct stream_decode *this)
 		    this->buf[i++] = rest >> 10;
 		    this->buf[i++] = (rest>>2) & 0xff;
 		    break;
-				         
+
 		case 4:
 		    this->buf[i++] = rest >> 16;
 		    this->buf[i++] = (rest>>8) & 0xff;
@@ -173,6 +173,6 @@ dec_get(struct stream_decode *this)
 
     this->rest = rest;
     this->no = no;
-	
+
     return token_set3(&this->st.tok, TOK_DATA, i, this->buf);
 }

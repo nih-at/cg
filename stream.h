@@ -2,8 +2,8 @@
 #define _HAD_STREAM_H
 
 /*
-  $NiH$
-  
+  $NiH: stream.h,v 1.3 2002/04/10 16:21:19 wiz Exp $
+
   stream.h -- stream interface
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -56,7 +56,7 @@ struct stream {
     token_list *queue_tail;
     int queue_len;
     int queue_cleanup;
-    
+
     struct stream *source;
     int eof;
 };

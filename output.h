@@ -2,8 +2,8 @@
 #define _HAD_OUTPUT_H
 
 /*
-  $NiH$
-  
+  $NiH: output.h,v 1.8 2002/04/10 16:21:17 wiz Exp $
+
   output.h -- output part of the decoder
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

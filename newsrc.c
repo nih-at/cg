@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: newsrc.c,v 1.6 2002/04/10 16:21:16 wiz Exp $
+
   newsrc.c -- .newsrc handling
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -53,12 +53,12 @@ readrc(char *group, long lower, long upper, long no_art)
     }
 
     rcmap = NULL;
-    
+
     parserc(group, rc, lower, upper, no_art);
 
     if (rcmap == NULL)
 	rcmap = range_init(lower, upper, no_art);
-    
+
     fclose(rc);
     return(0);
 }
@@ -70,7 +70,7 @@ int
 writerc(char *group)
 {
     static int modified = 0;
-    
+
     FILE *rc, *copy;
     int bool, found;
     char *temp, b[BUFSIZE], *compstr;
@@ -95,7 +95,7 @@ writerc(char *group)
 
     temp=(char *)xmalloc(strlen(newsrc)+11);
     sprintf(temp, "%s.%d", newsrc, (int)getpid());
-    
+
     if ((copy=fopen(temp, "w")) == NULL) {
 	fprintf(stderr, "%s: couldn't open %s for writing\n", prg,
 		temp);
@@ -112,7 +112,7 @@ writerc(char *group)
 	while(!ferror(rc) && fgets(b, BUFSIZE, rc) != NULL) {
 	    /* is this the group that gets rewritten ? */
 	    found+=bool=!strncmp(compstr, b, strlen(compstr));
-	
+
 	    while (b[strlen(b)-1] != '\n') {
 		if (!bool)
 		    fputs(b, copy);
@@ -121,11 +121,11 @@ writerc(char *group)
 	    }
 	    if (!bool)
 		fputs(b, copy);
-	    
+
 	    if ((found == 1) && bool) {
 		writegrouptorc(copy, compstr);
 	    }
-	    
+
 	    if (ferror(copy)) {
 		fprintf(stderr, "%s: couldn't write to %s: %s\n",
 			prg, temp, strerror(errno));
@@ -151,9 +151,9 @@ writerc(char *group)
 	unlink(temp);
 	return(-1);
     }
-    
+
     free(compstr);
-    
+
     if (rc && ferror(rc)) {
 	fprintf(stderr, "%s: couldn't read from %s: %s\n",
 		prg, newsrc, strerror(errno));
@@ -174,11 +174,11 @@ writerc(char *group)
 	free(temp);
 	return -1;
     }
-    
+
     free(temp);
 
     range_free(rcmap);
-    
+
     return(0);
 }
 
@@ -188,9 +188,9 @@ static void
 writegrouptorc (FILE *copy, char *compstr)
 {
     int lower, upper, first;
-    
+
     fprintf(copy, "%s ", compstr);
-    
+
     lower = upper = first = 0;
 
     while (range_get(rcmap, &lower, &upper, 1) == 0) {

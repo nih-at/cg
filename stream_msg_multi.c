@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream_msg_multi.c,v 1.2 2002/04/10 16:21:21 wiz Exp $
+
   stream_msg_multi.c -- parse MIME multipart message
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -48,7 +48,7 @@ stream_msg_multi_open(struct stream *source, struct mime_hdr *m)
     this = (struct stream_msg_mul *)stream_new(sizeof(struct stream_msg_mul),
 					       msg_mul_get, msg_mul_close,
 					       source);
-    
+
     /* XXX: handle missing MIME_CT_BOUNDARY */
     this->boundary = xstrdup(mime_option_get(m, MIME_CT_BOUNDARY));
     this->len = strlen(this->boundary);
@@ -62,7 +62,7 @@ static int
 msg_mul_close(struct stream_msg_mul *this)
 {
     /* XXX: skip to EOF? */
-      
+
     free(this->boundary);
     stream_free((stream *)this);
 

@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream_section.c,v 1.2 2002/04/10 16:21:22 wiz Exp $
+
   stream_section.c -- read one section from MIME multipart message
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -57,7 +57,7 @@ static int
 sec_close(struct stream_section *this)
 {
     /* XXX: skip to EOF? */
-      
+
     free(this->boundary);
     stream_free((stream *)this);
 

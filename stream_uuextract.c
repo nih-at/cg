@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream_uuextract.c,v 1.4 2002/04/10 16:21:23 wiz Exp $
+
   stream_uuextract.c -- extrace uuencode data
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -63,7 +63,7 @@ static int
 uux_close(struct stream_uux *this)
 {
     /* XXX: skip to EOF? */
-      
+
     stream_free((stream *)this);
 
     return 0;
@@ -87,7 +87,7 @@ uux_get(struct stream_uux *this)
 	switch (t->type) {
 	case TOK_LINE:
 	    len = strlen(t->line);
-	    
+
 	    if (old_state == UU_HEADER)
 		state = UU_HEADER;
 	    else if (t->line[0] == 'M' && len == 61)
@@ -105,7 +105,7 @@ uux_get(struct stream_uux *this)
 	    switch (state) {
 	    case UU_HEADER:
 		break;
-		
+
 	    case UU_END:
 		if (line_kept)
 		    token_set(stream_enqueue((stream *)this),
@@ -127,7 +127,7 @@ uux_get(struct stream_uux *this)
 		}
 		this->state = UU_FULL;
 		return token_set(&this->st.tok, TOK_LINE, t->line+1);
-		    
+
 	    case UU_SHORT:
 		if (old_state != UU_FULL && old_state != UU_PRE) {
 		    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,

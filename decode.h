@@ -2,8 +2,8 @@
 #define _HAD_DECODE_H
 
 /*
-  $NiH$
-  
+  $NiH: decode.h,v 1.10 2002/04/10 16:21:14 wiz Exp $
+
   decode.h -- main decode logic
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

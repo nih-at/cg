@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream_cat.c,v 1.5 2002/04/10 16:21:20 wiz Exp $
+
   stream_cat.c -- concatenate multiple article streams
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -93,7 +93,7 @@ cat_get(struct stream_cat *this)
 		       TOK_ERR, 0, "article failed");
 	    return token_set(&this->st.tok, TOK_EOA, NULL);
 	}
-	
+
 	this->st.source = stream_file_open(conin, 1);
     }
 
@@ -101,7 +101,7 @@ cat_get(struct stream_cat *this)
 
     if (t->type == EOF) {
 	close_current(this);
-	
+
 	return token_set(&this->st.tok, TOK_EOA, NULL);
     }
 

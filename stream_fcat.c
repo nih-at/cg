@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream_fcat.c,v 1.2 2002/04/10 16:21:20 wiz Exp $
+
   stream_fcat.c -- concatenate files
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -91,7 +91,7 @@ fcat_get(struct stream_fcat *this)
 
     if (t->type == EOF) {
 	close_current(this);
-	
+
 	return token_set(&this->st.tok, TOK_EOA, NULL);
     }
 

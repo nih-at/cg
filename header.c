@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: header.c,v 1.9 2002/04/10 16:21:15 wiz Exp $
+
   header.c -- RFC 822 header parsing
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -65,7 +65,7 @@ header_read(stream *in, out_state *out)
     h.next = NULL;
     h.value = NULL;
     h.type = NULL;
-    
+
 
     while ((t=stream_get(in))->type != TOK_EOH && t->type != TOK_EOF) {
 	if (t->type == TOK_LINE) {
@@ -102,7 +102,7 @@ header_read(stream *in, out_state *out)
 	else
 	    output(out, t);
     }
-	
+
     return h.next;
 }
 

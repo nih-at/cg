@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream_file.c,v 1.3 2002/04/10 16:21:21 wiz Exp $
+
   stream_file.c -- read single file
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

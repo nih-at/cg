@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: util.c,v 1.23 2002/04/10 16:21:25 wiz Exp $
+
   util.c -- miscellaneous functions
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -49,7 +49,7 @@ void *
 xmalloc(size_t size)
 {
     void *p;
-    
+
     if ((p=malloc(size)) == NULL) {
 	fprintf(stderr, "%s: malloc failure (size=%ld)\n", prg, (long)size);
 	exit(1);
@@ -78,7 +78,7 @@ expand(char *path)
 {
     char *home, *s, *p;
     struct passwd *pw;
-	    
+
     if (path[0] != '~')
 	return strdup(path);
 
@@ -133,7 +133,7 @@ fopen_uniq(char **fnp)
 	strcpy(b, s);
 	i = 0;
     }
-    
+
     for (;;) {
 	if ((fd=open(b, O_WRONLY | O_CREAT | O_EXCL, 0666)) < 0) {
 	    if (errno != EEXIST) {
@@ -185,7 +185,7 @@ getline(FILE *f)
     static char *b;
     static int bsize;
     int len;
-    
+
     if (bsize == 0) {
 	bsize = BUFSIZE;
 	b = (char *)xmalloc(bsize);
@@ -196,7 +196,7 @@ getline(FILE *f)
     }
 
     len = strlen(b);
-    
+
     while (b[len-1] != '\n') {
 	/* line too long */
 	bsize += BUFSIZE;
@@ -226,7 +226,7 @@ getline(FILE *f)
     }
 
     /* errlineno++; */
-    return b;    
+    return b;
 }
 
 
@@ -353,7 +353,7 @@ append_file(char *t, char *s, char *sep)
 	fclose(fout);
 	return EOF;
     }
-    
+
     fclose(fin);
     return fclose(fout);
 }
@@ -395,7 +395,7 @@ prdebug(int mask, char *fmt, ...)
     if (mask & do_debug_stdout)
 	puts(s);
 
-    free(s);    
+    free(s);
 }
 
 
@@ -419,7 +419,7 @@ str2hex(char *s)
 #define HEX_DIGIT(x)  ((x) >= '0' && (x) <= '9' ? (x)-'0' \
 		       : (x) >= 'a' && (x) <= 'f' ? (x)-'a'+10 \
 		       : (x) >= 'A' && (x) <= 'F' ? (x)-'A'+10 : 0)
-		       
+
     return (HEX_DIGIT(s[0])<<4) | HEX_DIGIT(s[1]);
 #undef HEX_DIGIT
 }

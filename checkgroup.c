@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: checkgroup.c,v 1.40 2002/04/10 16:21:13 wiz Exp $
+
   checkgroup.c -- main program
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -60,7 +60,7 @@ char *spattern[MAX_PATTERNS] = {  /* ! ( ! */
     "(.*)  *([^ ]*\\.[a-z0-9][a-z0-9][a-z0-9]) *$"  /* "c n.ext" */
 };
 
-regex_t pattern[MAX_PATTERNS]; 
+regex_t pattern[MAX_PATTERNS];
 
 int pat_key[MAX_PATTERNS] =     { 2,  3, 1, 1, 4 /* 2 */, 2 };
 int pat_comment[MAX_PATTERNS] = { 1,  1, 4, 2, 1 /* 4 */, 1 };
@@ -84,7 +84,7 @@ volatile int save_and_quit;
 
 #include "config.h"
 
-char version_string[] = 
+char version_string[] =
 PACKAGE " " VERSION "\n\
 Copyright (C) 1997, 2001, 2002 Dieter Baron, Thomas Klausner\n"
 PACKAGE " comes with ABSOLUTELY NO WARRANTY, to the extent permitted by law.\n\
@@ -220,7 +220,7 @@ main(int argc, char **argv)
 	    exit(1);
 	}
     }
-    
+
     err = 0;
 
     if (nntp_host == NULL) {
@@ -245,11 +245,11 @@ main(int argc, char **argv)
 	    }
 	}
     }
-    
+
     /* talk to server */
     if ((fd=sopen(nntp_host, "nntp")) == -1)
 	return -1;
-    
+
     conin = fdopen(fd, "r");
     conout = fdopen(fd, "w");
 
@@ -285,20 +285,20 @@ main(int argc, char **argv)
 		    " for group %s: %s\n", prg, argv[i], nntp_response);
 	    continue;
 	}
-	
+
 	readrc(argv[i], lower, upper, no_art);
-	
+
 	if (nntp_put("xover %ld-%ld", lower, upper) != 224) {
 	    fprintf(stderr, "%s: xover for group %s failed: %s\n", prg,
 		    argv[i], nntp_response);
 	    continue;
 	}
-    
+
 	if ((parts=map_new(no_art*2)) == NULL) {
 	    fprintf(stderr, "%s: can't create part map\n", prg);
 	    exit(1);
 	}
-	
+
 	no_file = parse(parts, conin);
 
 	todec = (struct file **)xmalloc(sizeof(struct file *)*no_file);
@@ -320,18 +320,18 @@ main(int argc, char **argv)
 		free(todec[j]->tag);
 		free(todec[j]->artno);
 		free(todec[j]);
-	    }	    
+	    }
 	    free(todec);
 	    continue;
 	}
-	
+
 	/* signal handling */
 	save_and_quit = 0;
 	signal(SIGINT, sighandle);
-	
+
 	ndecoded = 0;
 	out = output_new();
-	
+
 	for (j=0; toget[j]!=-1; j++) {
 	    if (save_and_quit || (do_decode(todec[toget[j]], out) <= 0)) {
 		for (k=0; k<=todec[toget[j]]->npart; k++)
@@ -341,9 +341,9 @@ main(int argc, char **argv)
 	    else
 		ndecoded++;
 	}
-		
+
 	output_free(out);
-    
+
 	no_file = j;
 
 	for (j=0; j<no_complete; j++) {
@@ -351,12 +351,12 @@ main(int argc, char **argv)
 	    free(todec[j]->tag);
 	    free(todec[j]->artno);
 	    free(todec[j]);
-	}	    
+	}
 	free(toget);
 	free(todec);
 
 	writerc(argv[i]);
-	
+
 	if (verbose)
 	    printf("%s: %ld found, %ld chosen, %ld decoded\n",
 		   argv[i], no_complete, no_file, ndecoded);
@@ -381,7 +381,7 @@ complete (map *parts, long no_file, struct file **todec)
     map_iter *iterate;
     char *key;
     struct file *value;
-    
+
     if ((iterate=map_start(parts)) == NULL) {
 	fprintf(stderr, "%s: can't iterate part map\n", prg);
 	exit(1);
@@ -411,7 +411,7 @@ complete (map *parts, long no_file, struct file **todec)
     map_stop(iterate);
 
     qsort(todec, i, sizeof(struct file *), compfile);
-    
+
     return i;
 }
 
@@ -424,7 +424,7 @@ choose (struct file **todec, long no_complete, char *group)
     long i, j;
     long *chosen;
     FILE *temp;
-    
+
     sprintf(fname, "00-%s-%d", group, (int)getpid());
 
     if ((temp=fopen(fname, "w")) == NULL) {
@@ -454,11 +454,11 @@ choose (struct file **todec, long no_complete, char *group)
 		prg, fname, strerror(errno));
 	return NULL;
     }
-    
+
     i=0;
 
     chosen = (long *)xmalloc(sizeof(long)*(no_complete+1));
-    
+
     while (fgets(b, BUFSIZE, temp) != NULL) {
 	j = 0;
 	sscanf(b,"%ld",&j);
@@ -467,9 +467,9 @@ choose (struct file **todec, long no_complete, char *group)
     }
 
     fclose(temp);
-    
+
     chosen[i]=-1;
-    
+
     return chosen;
 }
 
@@ -499,7 +499,7 @@ parse(map *parts, FILE *f)
 
     while (fgets(b, 8192, f)) {
 	l=strlen(b);
-	
+
 	/* normalization */
 	if (b[l-1] == '\n')
 	    b[--l] = '\0';
@@ -630,12 +630,12 @@ parse(map *parts, FILE *f)
 	    else
 		val->size += size*3/4;
 	}
-	
+
 	if (!mark_complete)
 	    range_set(rcmap, artno);
 
     }
-    
+
     return no_file;
 }
 
@@ -689,25 +689,25 @@ nntp_put(char *fmt, ...)
     va_list argp;
 
     ret = tries = writeerr = 0;
-    
+
     if (conout == NULL)
 	return -1;
-    
+
     va_start(argp, fmt);
     vsprintf(buf, fmt, argp);
     va_end(argp);
 
     for (;;) {
 	fprintf(conout, "%s\r\n", buf);
-    
+
 	if (fflush(conout) || ferror(conout))
 	    writeerr = 1;
-	else 
+	else
 	    ret = nntp_resp();
-	
+
 	if (writeerr || (ret == 400) || (ret == 503)) {
 	    /* connection to server closed -- reconnect */
-	    
+
 	    writeerr = 0;
 	    if (tries == 0) {
 		tries++;
@@ -716,7 +716,7 @@ nntp_put(char *fmt, ...)
 
 		if ((fd=sopen(nntp_host, "nntp")) == -1)
 		    return -1;
-		
+
 		conin = fdopen(fd, "r");
 		conout = fdopen(fd, "w");
 
@@ -729,21 +729,21 @@ nntp_put(char *fmt, ...)
 		fprintf(conout, "mode reader\r\n");
 		if (fflush(conout) || ferror(conout)) /* XXX: retry? */
 		    return -1;
-		
+
 		nntp_resp();
 
 		if (nntp_group != NULL) {
 		    fprintf(conout, "%s\r\n", nntp_group);
 		    if (fflush(conout) || ferror(conout)) /* XXX: retry? */
 			return -1;
-		    
+
 		    if (nntp_resp() != 211) {
 			fprintf(stderr, "%s: timed out -- can't reconnect",
 				prg);
 			return -1;
 		    }
 		}
-			
+
 		fprintf(stderr, "%s: timed out -- but reconnected\n", prg);
 	    }
 	    else {
@@ -769,7 +769,7 @@ nntp_put(char *fmt, ...)
 			prg, strerror(errno));
 		return -1;
 	    }
-		    
+
 	    if (nntp_resp() == 381) {
 		if (nntp_pass == NULL) {
 		    /* XXX prompt for user */
@@ -801,7 +801,7 @@ nntp_put(char *fmt, ...)
 	free(nntp_group);
 	nntp_group = strdup(buf);
     }
-    
+
     return ret;
 }
 
@@ -812,7 +812,7 @@ nntp_resp(void)
 {
     char line[BUFSIZE];
     int resp, l;
-    
+
     if (conin == NULL)
 	return -1;
 
@@ -824,7 +824,7 @@ nntp_resp(void)
     l = strlen(line);
     if (line[l-2] == '\r')
 	line[l-2] = '\0';
-    else 
+    else
 	line[l-1] = '\0';
     free (nntp_response);
     nntp_response = strdup(line);

@@ -2,8 +2,8 @@
 #define _HAD_STREAM_TYPES_H
 
 /*
-  $NiH$
-  
+  $NiH: stream_types.h,v 1.5 2002/04/10 16:21:23 wiz Exp $
+
   stream_types.h -- stream interface
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

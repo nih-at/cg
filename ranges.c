@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: ranges.c,v 1.5 2002/04/10 16:21:18 wiz Exp $
+
   ranges.c -- internal .newsrc format handling
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -106,7 +106,7 @@ range_clear(struct range *r, int n)
 	return;
 
     n -= r->first;
-    
+
     r->bitmap[n/8] &= ~(0x80>>(n%8));
 }
 
@@ -212,7 +212,7 @@ _range_grow_right(struct range *r, int high)
     int oldlen;
 
     oldlen = r->length;
-    
+
     r->length = (high-r->first+512+7)/8;
     r->length *= 8;
     if ((r->bitmap=(unsigned char *)realloc(r->bitmap, r->length/8))

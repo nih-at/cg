@@ -1,5 +1,5 @@
 /*
-  $NiH$
+  $NiH: sockets.c,v 1.2 2002/04/10 16:21:18 wiz Exp $
 
   sockets.c -- auxiliary socket functions
   Copyright (C) 1996, 1997 Dieter Baron
@@ -80,6 +80,6 @@ sopen(char *host, char *service)
 		prg, strerror(errno));
 	return -1;
     }
-	
+
     return s;
 }

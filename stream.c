@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream.c,v 1.3 2002/04/10 16:21:19 wiz Exp $
+
   stream.c -- stream interface
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -62,7 +62,7 @@ stream_get(stream *st)
     printf("stream_get(%p) = %d [%s]\n", st, t->type, t->line);
     fflush(stdout);
 #endif
-    
+
     return t;
 }
 
@@ -139,7 +139,7 @@ void
 stream_dequeue(stream *st)
 {
     token_list *e;
-    
+
     if (st->queue_len <= 0)
 	return;
 

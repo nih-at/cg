@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream_article.c,v 1.3 2002/04/10 16:21:19 wiz Exp $
+
   stream_article.c -- read article
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -74,7 +74,7 @@ static int
 art_close(struct stream_art *this)
 {
     /* XXX: skip to EOF? */
-      
+
     free(this->buf[0]);
     free(this->buf[1]);
     stream_free((stream *)this);
@@ -113,7 +113,7 @@ art_get(struct stream_art *this)
 
 		    this->state = AR_HEADER;
 		    this->bufno = 1-this->bufno;
-		    
+
 		    if (len+1 >= this->buf_alen[this->bufno])
 			grow_buffer(this, this->bufno, len+1);
 		    strcpy(this->buf[this->bufno], t->line);
@@ -168,6 +168,6 @@ grow_buffer(struct stream_art *this, int bufno, int size)
 	this->buf_alen[bufno] = 64;
     while (this->buf_alen[bufno] <= size)
 	this->buf_alen[bufno] *= 2;
-	
+
     this->buf[bufno] = xrealloc(this->buf[bufno], this->buf_alen[bufno]);
 }

@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: output.c,v 1.17 2002/04/10 16:21:17 wiz Exp $
+
   output.c -- output part of the decoder
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -63,7 +63,7 @@ output_new()
 void
 output_close(out_state *out)
 {
-    
+
     if (out->fout)
 	fclose(out->fout);
     out->fout = NULL;
@@ -146,7 +146,7 @@ output(out_state *out, token *t)
 	prdebug(DEBUG_TOK, ">debug: %s", t->line);
 	prdebug(DEBUG_DEBUG, "%s", t->line);
 	break;
-	
+
     case TOK_LINE:
 	if (out->infile) {
 	    if (out->fout != NULL) {
@@ -181,7 +181,7 @@ output(out_state *out, token *t)
 		    }
 		}
 	    }
-	
+
 	    if (out->do_fdesc == FDESC_OPEN) {
 		if (t->line[0] == '\0') {
 		    /* save newline for later */
@@ -193,7 +193,7 @@ output(out_state *out, token *t)
 			fputc('\n', out->fdesc);
 			out->fdescnl--;
 		    }
-		    
+
 		    fprintf(out->fdesc, "%s\n", t->line);
 		    if (ferror(out->fdesc)) {
 			fprintf(stderr, "SYSERR: can't write to "
@@ -226,9 +226,9 @@ output(out_state *out, token *t)
 	free(out->fdescfilename);
 	out->fdescfilename = NULL;
 	close_fdesc(out);
-	
+
 	/* fallthrough */
-	
+
     case TOK_EOF:
 	if (out->infile)
 	    prdebug(DEBUG_SIZE, "[%lu bytes]", out->size);
@@ -275,7 +275,7 @@ output(out_state *out, token *t)
 		}
 	    }
 	    out->broken = 1;
-		
+
 	}
 	break;
 

@@ -2,8 +2,8 @@
 #define _HAD_UTIL_H
 
 /*
-  $NiH$
-  
+  $NiH: util.h,v 1.21 2002/04/10 16:21:26 wiz Exp $
+
   util.h -- miscellaneous functions
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

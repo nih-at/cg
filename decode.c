@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: decode.c,v 1.32 2002/04/10 16:21:14 wiz Exp $
+
   decode.c -- main decode logic
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -65,11 +65,11 @@ decode(stream *in, out_state *out)
 	    skip_to(in, TOK_EOA);
 	    continue;
 	}
-	
+
 	if ((s=header_get(h, HDR_CONTENT_TYPE)) && (m=mime_parse(s))) {
 	    if (m->type == MIME_CT_MSG_PART) {
 		debug(out, "found: MIME message/partial");
-		
+
 		stm = stream_msg_partial_open(in, m);
 		st2 = stream_article_open(stm);
 		ret = decode_acum_ret(ret, decode(st2, out));
@@ -78,7 +78,7 @@ decode(stream *in, out_state *out)
 	    }
 	    else if (strncasecmp(m->type, "multipart/", 10) == 0) {
 		debug(out, "found: MIME %s", m->type);
-		
+
 		stm = stream_msg_multi_open(in, m);
 
 		while (!stream_eof(stm)) {
@@ -95,13 +95,13 @@ decode(stream *in, out_state *out)
 	    else if ((s=header_get(h, HDR_CONTENT_TRENC))
 		     && (m2=mime_parse(s))) {
 		debug(out, "found: MIME (single part)");
-		
+
 		ret = decode_acum_ret(ret, decode_mime(in, out, h, m, m2));
 		mime_free(m2);
 	    }
 	    mime_free(m);
 	}
-	    	
+
 	header_free(h);
 
 	/* non mime */
@@ -111,7 +111,7 @@ decode(stream *in, out_state *out)
 		s = t->line+6 + strspn(t->line+6, "01234567");
 		if (s != t->line+6 && *s == ' ') {
 		    debug(out, "found: uuencoded");
-		    
+
 		    output(out, token_set(&tok, TOK_FNAME, s+1));
 		    stm = stream_uuextract_open(in);
 		    ret = decode_acum_ret(ret,
@@ -123,12 +123,12 @@ decode(stream *in, out_state *out)
 	    }
 	    else if (strncmp(t->line, "=ybegin ", 8) == 0) {
 		debug(out, "found: yEnc");
-		
+
 		ret = decode_acum_ret(ret, decode_yenc(in, out, t->line));
 	    }
 	    else if (strcmp(t->line, BINHEX_TAG) == 0) {
 		debug(out, "found: binhex");
-		
+
 		ret = decode_acum_ret(ret, decode_binhex(in, out));
 	    }
 	    else {
@@ -144,7 +144,7 @@ decode(stream *in, out_state *out)
     }
 
     return ret;
-}  
+}
 
 
 
@@ -230,7 +230,7 @@ decode_mime_uu(stream *in, out_state *out, char *fname)
 
     for (;;) {
 	t = stream_get(in);
-	
+
 	switch (t->type) {
 	case TOK_LINE:
 	    if (strncmp(t->line, "begin ", 6) == 0) {
@@ -285,7 +285,7 @@ int
 decode_binhex(stream *in, out_state *out)
 {
     token tok;
-    
+
     /* XXX: extract file name */
     /* XXX: handle multi-part */
 

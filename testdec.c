@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: testdec.c,v 1.8 2002/04/10 16:21:25 wiz Exp $
+
   testdec.c -- command line test program
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

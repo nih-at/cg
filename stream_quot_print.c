@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream_quot_print.c,v 1.2 2002/04/10 16:21:22 wiz Exp $
+
   stream_quot_print.c -- decode MIME quoted printables
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -61,7 +61,7 @@ static int
 qp_close(struct stream_quot_print *this)
 {
     /* XXX: skip to EOF? */
-      
+
     stream_free((stream *)this);
 
     return 0;

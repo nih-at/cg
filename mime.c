@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: mime.c,v 1.15 2002/04/10 16:21:16 wiz Exp $
+
   mime.c -- MIME header parsing
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -73,7 +73,7 @@ mime_free(struct mime_hdr *m)
 
     if (m == NULL)
 	return;
-    
+
     for (i=0; m->option[i].name; i++)
 	free(m->option[i].value);
 
@@ -89,7 +89,7 @@ mime_parse(char *h)
     struct mime_hdr *m;
     struct mime_opt o[256];
     int i;
- 
+
     if ((m=(struct mime_hdr *)malloc(sizeof(struct mime_hdr))) == NULL)
 	return NULL;
 
@@ -103,7 +103,7 @@ mime_parse(char *h)
     _mime_lws(&h);
     while (*h == ';') {
 	h++;
-	
+
 	if ((o[i].name=_mime_token(&h)) == NULL) {
 	    break;
 	}
@@ -121,7 +121,7 @@ mime_parse(char *h)
 
     o[i].name = o[i].value = NULL;
     i++;
-    
+
     if ((m->option=(struct mime_opt *)malloc(sizeof(struct mime_opt)*i))
 	== NULL) {
 	free(m);
@@ -161,7 +161,7 @@ void
 _mime_lws(char **s)
 {
     /* XXX: handle () comments */
-    
+
     *s += strspn(*s, " \t");
 }
 
@@ -173,10 +173,10 @@ _mime_value(char **s)
     static char b[8192];
     char *p, *r, c;
     int i;
-    
+
     i=0;
     _mime_lws(s);
-    
+
     if (**s == '"') {
 	/* quoted string */
 	p = *s;
@@ -229,6 +229,6 @@ mime_option_get(struct mime_hdr *m, symbol name)
     for (i=0; m->option[i].name; i++)
 	if (m->option[i].name == name)
 	    return m->option[i].value;
-    
+
     return NULL;
 }

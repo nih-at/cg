@@ -2,8 +2,8 @@
 #define _HAD_HEADER_H
 
 /*
-  $NiH$
-  
+  $NiH: header.h,v 1.6 2002/04/10 16:21:15 wiz Exp $
+
   header.h -- RFC822 header parsing
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

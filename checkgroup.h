@@ -2,8 +2,8 @@
 #define _HAD_CHECKGROUP_H
 
 /*
-  $NiH$
-  
+  $NiH: checkgroup.h,v 1.4 2002/04/10 16:21:13 wiz Exp $
+
   checkgroup.h -- global header
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

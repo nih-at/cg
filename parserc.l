@@ -1,8 +1,8 @@
 /* -*- c -*- */
 
 /*
-  $NiH$
-  
+  $NiH: parserc.l,v 1.4 2002/04/10 16:21:18 wiz Exp $
+
   parserc.l -- parse .newsrc
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

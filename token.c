@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: token.c,v 1.2 2002/04/10 16:21:25 wiz Exp $
+
   token.c -- token handling
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -58,7 +58,7 @@ token_free(token *t)
 {
     if (t == NULL)
 	return;
-    
+
     free(t->line);
     free(t);
 }

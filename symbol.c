@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: symbol.c,v 1.5 2002/04/10 16:21:24 wiz Exp $
+
   symbol.c -- simple symbol table
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -46,7 +46,7 @@ intern(char *s)
 {
     int i;
     struct entry *e;
-    
+
     i = yourhash(s);
 
     if (table[i].s) {
@@ -56,7 +56,7 @@ intern(char *s)
 	}
 	if (strcmp(e->s, s) == 0)
 	    return e->s;
-	
+
 	if ((e->next=(struct entry *)malloc(sizeof(struct entry))) == NULL)
 	    return NULL;
 
@@ -125,7 +125,7 @@ yourhash(char *s)
     int i, j, k;
 
     i = j = 0;
-    
+
     while (*(s+i) != '\0') {
 	j += (i+1)*(int)*(i+s);
 	j %= TBLSIZE;
@@ -140,5 +140,5 @@ yourhash(char *s)
     j %= TBLSIZE;
 
     return j;
-    
+
 }

@@ -2,8 +2,8 @@
 #define _HAD_GLOBALS_H
 
 /*
-  $NiH$
-  
+  $NiH: globals.h,v 1.3 2002/04/10 16:21:14 wiz Exp $
+
   globals.h -- global variables
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

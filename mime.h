@@ -2,8 +2,8 @@
 #define _HAD_MIME_H
 
 /*
-  $NiH$
-  
+  $NiH: mime.h,v 1.9 2002/04/10 16:21:16 wiz Exp $
+
   mime.h -- MIME header parsing
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 

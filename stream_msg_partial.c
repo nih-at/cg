@@ -1,6 +1,6 @@
 /*
-  $NiH$
-  
+  $NiH: stream_msg_partial.c,v 1.3 2002/04/10 16:21:22 wiz Exp $
+
   stream_msg_partial.c -- assemble MIME partial message
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
 
@@ -73,7 +73,7 @@ stream_msg_partial_open(struct stream *source, struct mime_hdr *m)
     if ((this->n = get_int(m, MIME_CT_TOTAL)) < 0)
 	token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
 		   "message/partial missing total");
-    
+
     return (stream *)this;
 }
 
@@ -83,7 +83,7 @@ static int
 mprt_close(struct stream_mprt *this)
 {
     /* XXX: skip to EOF? */
-      
+
     free(this->id);
     stream_free((stream *)this);
 
@@ -102,13 +102,13 @@ mprt_get(struct stream_mprt *this)
 
     for (;;) {
 	t = stream_get(this->st.source);
-	
+
 	switch (t->type) {
 	case TOK_LINE:
 	    switch (this->state) {
 	    case MP_BODY:
 		return t;
-		
+
 	    case MP_HEADER:
 		if (strncasecmp(t->line, "Content-Type:", 13) == 0) {
 		    this->ct_seen = 1;
@@ -164,19 +164,19 @@ mprt_get(struct stream_mprt *this)
 		break;
 	    }
 	    break;
-	    
+
 	case TOK_EOH:
 	    this->state = MP_BODY;
 	    if (!this->ct_seen)
 		return token_set3(&this->st.tok,
 				  TOK_ERR, 1, "missing Content-Type header");
 	    break;
-	    
+
 	case TOK_EOA:
 	    this->state = MP_HEADER;
 	    this->ct_seen = 0;
 	    break;
-	    
+
 	case TOK_EOF:
 	    if (this->i>0 && this->n>0 && this->i != this->n)
 		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
