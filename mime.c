@@ -90,7 +90,7 @@ _mime_token(char **s)
     char c, *p;
 
     _mime_lws(s);
-    p = s+strcspn(*s, " \t()<>@,;:\\\"[]?=");
+    p = *s+strcspn(*s, " \t()<>@,;:\\\"[]?=");
     c = *p;
     *p = '\0';
     if (strlen(s) > 0)
@@ -117,14 +117,48 @@ _mime_lws(char **s)
 char *
 _mime_value(char **s)
 {
+    static char b[8192];
+    char *p, *r, c;
+    int i;
     
-
+    i=0;
     _mime_lws(s);
     
     if (**s == '"') {
 	/* quoted string */
+	for (;;) {
+	    switch (**(++s)) {
+	    case '"':
+		s++;
+		/* fallthrough */
+	    case '\0':
+		b[i++]='\0';
+		return strdup(b);
+	    case '\\':
+		if (**s == '\0') {
+		    b[i++]='\0';
+		    return strdup(b);
+		}
+		else
+		    b[i++]=**(++s);
+		break;
+	    default:
+		b[i++]=**s;
+		break;
+	    }
+	}
     }
     else {
 	/* token */
+	p = *s+strcspn(*s, " \t()<>@,;:\\\"[]?=");
+	c = *p;
+	*p = '\0';
+	if (strlen(*s) > 0)
+	    r = strdup(*s);
+	else
+	    r = NULL;
+	*p = c;
+	*s = p;
+	return r;
     }
 }
