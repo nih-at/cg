@@ -4,6 +4,7 @@ multiple nntp servers as input
 [cleanup nntp support to ease above]
 saving parts to files and use as input
 sane part0 handling
+remember duplicate parts, sort and failover
 
 ---- Before rewrite
 
