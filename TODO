@@ -1,19 +1,19 @@
-multipart/appledouble: better handling if filename same
 binhex support
+remove/move broken files
+multipart/appledouble: better handling if filename same
+
 multiple nntp servers as input
 [cleanup nntp support to ease above]
 saving parts to files and use as input
 remember duplicate parts, sort and failover
+investigate no end founds
 
 ---- Before rewrite
 
 * enforce minimum file size, e.g. >1k
 * progressbar?
 
-* skip rest of stream when filename can't be created (e.g. "xy on 7/8/99.mp3")
-
 * better error messages (partno, lineno, etc.)
-* remove/move broken files
 
 * user interface
 * newsreader
@@ -22,9 +22,4 @@ remember duplicate parts, sort and failover
 
 * xref handling
 
-* investigate no end founds
-* binhex, mime
-* header values
-
 * more smarts in ignoring pointless descriptions
-* signature to desc file
