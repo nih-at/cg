@@ -2,7 +2,7 @@
 @c %**start of header
 @setfilename libmap.info
 @settitle libmap
-@setchapternewpage odd
+@setchapternewpage off
 @c %**end of header
 
 @include version.texi
@@ -46,6 +46,7 @@ approved by the Free Software Foundation.
 @titlepage
 @title libmap -- A Library for Associative Arrays
 @subtitle For version @value{VERSION}, @value{UPDATED}
+@author Dieter Baron
 @c copyright page
 @page
 @vskip 0pt plus 1filll
@@ -76,6 +77,7 @@ approved by the Free Software Foundation.
 @end titlepage
 
 @ifinfo
+@c ================================================================
 @node Top, Introduction, (dir), (dir)
 @comment  node-name,  next,  previous,  up
 @top libmap
@@ -88,43 +90,123 @@ arrays, implemented as hash tables with external linking.
 
 @menu
 * Introduction::	Design philosophy of libmap
-* Functions::           A detailed description of each function
-@end menu
+* Creating::            Creating and Destroying Maps
+* Manipulating::        Manipulating Maps
+* Iterating::           Iterating Through Maps
+* Configuration::       Configurability and Default Values
 
+* Index::
+* Index of Functions::
+* Index of Variables::
+@end menu
+@end ifinfo
+
+@c ================================================================
 @node Introduction
 @chapter Introduction
+@cindex Introduction
+@cindex map
+@cindex hash table
 
-@node Functions
-@chap Functions
+Associative arrays (also called maps) are arrays whose indices, called
+keys, are not natural numbers.  Most often, they are strings.
 
-@menu
-Creating and deleting maps:
+One way to implement associative arrays is to use hash tables: key/value
+pairs are stored in an ordinary array, at the index specified by the
+key's hash, which acts like a fingerprint.  This is both easy to
+implement and efficient, if the function used to compute the hash value
+is fast and rarely generates the same value for different keys.
 
-* new_map::             Create a new map
-* free_map::            Delete a map
+There are different ways to handle collitions (two different keys with
+the same hash value); one is to use linked lists as array elements, and
+to store the key/value pairs in these lists (one for each hash value).
+This method is not the fastest, but does not pose an arbitrary limit on
+the size of the associative array.
 
-Manipulating maps:
+Still, to get good performance, the size of the hash tabel should be
+about 5 times as large as the expected number of entries (to avoid
+collisions), but space can be traded off for time.
 
-* map_lookup::          Find element in map
-* map_insert::          Insert element into map
-* map_delete::          Remove element from map
+For a thorrough discussion of hash tables, see @cite{The Art of Computer
+Programming, Vol. II: Seminumerical Algorithms}, by Donald E. Knuth.
+@c XXX: correct volume?
 
-Iterating through maps:
 
-* map_start::           Start iteration
-* map_next::            Iterate
-* map_stop::            Terminate iteration
-@end menu
+@c ================================================================
+@node Creating
+@chapter Creating and Destroying Maps
+@cindex creating
+@cindex destroying
 
-map *new_map(int size, int (*equal)(), int (*hash)(), void *(*cpykey)(),
-	     void (*delkey)(), void (*delval)());
-void free_map(map *m);
-void *map_lookup(map *m, void *k);
-void **map_insert(map *m, void *k);
-void map_delete(map *m, void *k);
-map_iter *map_start(map *m);
-int map_next(map_iter *mi, void **key, void **value);
-void map_stop(map_iter *mi);
+@deftypefun {map *} new_map (int @var{size})
+The @code{new_map} function creates a new map of @var{size}, or
+@code{map_def_size} if @var{size} is 0.  All helper functions are set to
+their default values.
+
+@code{new_map} returns the created map, or a null pointer if creation
+fails.
+@end deftypefun
+
+@deftypefun {map *} new_map2 (int @var{size}, int (*@var{equal})(), int (*@var{hash})(), void *(*@var{cpykey})(), void (*@var{delkey})(), void (*@var{delval})())
+@end deftypefun
+
+@deftypefun void free_map (map *@var{m})
+@end deftypefun
+
+
+@c ================================================================
+@node Manipulating
+@chapter Manipulating Maps
+@cindex manipulating
+
+@deftypefun {void *} map_lookup (map *@var{m}, void *@var{key})
+@end deftypefun
+
+@deftypefun {void **} map_insert (map *@var{m}, void *@var{key})
+@end deftypefun
+
+@deftypefun void map_delete (map *@var{m}, void *@var{key}, int @var{delvaluep})
+@end deftypefun
+
+
+@c ================================================================
+@node Iterating
+@chapter Iterating Through Maps
+@cindex iterating
+
+@deftypefun {map_iter *} map_start (map *@var{m})
+@end deftypefun
+
+@deftypefun int map_next (map_iter *@var{iteratior}, void **@var{key}, void **@var{value})
+@end deftypefun
+
+@deftypefun void map_stop (map_iter *@var{iterator})
+@end deftypefun
+
+
+@c ================================================================
+@node Configuration
+@chapter Configurability and Default Values
+
+
+@iftex
+@page
+@end iftex
+@c ================================================================
+@node Index
+@unnumbered Index
+
+@printindex cp
+
+@node Index of Functions
+@unnumbered Index of Functions
+
+@printindex fn
+
+@node Index of Variables
+@unnumbered Index of Variables
+
+@printindex vr
 
 @contents
 @bye
