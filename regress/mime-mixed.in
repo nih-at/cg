@@ -1,0 +1,28 @@
+From: srepsis@subdimension.com (akula)
+Subject: test.zip
+MIME-Version: 1.0
+Content-Type: multipart/mixed;
+        	boundary="= Multipart Boundary 0618010712"
+
+This is a multipart MIME message.
+
+--= Multipart Boundary 0618010712
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
+
+  This is the text part of this mime message.  It is about as
+usefull as the included zip file.
+
+--= Multipart Boundary 0618010712
+Content-Type: application/octet-stream; name="test.zip"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="test.zip"
+
+UEsDBAoAAAAAAApD0CqGzAWXBQAAAAUAAAAIAAAAdGVzdC50eHR0ZXN0IVBL
+AQIUAAoAAAAAAApD0CqGzAWXBQAAAAUAAAAIAAAAAAAAAAEAIAC2gQAAAAB0
+ZXN0LnR4dFBLBQYAAAAAAQABADYAAAArAAAAAAA=
+
+--= Multipart Boundary 0618010712--
+
+
+

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -z ${srcdir} ]
+then
+    srcdir=.
+fi
+
+exec ${srcdir}/runtest mime-mixed 0 test.zip test.zip.desc
