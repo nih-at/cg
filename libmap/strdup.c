@@ -30,7 +30,7 @@
 #ifndef HAVE_STRDUP
 
 char *
-map__strdup(const char *s)
+_map_strdup(const char *s)
 {
     char *t;
 

@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include "map.h"
 
-map_entry *map__lookup(map *m, void *k);
+map_entry *_map_lookup(map *m, void *k);
 
 
 
@@ -33,7 +33,7 @@ map_delete(map *m, void *k, int dv)
 {
     map_entry *me, *p;
 
-    p = map__lookup(m, k);
+    p = _map_lookup(m, k);
     if ((me = p->next) != NULL) {
 	if (m->delkey)
 	    m->delkey(me->key);

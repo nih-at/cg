@@ -27,7 +27,7 @@
 
 
 map_entry *
-map__lookup(map *m, void *k)
+_map_lookup(map *m, void *k)
 {
     map_entry *me;
     unsigned int index;

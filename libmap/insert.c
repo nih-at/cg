@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include "map.h"
 
-map_entry *map__lookup(map *m, void *k);
+map_entry *_map_lookup(map *m, void *k);
 
 
 
@@ -33,7 +33,7 @@ map_insert(map *m, void *k)
 {
     map_entry *me;
 
-    me = map__lookup(m, k);
+    me = _map_lookup(m, k);
 
     if (me->next == NULL) {
 	if ((me->next=(map_entry *)malloc(sizeof(map_entry))) == NULL)

@@ -27,8 +27,8 @@
 #include "config.h"
 
 #ifndef HAVE_STRDUP
-char *map__strdup(const char *s);
-#define strdup map__strdup
+char *_map_strdup(const char *s);
+#define strdup _map_strdup
 #endif
 
 
