@@ -311,8 +311,8 @@ main(int argc, char **argv)
 	ndecoded = 0;
 	out = output_new();
 	
-	for (j=0; toget[j]!=-1;j++) {
-	    if (save_and_quit || (do_decode(todec[toget[j]], out) == 0)) {
+	for (j=0; toget[j]!=-1; j++) {
+	    if (save_and_quit || (do_decode(todec[toget[j]], out) <= 0)) {
 		for (k=0; k<todec[toget[j]]->npart; k++)
 		    range_clear(rcmap, todec[toget[j]]->artno[k]);
 		if (todec[toget[j]]->part0 != -1)
@@ -637,34 +637,6 @@ extract(char *s, regmatch_t m)
     t[m.rm_eo-m.rm_so] = '\0';
 
     return t;
-}
-
-
-
-void
-save_comment(FILE *fin)
-{
-    char *line;
-    char *fn;
-    FILE *fout;
-
-#if 0
-    while ((line=getline(fin))!=NULL) {
-	;
-    }
-    return;
-#endif
-    /* XXX: hm, from where do I get the filename? */
-    fn = NULL;
-
-    fout = fopen_uniq(&fn);
-    while ((line=getline(fin))!=NULL) {
-	fwrite(line, 1, strlen(line), fout);
-	fputc('\n', fout);
-    }
-    fclose(fout);
-
-    return;
 }
 
 
