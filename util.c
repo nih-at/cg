@@ -338,21 +338,21 @@ our_basename(char *name)
 
 
 void
-prdebug(int level, char *fmt, ...)
+prdebug(int mask, char *fmt, ...)
 {
     char *s;
     va_list argp;
 
-    if (level < do_debug_file &&  level < do_debug_stdout)
+    if (!(mask & do_debug_file) && !(mask & do_debug_stdout))
 	return;
 
     va_start(argp, fmt);
     vasprintf(&s, fmt, argp);
     va_end(argp);
 
-    if (level >= do_debug_file)
+    if (mask & do_debug_file)
 	fprintf(debug_file, "%s\n", s);
-    if (level >= do_debug_stdout)
+    if (mask & do_debug_stdout)
 	puts(s);
 
     free(s);    
@@ -363,7 +363,7 @@ prdebug(int level, char *fmt, ...)
 void
 prdebug_init(int do_file, int do_stdout)
 {
-    if (do_file < INT_MAX) {
+    if (do_file) {
 	if ((debug_file=fopen(DEBUG_FILE_NAME, "w")) == NULL)
 	    do_file = INT_MAX;
     }

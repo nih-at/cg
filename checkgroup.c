@@ -194,7 +194,8 @@ main(int argc, char **argv)
 	exit(1);
     }
 
-    prdebug_init(1, 1);
+    prdebug_init(DEBUG_ALL^(DEBUG_SUBJ),
+		 DEBUG_ALL^(DEBUG_LINE|DEBUG_SUBJ|DEBUG_PART));
 
     newsrc = expand(newsrc);
 
@@ -512,13 +513,13 @@ parse(map *parts, FILE *f)
 	while (s != NULL && s[0] == '<')
 	    s = strtok(NULL, "\t"); /* message-ID & references */
 	if (s == NULL) {
-	    prdebug(5, "xover for article %ld is weird\n", artno);
+	    prdebug(DEBUG_XOVR, "xover for article %ld is weird", artno);
 	    size = 0;
 	}
 	else {
 	    size = strtol(s, NULL, 10);
 	    if ((s=strtok(NULL, "\t")) == NULL) {
-		prdebug(5, "xover for article %ld is weird\n", artno);
+		prdebug(DEBUG_XOVR, "xover for article %ld is weird", artno);
 		lines = 0;
 	    }
 	    else {
@@ -542,7 +543,7 @@ parse(map *parts, FILE *f)
 		npart = 1;
 	    }
 	    else {
-		prdebug(0, "unrecognized subject: %s", subj);
+		prdebug(DEBUG_SUBJ, "unrecognized subject: %s", subj);
 		continue;
 	    }
 	}
@@ -567,7 +568,8 @@ parse(map *parts, FILE *f)
 
 	if ((npart == 0) || (npart > 10000) || (part > 10000)
 	    || (part > npart)) {
-	    prdebug(5, "%s: ignored: part %d of %d\n", subj, part, npart);
+	    prdebug(DEBUG_PART, "%s: ignored: part %d of %d",
+		    subj, part, npart);
 	    free(key);
 	    free(comment);
 	    if (!mark_complete)
@@ -610,7 +612,7 @@ parse(map *parts, FILE *f)
 	}
 
 	if (val->artno[part-1] != -1 ) {
-	    prdebug(5, "%s: ignored: duplicate part %d\n",
+	    prdebug(DEBUG_PART, "%s: ignored: duplicate part %d",
 		    val->tag, part);
 	    if (!mark_complete)
 		range_set(rcmap, artno);

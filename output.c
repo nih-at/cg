@@ -61,13 +61,14 @@ output(out_state *out, token *t)
 	out->ndata++;
     else {
 	if (out->ndata)
-	    prdebug(2, ">data [%d]", out->ndata);
+	    prdebug(DEBUG_TOK, ">data [%d]", out->ndata);
 	out->ndata = 0;
     }
 
     switch (t->type) {
     case TOK_FNAME:
-	prdebug(2, ">%s: %s", tname[t->type], t->line ? t->line : "(null)");
+	prdebug(DEBUG_TOK, ">%s: %s",
+		tname[t->type], t->line ? t->line : "(null)");
 
 	if (out->infile) {
 	    fprintf(stderr, "ERROR: fname while in file (missing EOF)\n");
@@ -104,11 +105,10 @@ output(out_state *out, token *t)
 	break;
 
     case TOK_DEBUG:
-	prdebug(5, ">debug: %s", t->line);
+	prdebug(DEBUG_DTOK, ">debug: %s", t->line);
 	break;
 	
     case TOK_LINE:
-	prdebug(1, ">%s: %s", tname[t->type], t->line);
 	if (out->infile) {
 	    if (out->fout != NULL) {
 		fprintf(out->fout, "%s\n", t->line);
@@ -121,6 +121,7 @@ output(out_state *out, token *t)
 	    }
 	}
 	else {
+	    prdebug(DEBUG_LINE, ">%s: %s", tname[t->type], t->line);
 	    if (t->line[0] != '\0' && out->do_fdesc == -1) {
 		out->do_fdesc = 1;
 		strcpy(out->tempdesc, "./tmpdesc.XXXXXX");
@@ -184,7 +185,7 @@ output(out_state *out, token *t)
 	/* fallthrough */
 	
     case TOK_EOF:
-	prdebug(2, ">%s", tname[t->type]);
+	prdebug(DEBUG_TOK, ">%s", tname[t->type]);
 
 	if (out->infile && out->fout)
 	    fclose(out->fout);
@@ -214,7 +215,7 @@ output(out_state *out, token *t)
 	break;
 
     default:
-	prdebug(2, ">%s", tname[t->type]);
+	prdebug(DEBUG_TOK, ">%s", tname[t->type]);
 	break;
     }
 

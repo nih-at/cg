@@ -19,7 +19,8 @@ main(int argc, char *argv[])
 
     prg = argv[0];
 
-    prdebug_init(1, 1);
+    prdebug_init(DEBUG_ALL^(DEBUG_SUBJ),
+		 DEBUG_ALL^(DEBUG_LINE|DEBUG_SUBJ|DEBUG_PART));
 
     header_init();
     mime_init();
