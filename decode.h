@@ -19,5 +19,5 @@ extern int decode_table_binhex[256];
 
 
 enum enctype decode_file(FILE *fin, FILE **foutp, enum enctype type);
-int decode_line(unsigned char *buf, char *line, int *table);
+int decode_line(unsigned char *buf, unsigned char *line, int *table);
 

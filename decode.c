@@ -117,6 +117,10 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type)
 	    }
 	    else {
 		/* XXX: ignore BEGIN, CUT HERE, etc. */
+		if (strncmp(line, "BEGIN --- CUT HERE", 18) == 0) {
+		    /* skip -- line is not interesting */
+		    continue;
+		}
 		if (descname == NULL) {
 		    descname = ".desc";
 		    if ((fdesc=fopen_uniq(&descname)) == NULL)
@@ -434,7 +438,7 @@ decode_binhex(FILE *fin, FILE **foutp, char **fn)
 
 
 int
-decode_line(unsigned char *buf, char *line, int *table)
+decode_line(unsigned char *buf, unsigned char *line, int *table)
 {
     static int rest, no;
     int i, b;
