@@ -78,8 +78,6 @@ main(int argc, char **argv)
 	    printf(" -- FAILED (%s)!\n", entries[i].key);
 	    exit(1);
 	}
-	else
-	    *p = entries[i].value;
     }
 
     printf("iterating");
