@@ -203,12 +203,12 @@ main(int argc, char **argv)
     if (nntp_host == NULL) {
 	if ((nntp_host=getenv("NNTPSERVER")) == NULL) {
 	    if ((fp=fopen(NNTPHOSTFILE, "r")) == NULL) {
-		fprintf(stderr, "%s: can't open %s: %s", prg, NNTPHOSTFILE,
-			strerror(errno));
+		fprintf(stderr, "%s: NNTPSERVER not set, and can't open "
+			"%s: %s\n", prg, NNTPHOSTFILE, strerror(errno));
 		exit(7);
 	    }
 	    if (fgets(b, BUFSIZE, fp) == NULL) {
-		fprintf(stderr, "%s: can't read newsserver from %s: %s",
+		fprintf(stderr, "%s: can't read newsserver from %s: %s\n",
 			prg, NNTPHOSTFILE, strerror(errno));
 		exit(7);
 	    }
@@ -217,7 +217,7 @@ main(int argc, char **argv)
 		b[strlen(b)-1]='\0';
 	    if ((nntp_host=strdup(b)) == NULL) {
 		fprintf(stderr, "%s: can't strdup nntp_host from `%s': "
-			"shoot me", prg, b);
+			"shoot me\n", prg, b);
 		exit(77);
 	    }
 	}
