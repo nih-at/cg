@@ -3,7 +3,10 @@ INCLUDES=-I$(srcdir)/libmap
 SUBDIRS=libmap regress
 
 bin_PROGRAMS=cg
+man_MANS=cg.1
 noinst_PROGRAMS=testdec
+
+EXTRA_DIST=cg.mdoc cg.man
 
 cg_SOURCES=checkgroup.c crc.c decode.c header.c mime.c newsrc.c \
 	output.c parserc.l ranges.c sockets.c stream.c stream_article.c \

@@ -7,6 +7,8 @@ AC_SUBST(LIBOBJS)
 # We want these before the checks, so the checks can modify their values.
 #test -z "$CFLAGS" && CFLAGS='-g -Wall' auto_cflags=1
 
+AC_CANONICAL_HOST
+
 dnl programs
 
 AC_PROG_CC
@@ -35,5 +37,13 @@ if test $need_snprintf = yes
 then
 	LIBOBJS="$LIBOBJS snprintf.o"
 fi
+
+case $host_os
+in
+	*bsd*) MANFMT=mdoc;;
+	*) MANFMT=man;;
+esac
+
+AC_LINK_FILES(cg.${MANFMT}, cg.1)
 
 AC_OUTPUT(Makefile regress/Makefile)
