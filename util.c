@@ -1,5 +1,5 @@
 /*
-  $NiH: util.c,v 1.23 2002/04/10 16:21:25 wiz Exp $
+  $NiH: util.c,v 1.24 2002/04/10 16:23:39 wiz Exp $
 
   util.c -- miscellaneous functions
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -334,7 +334,7 @@ append_file(char *t, char *s, char *sep)
 	return EOF;
     }
 
-    if (fputs(sep, fout) != 0) {
+    if (fputs(sep, fout) == EOF) {
 	fclose(fin);
 	fclose(fout);
 	return EOF;
