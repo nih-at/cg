@@ -1,3 +1,5 @@
+AUTOMAKE_OPTIONS=dist-bzip2
+
 INCLUDES=-I$(srcdir)/libmap
 
 SUBDIRS=libmap regress
