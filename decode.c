@@ -396,6 +396,7 @@ decode_base64(FILE *fin, FILE *fout)
 	    }
 
 	    skip_rest(fin);
+	    /* XXX: error message */
 	    return enc_error;
 	}
     }
