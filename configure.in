@@ -1,0 +1,16 @@
+AC_INIT(checkgroup.c)
+AM_INIT_AUTOMAKE(checkgroup, 0.1)
+AM_CONFIG_HEADER(config.h)
+AC_SUBST(LIBOBJS)
+
+# We want these before the checks, so the checks can modify their values.
+test -z "$CFLAGS" && CFLAGS='-g -Wall' auto_cflags=1
+
+AC_PROG_CC
+AC_PROG_LEX
+
+AC_DECL_YYTEXT
+
+AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
+
+AC_OUTPUT(Makefile)
