@@ -102,8 +102,8 @@ struct option options[] = {
 int sopen(char *host, char *service);
 
 /* intern */
-long complete (map *parts, long no_file, struct file **todec);
-long *choose (struct file **todec, long no_complete, char *group);
+long complete(map *parts, long no_file, struct file **todec);
+long *choose(struct file **todec, long no_complete, char *group);
 int parse(map *parts, FILE *f);
 char *extract(char *s, regmatch_t m);
 int do_decode(struct file *value, out_state *out);
@@ -111,7 +111,7 @@ int nntp_resp(void);
 int nntp_put(char *fmt, ...);
 int writerc(char *group);
 int readrc(char *group, long lower, long upper, long no_art);
-void writegrouptorc (FILE *copy, char *compstr);
+void writegrouptorc(FILE *copy, char *compstr);
 
 
 
@@ -203,21 +203,21 @@ main(int argc, char **argv)
     if (nntp_host == NULL) {
 	if ((nntp_host=getenv("NNTPSERVER")) == NULL) {
 	    if ((fp=fopen(NNTPHOSTFILE, "r")) == NULL) {
-		fprintf(stderr, "can't open %s: %s", NNTPHOSTFILE,
+		fprintf(stderr, "%s: can't open %s: %s", prg, NNTPHOSTFILE,
 			strerror(errno));
 		exit(7);
 	    }
 	    if (fgets(b, BUFSIZE, fp) == NULL) {
-		fprintf(stderr, "can't read newsserver from %s: %s",
-			NNTPHOSTFILE, strerror(errno));
+		fprintf(stderr, "%s: can't read newsserver from %s: %s",
+			prg, NNTPHOSTFILE, strerror(errno));
 		exit(7);
 	    }
 	    fclose(fp);
 	    if (b[strlen(b)-1]=='\n')
 		b[strlen(b)-1]='\0';
 	    if ((nntp_host=strdup(b)) == NULL) {
-		fprintf(stderr,
-			"can't strdup nntp_host from `%s': shoot me", b);
+		fprintf(stderr, "%s: can't strdup nntp_host from `%s': "
+			"shoot me", prg, b);
 		exit(77);
 	    }
 	}
@@ -276,11 +276,11 @@ main(int argc, char **argv)
 	    exit(1);
 	}
 	
-	no_file=parse(parts, conin);
+	no_file = parse(parts, conin);
 
 	todec = (struct file **)xmalloc(sizeof(struct file *)*no_file);
 
-	no_complete=complete(parts, no_file, todec);
+	no_complete = complete(parts, no_file, todec);
 
 	map_free(parts, 0);
 
@@ -311,10 +311,9 @@ main(int argc, char **argv)
 	
 	for (j=0; toget[j]!=-1; j++) {
 	    if (save_and_quit || (do_decode(todec[toget[j]], out) <= 0)) {
-		for (k=0; k<todec[toget[j]]->npart; k++)
-		    range_clear(rcmap, todec[toget[j]]->artno[k]);
-		if (todec[toget[j]]->part0 != -1)
-		    range_clear(rcmap, todec[toget[j]]->part0);
+		for (k=0; k<=todec[toget[j]]->npart; k++)
+		    if (todec[toget[j]]->artno[k] != -1)
+			range_clear(rcmap, todec[toget[j]]->artno[k]);
 	    }
 	    else
 		ndecoded++;
@@ -367,12 +366,12 @@ complete (map *parts, long no_file, struct file **todec)
 
     for (i=0; map_next(iterate, (void *)&key, (void *)&value) == 0; ) {
 	if (value->new) {
-	    for (j=0; j<value->npart; j++) {
+	    for (j=1; j<=value->npart; j++) {
 		if (value->artno[j] == -1)
 		    break;
 	    }
 	}
-	if ((j == value->npart) && value->new) {
+	if ((j == value->npart+1) && value->new) {
 	    todec[i++]=value;
 	    if (mark_complete) {
 		for (j=0; j<value->npart; j++)
@@ -574,12 +573,11 @@ parse(map *parts, FILE *f)
 	    val->tag = key;
 	    val->comment = comment;
 	    val->npart = npart;
-	    val->artno = (long *)xmalloc(sizeof(long)*npart);
-	    for (i=0; i<npart; i++)
+	    val->artno = (long *)xmalloc(sizeof(long)*(npart+1));
+	    for (i=0; i<=npart; i++)
 		val->artno[i] = -1;
 	    val->new=0;
 	    val->size = 0;
-	    val->part0 = -1;
 
 	    *valp = val;
 	}
@@ -589,18 +587,7 @@ parse(map *parts, FILE *f)
 	    free(comment);
 	}
 
-	/* make comment available for writing to .desc file */
-	if (part == 0) {
-	    /* take first appearing comment only */
-	    if (val->part0 == -1) {
-		val->part0 = artno;
-		if (!mark_complete)
-		    range_set(rcmap, artno);
-	    }
-	    continue;
-	}
-
-	if (val->artno[part-1] != -1 ) {
+	if (val->artno[part] != -1 ) {
 	    prdebug(DEBUG_PART, "%s: ignored: duplicate part %d",
 		    val->tag, part);
 	    if (!mark_complete)
@@ -608,11 +595,15 @@ parse(map *parts, FILE *f)
 	    continue;
 	}
 
-	val->artno[part-1] = artno;
-	if (!range_isin(rcmap, artno))
-	    val->new=1;
+	val->artno[part] = artno;
 
-	val->size += 3*size/4;
+	if (part != 0) {
+	    /* previously unseen part */
+	    if (!range_isin(rcmap, artno))
+		val->new=1;
+
+	    val->size += 3*size/4;
+	}
 	
 	if (!mark_complete)
 	    range_set(rcmap, artno);
