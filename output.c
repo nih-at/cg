@@ -16,7 +16,7 @@ output_new()
 
     out = xmalloc(sizeof(*out));
 
-    out->infile = out->warned = 0;
+    out->infile = out->warned = out->ndata = 0;
     out->fout = NULL;
 
     return out;
@@ -46,7 +46,14 @@ output(out_state *out, token *t)
     };
     static char **tname = _foo+1;
 
-    printf(">%s", tname[t->type]);
+    if (t->type == TOK_DATA)
+	out->ndata++;
+    else {
+	if (out->ndata)
+	    printf(">data [%d]\n", out->ndata);
+	out->ndata = 0;
+	printf(">%s", tname[t->type]);
+    }
 
     switch (t->type) {
     case TOK_FNAME:
@@ -84,8 +91,6 @@ output(out_state *out, token *t)
 	break;
 
     case TOK_DATA:
-	putc('\n', stdout);
-
 	if (!out->infile && !out->warned) {
 	    printf("ERROR: data while not in file (missing fname)");
 	    out->warned = 1;

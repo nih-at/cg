@@ -6,6 +6,7 @@
 struct out_state {
     int infile;
     int warned;
+    int ndata;
     FILE *fout;
 };
 
