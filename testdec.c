@@ -15,6 +15,7 @@ main(int argc, char *argv[])
     stream *stm, *st2;
     out_state *out;
     int ret;
+    token t;
 
     prg = argv[0];
 
@@ -26,6 +27,8 @@ main(int argc, char *argv[])
     out = output_new();
 
     ret = decode(st2, out) ? 1 : 0;
+
+    output(out, token_set(&t, TOK_EOP, NULL));
 
     stream_close(st2);
     stream_close(stm);
