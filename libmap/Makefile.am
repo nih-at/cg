@@ -20,6 +20,8 @@ EXTRA_PROGRAMS=testmap
 testmap_SOURCES=testmap.c
 testmap_LDADD=libmap.a
 
+CLEANFILES=testmap
+
 TESTS=testmap
 
 
