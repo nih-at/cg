@@ -1,5 +1,5 @@
 /*
-  $NiH: checkgroup.c,v 1.46 2002/07/27 12:36:08 dillo Exp $
+  $NiH: checkgroup.c,v 1.47 2003/11/24 16:12:25 wiz Exp $
 
   checkgroup.c -- main program
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -710,7 +710,7 @@ nntp_put(char *fmt, ...)
 	else
 	    ret = nntp_resp();
 
-	if (writeerr || (ret == 400) || (ret == 503)) {
+	if (writeerr || (ret == 400) || (ret == 503) || (ret == -1)) {
 	    /* connection to server closed -- reconnect */
 
 	    writeerr = 0;
@@ -822,8 +822,11 @@ nntp_resp(void)
 	return -1;
 
     clearerr(conin);
-    if (fgets(line, BUFSIZE, conin) == NULL)
+    if (fgets(line, BUFSIZE, conin) == NULL) {
+	free(nntp_response);
+	nntp_response = strdup("connection to server lost");
 	return -1;
+    }
 
     resp = atoi(line);
     l = strlen(line);
