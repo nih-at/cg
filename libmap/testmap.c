@@ -79,6 +79,7 @@ main(int argc, char **argv)
 	    exit(1);
 	}
     }
+    printf("\n");
 
     printf("iterating");
     fflush(stdout);
