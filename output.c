@@ -42,7 +42,8 @@ int
 output(out_state *out, token *t)
 {
     static char *_foo[] = {
-	"EOF", "line", "data", "EOS", "EOH", "EOA", "fname", "debug", "error"
+	"EOF", "line", "data", "EOS", "EOH", "EOA", "EOP", "fname", "debug",
+	"error"
     };
     static char **tname = _foo+1;
 
