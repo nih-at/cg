@@ -10,6 +10,8 @@
 
 #include "util.h"
 
+#define HOUSENUMBER 102400
+
 
 
 void *
@@ -19,6 +21,19 @@ xmalloc(size_t size)
     
     if ((p=malloc(size)) == NULL) {
 	fprintf(stderr, "%s: malloc failure (size=%ld)\n", prg, (long)size);
+	exit(1);
+    }
+
+    return p;
+}
+
+
+
+void *
+xrealloc(void *p, size_t size)
+{
+    if ((p=realloc(p, size)) == NULL) {
+	fprintf(stderr, "%s: realloc failure (size=%ld)\n", prg, (long)size);
 	exit(1);
     }
 
@@ -119,6 +134,47 @@ fopen_uniq(char **fnp)
 
 	sprintf(b, (*fnp) ? "%s.%d" : "%s.%03d", s, ++i);
     }
-	
+}
+
+
+
+char *
+getline(FILE *f)
+{
+    static char *b;
+    static int bsize;
+    int len;
     
+    if (bsize == 0) {
+	bsize = BUFSIZE;
+	b = (char *)xmalloc(bsize);
+    }
+
+    if (fgets(b, bsize, f) == NULL) {
+	return NULL;
+    }
+
+    len=strlen(b);
+    
+    while (b[len-1] != '\n') {
+	/* line too long */
+	bsize += BUFSIZE;
+	if (bsize >= HOUSENUMBER) {
+	    prerror("line longer than %d", HOUSENUMBER);
+	    bsize -= BUFSIZE;
+	    return b;
+	}
+	b = xrealloc(b, bsize);
+	if (fgets(b+bsize-BUFSIZE, BUFSIZE, f) == NULL) {
+	    return NULL;
+	}
+	len += strlen(b+bsize-BUFSIZE);
+    }
+
+    if (b[len-2] != '\r')
+	b[len-2] = '\0';
+    else
+	b[len-1] = '\0';
+
+    return b;    
 }
