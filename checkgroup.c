@@ -30,10 +30,10 @@ struct file {
     long size;
 };
 
-#define MAX_PATTERNS 5
+#define MAX_PATTERNS 6
 
 char *spattern[MAX_PATTERNS] = {  /* ! ( ! */
-/*    "(.*) - (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])]",   /* "c - n ()" */
+    "(.*) - (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])]",   /* "c - n ()" */
     "(([^-]|-+[^ -])+)-+ (.*[^ ]) *[[(]([0-9]*)[/\\]([0-9]*)[])]", /* c - n () */
     "- (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])] *(.*)",  /* "- n () c" mac groups */
     "(.*)()[[(]([0-9]*)/([0-9]*)[])]",              /* "n ()" desperate */
@@ -43,10 +43,10 @@ char *spattern[MAX_PATTERNS] = {  /* ! ( ! */
 
 regex_t pattern[MAX_PATTERNS]; 
 
-int pat_key[MAX_PATTERNS] =     {/* 2 */ 3, 1, 1, 4 /* 2 */, 2 };
-int pat_comment[MAX_PATTERNS] = {/* 1 */ 1, 4, 2, 1 /* 4 */, 1 };
-int pat_part[MAX_PATTERNS] =    {/* 3 */ 4, 2, 3, 2 /* 1 */, 0 };
-int pat_npart[MAX_PATTERNS] =   {/* 4 */ 5, 3, 4, 3 /* 3 */, 0 };
+int pat_key[MAX_PATTERNS] =     { 2,  3, 1, 1, 4 /* 2 */, 2 };
+int pat_comment[MAX_PATTERNS] = { 1,  1, 4, 2, 1 /* 4 */, 1 };
+int pat_part[MAX_PATTERNS] =    { 3,  4, 2, 3, 2 /* 1 */, 0 };
+int pat_npart[MAX_PATTERNS] =   { 4,  5, 3, 4, 3 /* 3 */, 0 };
 
 char *prg;
 char *nntp_response, *nntp_group, *nntp_host;
@@ -257,11 +257,7 @@ main(int argc, char **argv)
 	
 	no_file=parse(parts, conin);
 
-	if ((todec=(struct file **)malloc(sizeof(struct file *)*no_file))
-	    == NULL) {
-	    fprintf(stderr, "%s: malloc failure\n", prg);
-	    exit(1);
-	}
+	todec = (struct file **)xmalloc(sizeof(struct file *)*no_file);
 
 	no_complete=complete(parts, no_file, todec);
 
@@ -404,7 +400,7 @@ choose (struct file **todec, long no_complete, char *group)
     
     i=0;
 
-    chosen=(long *)malloc(sizeof(long)*(no_complete+1));
+    chosen = (long *)xmalloc(sizeof(long)*(no_complete+1));
     
     while (fgets(b, BUFSIZE, temp) != NULL) {
 	j = 0;
@@ -481,7 +477,7 @@ parse(map *parts, FILE *f)
 	    /* lines = */ strtok(NULL, "\t");
 	    /* xref = */ strtok(NULL, "\t");
 	}
-	
+
 	for (i=0; i<MAX_PATTERNS; i++) {
 	    if (regexec(&pattern[i], subj, 6, match, 0) == 0)
 		break;
@@ -518,8 +514,9 @@ parse(map *parts, FILE *f)
 	    continue;
 	}
 
-	if (npart == 0) {
-	    /* DEBUG */ fprintf(dfile,"%s: ignored: number of parts zero\n", subj);
+	if ((npart == 0) || (npart > 10000) || (part > 10000)) {
+	    /* DEBUG */ fprintf(dfile,"%s: ignored: part %d of %d\n",
+				subj, part, part);
 	    free(key);
 	    free(comment);
 	    if (!mark_complete)
@@ -531,18 +528,11 @@ parse(map *parts, FILE *f)
 	valp = (struct file **)map_insert(parts, b);
 	if (*valp == NULL) {
 	    no_file++;
-	    if ((val=(struct file *)malloc(sizeof(struct file))) == NULL) {
-		fprintf(stderr, "%s: malloc failure\n", prg);
-		exit(1);
-	    }
+	    val = (struct file *)xmalloc(sizeof(struct file));
 	    val->tag = key;
 	    val->comment = comment;
 	    val->npart = npart;
-	    if (((val->artno=(long *)malloc(sizeof(long)*npart))
-		 == NULL)) {
-		fprintf(stderr, "%s: malloc failure\n", prg);
-		exit(1);
-	    }
+	    val->artno = (long *)xmalloc(sizeof(long)*npart);
 	    for (i=0; i<npart; i++)
 		val->artno[i] = -1;
 	    val->new=0;
@@ -585,10 +575,7 @@ extract(char *s, regmatch_t m)
 {
     char *t;
 
-    if ((t=(char *)malloc(m.rm_eo-m.rm_so+1)) == NULL) {
-	fprintf(stderr, "%s: malloc failure\n", prg);
-	exit(1);
-    }
+    t = (char *)xmalloc(m.rm_eo-m.rm_so+1);
 
     strncpy(t, s+m.rm_so, m.rm_eo-m.rm_so);
     t[m.rm_eo-m.rm_so] = '\0';
