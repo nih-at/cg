@@ -1,7 +1,7 @@
 binhex support
 multipart/appledouble: better handling if filename same
 
-test cases: multiple uu in one post (w/desc), mime-xuu, uu-in-mime, errors
+test cases: mime-xuu, uu-in-mime, errors
 stream_quot_print can't handle NUL chars (it returns TOK_LINEs)
 vasprintf replacement
 decode(): don't count broken files in return value

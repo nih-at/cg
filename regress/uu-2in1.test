@@ -1,0 +1,5 @@
+return 0
+output testfile.txt testfile.txt
+output uu-2in1.desc.1 testfile.txt.desc
+output test.zip test.zip
+output uu-2in1.desc.2 test.zip.desc

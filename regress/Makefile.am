@@ -1,5 +1,6 @@
 EXTRA_DIST=runtest ${TESTCASES} \
 	test.zip testfile.txt testlatin.txt true.sh xteddy.xbm \
+	uu-2in1.desc.1 uu-2in1.desc.2 uu-2in1.in uu-2in1.log \
 	mime-mixed.desc mime-mixed.in mime-mixed.log \
 	mime-multi.in.1 mime-multi.in.2 mime-multi.log \
 	mime-quot.desc mime-quot.in mime-quot.log \
@@ -9,7 +10,7 @@ EXTRA_DIST=runtest ${TESTCASES} \
 	yenc-single.in yenc-single.log
 
 TESTCASES=mime-mixed.test mime-multi.test mime-quot.test \
-	uu-multi.test uu-short.test \
+	uu-2in1.test uu-multi.test uu-short.test \
 	yenc-single.test yenc-multi.test
 
 check:
