@@ -1,5 +1,5 @@
 /*
-  $NiH: ranges.c,v 1.5 2002/04/10 16:21:18 wiz Exp $
+  $NiH: ranges.c,v 1.6 2002/04/10 16:23:31 wiz Exp $
 
   ranges.c -- internal .newsrc format handling
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -48,7 +48,7 @@ range_init(int lower, int upper, int num)
     r->first = lower;
     r->length = (upper-lower+1+7)/8;
     r->length = r->length*8;
-    r->bitmap=(char *)xmalloc(r->length/8);
+    r->bitmap=(unsigned char *)xmalloc(r->length/8);
 
     memset(r->bitmap, 0, r->length/8);
 

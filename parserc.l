@@ -1,7 +1,7 @@
 /* -*- c -*- */
 
 /*
-  $NiH: parserc.l,v 1.5 2002/04/10 16:23:30 wiz Exp $
+  $NiH: parserc.l,v 1.6 2002/04/15 19:19:41 wiz Exp $
 
   parserc.l -- parse .newsrc
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -25,8 +25,8 @@
 */
 
 %{
-    #include "ranges.h"
-    #include <string.h>
+#include "ranges.h"
+#include <string.h>
     static char *group;
     extern struct range *rcmap;
     extern char *prg;

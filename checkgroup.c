@@ -1,5 +1,5 @@
 /*
-  $NiH: checkgroup.c,v 1.40 2002/04/10 16:21:13 wiz Exp $
+  $NiH: checkgroup.c,v 1.41 2002/04/10 16:23:26 wiz Exp $
 
   checkgroup.c -- main program
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -169,6 +169,7 @@ main(int argc, char **argv)
     header_init();
 
     nntp_host = nntp_user = nntp_pass = NULL;
+    verbose = 1;
 
     opterr = 0;
     while ((c=getopt_long(argc, argv, OPTIONS, options, 0)) != EOF) {

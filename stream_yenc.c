@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_yenc.c,v 1.4 2002/04/10 16:23:37 wiz Exp $
+  $NiH: stream_yenc.c,v 1.5 2002/04/15 18:55:24 wiz Exp $
 
   stream_yenc.c -- extract and decode yenc data
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -199,8 +199,10 @@ yenc_get(struct stream_yenc *this)
 		    this->state = Y_DATA;
 
 		    this->pos += i;
-		    this->crc = crc_update(this->crc, t->line, i);
-		    this->pcrc = crc_update(this->pcrc, t->line, i);
+		    this->crc = crc_update(this->crc,
+					   (unsigned char *)t->line, i);
+		    this->pcrc = crc_update(this->pcrc,
+					    (unsigned char *)t->line, i);
 
 		    return token_set3(&this->st.tok, TOK_DATA, i, t->line);
 
