@@ -1,0 +1,119 @@
+.\" $NiH$
+.\"
+.\" cg.mdoc -- mdoc man page for cg
+.\" Copyright (C) 2002 Dieter Baron and Thomas Klausner
+.\"
+.\" This file is part of cg, a program to assemble and decode binary Usenet
+.\" postings.  The authors can be contacted at <nih@giga.or.at>
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.Dd April 17, 2002
+.Dt CG 1
+.Os
+.Sh NAME
+.Nm cg
+.Nd semi-automatic newsgroup binary downloader
+.Sh SYNOPSIS
+.Nm
+.Op Fl -chmV
+.Op Fl s Ar server
+.Op Fl n Ar rcfile
+.Op Fl u Ar user
+.Op Fl p Ar passwd
+.Ar group ...
+.Sh DESCRIPTION
+.Nm
+is a semi-automatic newsgroup binary downloader.
+It assembles parts based on subject headers and then offers them in an
+editor for the user to choose which files he really wants.
+.Pp
+It supports decoding data in the following formats:
+.Bl -tag -width uuencode -compact -offset indent
+.It MIME
+All of the following are supported: multipart/mixed, message/partial;
+base64, quoted printable, x-uuencode.
+.It uuencode
+Both single- and multi-posting binaries.
+.It yEnc
+Both single- and multi-posting binaries.
+.El
+.Pp
+The following flags are supported:
+.Bl -tag -width 20n -compact -offset indent
+.It Fl c , Fl -mark-complete
+Mark only parts of complete files as read.
+.It Fl h , Fl -help
+Show a short usage.
+.It Fl n , Fl -newsrc Ar FILE
+Use
+.Ar FILE
+as newsrc file.
+.It Fl p , Fl -pass Ar PASS
+Use
+.Ar PASS
+as password for authentication.
+.It Fl s , Fl -server Ar SERVER
+Use
+.Ar SERVER
+as NNTP server.
+.It Fl u , Fl -user Ar USER
+Use
+.Ar USER
+as user for authentication.
+.It Fl V , Fl -version
+Show release information.
+.El
+.Pp
+.Nm
+reads the XOVER record from the news server for each group given on
+the command line and tries to assemble all unread binaries in this
+group.
+Then
+.Nm
+spawns an editor (taken from the
+.Ev VISUAL
+or
+.Ev EDITOR
+environment variables, or defaulting to
+.Xr vi 1 )
+where the user can delete all lines of unwanted binaries.
+After leaving the editor, the binaries corresponding to undelete lines
+are decoded and saved in the current directory.
+.Pp
+Comments in 0-parts or around the encoded data are saved in the file
+.Dq filename.desc ;
+Broken files (problems during decoding, missing parts due to
+expiration) are saved as
+.Dq filename.broken .
+Files are not overwritten, rather
+.Dq .1 ,
+.Dq .2 ,
+\&... is appended to the filename to make it unique.
+.Sh ENVIRONMENT
+The
+.Ev VISUAL
+and
+.Ev EDITOR
+environment variables are honored in this order.
+.Pp
+Set the
+.Ev NNTPSERVER
+environment variable to choose your newsserver (which must support
+xover records), or use the
+.Fl s
+flag.
+.Sh BUGS
+Mail suggestions and bug reports to <nih@giga.or.at>.
