@@ -1,4 +1,3 @@
-install man page, translate to man format when needed
 test cases: mime: unknown CTE, errors
 
 uuencode-base64 support
