@@ -10,7 +10,7 @@ test -z "$CFLAGS" && CFLAGS='-g -Wall' auto_cflags=1
 AC_PROG_CC
 AM_PROG_LEX
 
-# covered by LEX-test above
+# covered by LEX test above
 # AC_DECL_YYTEXT
 
 AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
