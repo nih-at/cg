@@ -1,3 +1,4 @@
+portability: work around missing snprintf, vsnprintf
 man page or similar
 test cases: mime: unknown CTE, errors
 
