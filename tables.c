@@ -2,8 +2,8 @@
 #include "decode.h"
 
 #define IL DEC_ILL
-#define EQ DEC_EQUAL
-#define CO DEC_COLON
+#define EQ DEC_PAD
+#define CO DEC_END
 
 
 

@@ -3,508 +3,174 @@
 #include <errno.h>
 #include <ctype.h>
 
+#include "stream.h"
 #include "decode.h"
 #include "header.h"
 #include "mime.h"
 #include "util.h"
+#include "stream_types.h"
 
 #define BINHEX_TAG "(This file must be converted with BinHex 4.0)"
 
+int decode_binhex(stream *in, out_state *out);
+int decode_file(stream *in, out_state *out, int *tbl);
+int decode_mime(stream *in, out_state *out, struct header *h,
+		struct mime_hdr *ct, struct mime_hdr *te);
 
-enum enctype decode_mime(FILE *fin, FILE **foutp, char **fnamep,
-			 struct header *h);
-enum enctype decode_uu(FILE *fin, FILE *fout, int inp);
-enum enctype decode_base64(FILE *fin, FILE *fout);
-enum enctype decode_binhex(FILE *fin, FILE **foutp, char **fn);
 
 
 
-enum enctype
-decode_file(FILE *fin, FILE **foutp, enum enctype type)
+int
+decode(stream *in, out_state *out)
 {
-    FILE *fdesc;
+    stream *stm, *st2, *st3;
     struct header *h;
-    struct mime_hdr *m;
-    char *s, *line, *descname, b[8192], *filename;
-    int nel, i;
-
-    if ((h=header_read(fin, 1)) == NULL)
-	return enc_eof;
-
-    filename = descname = NULL;
-    fdesc = NULL;
+    struct mime_hdr *m, *m2;
+    token *t, tok;
+    char *s;
     
-    if (type == enc_unknown) {
-	if ((s=header_get(h, HDR_CONTENT_TYPE))) {
-	    if ((m=mime_parse(s)) != NULL) {
-		if (m->type == MIME_CT_MSG_PART) {
-		    /* message/partial */
-		    
-		    mime_free(m);
-		    header_free(h);
-		    if ((h=header_read(fin, 1)) == NULL) {
-			prerror(errfile, "mime message/partial, but no"
-				" second header");
-			return enc_error;
-		    }
-		    type = decode_mime(fin, foutp, NULL, h);
-		    header_free(h);
-		    return type;
-		}
-		else if (m->type == MIME_CT_MSG_MULTI) {
-		    /* XXX: message/multipart */
 
-		mime_free(m);
-		header_free(h);
-		return enc_eof;
-		}
-		mime_free(m);
-	    }
+    while (!stream_eof(in)) {
+	if ((h=header_read(in, out)) == NULL) {
+	    /* XXX: error: no header found */
+	    skip_to(in, TOK_EOA);
+	    continue;
 	}
-	if ((s=header_get(h, HDR_CONTENT_TRENC))) {
-	    if ((m=mime_parse(s)) != NULL) {
-		if (m->type == MIME_TE_BASE64) {
-                     /* mime base64 (single part) */
-		    
-		    mime_free(m);
+	
+	if ((s=header_get(h, HDR_CONTENT_TYPE)) && (m=mime_parse(s))) {
+	    if (m->type == MIME_CT_MSG_PART) {
+		debug(out, "found: MIME message/partial");
+		
+		stm = stream_msg_partial_open(in, m);
+		st2 = stream_article_open(stm);
+		decode(st2, out);
+		stream_close(st2);
+		stream_close(stm);
+	    }
+	    else if (m->type == MIME_CT_MULTI_MIX) {
+		debug(out, "found: MIME multipart/mixed");
+		
+		stm = stream_msg_multi_open(in, m);
 
-		    type = decode_mime(fin, foutp, NULL, h);
-		    header_free(h);
-		    
-		    if (type == enc_base64)
-			return enc_eof;
-		    return type;
+		while (!stream_eof(stm)) {
+		    st2 = stream_section_open(stm, NULL);
+		    st3 = stream_article_open(st2);
+		    decode(st3, out);
+		    stream_close(st3);
+		    stream_close(st2);
 		}
-		mime_free(m);
+
+		stream_close(stm);
+		output(out, TOKEN_EOF);
 	    }
+	    else if ((s=header_get(h, HDR_CONTENT_TRENC))
+		     && (m2=mime_parse(s))) {
+		debug(out, "found: MIME (single part)");
+		
+		decode_mime(in, out, h, m, m2);
+		mime_free(m2);
+	    }
+	    mime_free(m);
 	}
+	    	
+	header_free(h);
 
 	/* non mime */
 
-	nel = 0;
-	while (type == enc_unknown) {
-	    if ((line=getline(fin)) == NULL) {
-		/* no encoded data found */
-		type = enc_nodata;
-		break;
-	    }
-	    if (strncmp(line, "begin ", 6) == 0) {
-		s = line+6 + strspn(line+6, "01234567");
-		if (s != line+6 && *s == ' ') {
-		    /* found uuencoded data */
+	while ((t=stream_get(in))->type == TOK_LINE) {
+	    if (strncmp(t->line, "begin ", 6) == 0) {
+		s = t->line+6 + strspn(t->line+6, "01234567");
+		if (s != t->line+6 && *s == ' ') {
+		    debug(out, "found: uuencoded");
 		    
-		    type = enc_uu;
-		    s = strdup(s+1);
-		    filename = s;
-		    if ((*foutp = fopen_uniq(&filename)) == NULL) {
-			prerror(errnone, "can't create %s: %s", filename,
-				strerror(errno));
-			type = enc_error;
-		    }
-		    else
-			type = decode_uu(fin, *foutp, 1);
-		    if (filename != s)
-			free(s);
+		    output(out, token_set(&tok, TOK_FNAME, s+1));
+		    stm = stream_uuextract_open(in);
+		    decode_file(stm, out, decode_table_uuencode);
+		    output(out, TOKEN_EOF);
+		    stream_close(stm);
 		}
 	    }
-	    else if (strcmp(line, BINHEX_TAG) == 0) {
-		/* found binhexed data */
+	    else if (strcmp(t->line, BINHEX_TAG) == 0) {
+		debug(out, "found: binhex");
 		
-		type = decode_binhex(fin, foutp, &filename);
-	    }
-	    else if (line[0] == 0) {
-		nel++;
+		decode_binhex(in, out);
 	    }
 	    else {
 		/* XXX: ignore BEGIN, CUT HERE, etc. */
-		if (strncmp(line, "BEGIN --- CUT HERE", 18) == 0) {
+		if (strncmp(t->line, "BEGIN --- CUT HERE", 18) == 0) {
 		    /* skip -- line is not interesting */
 		    continue;
 		}
-		if (descname == NULL) {
-		    descname = ".desc";
-		    if ((fdesc=fopen_uniq(&descname)) == NULL)
-			prerror(errnone, "can't create %s: %s", descname,
-			      strerror(errno));
-		}
-		else {
-		    for (i=0; i<nel; i++)
-			putc('\n', fdesc);
-		    nel = 0;
-		}
-		/* XXX: write even if fopen 10 lines above failed ??? */
-		fprintf(fdesc, "%s\n", line);
+
+		output(out, t);
 	    }
-	}
-	if (fdesc) {
-	    if (fclose(fdesc) != 0)
-		prerror(errnone, "can't close %s: %s", descname,
-			strerror(errno));
-	    switch (type) {
-	    case enc_error:
-	    case enc_nodata:
-		remove(descname);
-		break;
-	    default:
-		sprintf(b, "%s.desc", filename);
-		if (rename(descname, b) != 0) {
-		    prerror(errnone, "can't rename %s to %s: %s", descname,
-			    b, strerror(errno));
-		}
-		break;
-	    }
-	}
-	/* XXX: descname not freed */
-	free(filename);
-	return type;
-    }	
-    else {
-	/* not first part */
-	switch (type) {
-	case enc_uu:
-	    type = decode_uu(fin, *foutp, 0);
-	    return type;
-	case enc_binhex:
-	    type = decode_binhex(fin, foutp, NULL);
-	    return type;
-	case enc_base64:
-	    type = decode_base64(fin, *foutp);
-	    return type;
-	default:
-	    prerror(errpart, "can't happen: decode called with invalid"
-		    " encoding type %d", type);
-	    return enc_error;
 	}
     }
+
+    return 0;
 }  
 
 
 
-enum enctype
-decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
+int
+decode_mime(stream *in, out_state *out, struct header *h,
+	    struct mime_hdr *ct, struct mime_hdr *te)
 {
+    token t;
     char *s, *filename;
-    struct mime_hdr *m;
-    int i;
-
-    /* XXX: check cte */
+    struct mime_hdr *cd;
 
     filename = NULL;
 
-    if ((s=header_get(h, HDR_CONTENT_DISP))) {
-	if ((m=mime_parse(s)) != NULL) {
-	    for (i=0; m->option[i].name != NULL; i++)
-		if (m->option[i].name == MIME_CD_FILENAME) {
-		    filename = strdup(m->option[i].value);
-		    break;
-		}
-	    mime_free(m);
-	}
+    if ((s=header_get(h, HDR_CONTENT_DISP)) && ((cd=mime_parse(s)))) {
+	filename = mime_option_get(cd, MIME_CD_FILENAME);
+	mime_free(cd);
     }
-		    
-    if (filename == NULL) {
-	if ((s=header_get(h, HDR_CONTENT_TYPE))) {
-	    if ((m=mime_parse(s)) != NULL) {
-		for (i=0; m->option[i].name != NULL; i++)
-		    if (m->option[i].name == MIME_CT_NAME) {
-			filename = strdup(m->option[i].value);
-			break;
-		    }
-		mime_free(m);
-	    }
-	}
-    }
-
-    s = filename;
-    if (filename != NULL)
-	strncpy(errfilename, filename, ERRFILESIZE);
-    if ((*foutp=fopen_uniq(&filename)) == NULL) {
-	prerror(errnone, "can't create %s: %s", filename,
-		strerror(errno));
-	free(filename);
-	/* XXX: next line okay? */
-	skip_rest(fin);
-	return enc_error;
-    }
-
-    if (s != filename)
-	free(s);
-
-    if (fnamep != NULL)
-	*fnamep = filename;
-    else
-	free(filename);
-    
-    return decode_base64(fin, *foutp);
-}
-
-
-
-enum enctype
-decode_uu(FILE *fin, FILE *fout, int inp)
-{
-    unsigned char *line, b2[2][90], b[8192];
-    int len, len2[2], end, err, i;
-    
-
-    end = len2[0] = 0;
-
-    /* heuristically find uu data -- no 'begin' found */
-    while (!inp) {
-	if ((line=getline(fin)) == NULL) {
-	    prerror(errpart, "no uu data found");
-	    return enc_nodata;
-	}
 	
-	if (line[0] == ' ' || line[0] == '`') {
-	    end = 1;
-	}
-	else if (strcmp(line, "end") == 0) {
-	    if (end == 1) {
-		inp = 1;
-	    }
-	    else
-		len2[0] = 0;
-	}
-	else if (line[0] < '!' || line[0] > 'M') {
-	    end = 0;
-	    len2[0] = 0;
-	}
-	else {
-	    end = 0;
-	    len2[1] = (line[0] - ' ');
-	    if ((strlen(line)-1+3)/4 == (len2[1]+2)/3) {
-		if (len2[0] == 45) {
-		    strcpy(b2[1], line);
-		    inp = 1;
-		}
-		else {
-		    strcpy(b2[0], line);
-		    len2[0] = len2[1];
-		    len2[1] = 0;
-		}
-	    }
-	    else
-		len2[0] = 0;
-	}
+    if (filename == NULL)
+	filename = mime_option_get(ct, MIME_CT_NAME);
+
+    if (te->type == MIME_TE_BASE64) {
+	debug(out, "found: MIME base64");
+
+	output(out, token_set(&t, TOK_FNAME, filename));
+	decode_file(in, out, decode_table_base64);
+	output(out, TOKEN_EOF);
     }
+    else
+	debug(out, "unknown MIME transfer encoding: %s", te->type);
 
-    for (i=0; i<2; i++)
-	if (len2[0] && len2[i]) {
-	    err = decode_line(b, b2[i]+1, decode_table_uuencode);
-	    if (err & DEC_ERRMASK) {
-		prerror(errline, "illegal char in uu data");
-		skip_rest(fin);
-		return enc_error;
-	    }
-	    if (len != 45 && (err & ~DEC_ERRMASK) < len)
-		len = err & ~DEC_ERRMASK;
-	    if (fwrite(b, 1, len2[i], fout) != len2[i]) {
-		/* XXX: handle disc full */
-		prerror(errfile, "write error: %s\n", strerror(errno));
-		skip_rest(fin);
-		return enc_error;
-	    }
-	}
-
-    if (end) {
-	skip_rest(fin);
-	return enc_eof;
-    }
-
-    for (;;) {
-	if ((line=getline(fin)) == NULL)
-	    return enc_uu;
-
-	if (line[0] == 'M') {
-	    if (strlen(line) != 61) {
-		if (iscntrl(line[61]) && line[62] == '\0')
-		    line[61] = '\0';
-		else {
-		    /* XXX: wrong line */
-		    skip_rest(fin);
-		    return enc_uu;
-		}
-	    }
-	    len = 45;
-	}
-	else if (line[0] > ' ' && line[0] < 'M') {
-	    len = line[0] - ' ';
-	    if ((strlen(line)-1+3)/4 != (len+2)/3) {
-		/* XXX: wrong line */
-		skip_rest(fin);
-		return enc_uu;
-	    }
-	}
-	else if (line[0] == ' ' || line[0] == '`') {
-	    continue;
-	}
-	else if (strcmp(line, "end") == 0) {
-	    len = (decode_line(b, NULL, NULL) & ~DEC_ERRMASK);
-
-	    if (len != 0 && fwrite(b, 1, len, fout) != len) {
-		/* XXX: handle disc full */
-		prerror(errfile, "write error: %s\n", strerror(errno));
-		skip_rest(fin);
-		return enc_error;
-	    }
-		
-	    skip_rest(fin);
-	    return enc_eof;
-	}
-	else {
-	    /* XXX: wrong line */
-	    skip_rest(fin);
-	    return enc_uu;
-	}
-
-	err = decode_line(b, line+1, decode_table_uuencode);
-	if (err & DEC_ERRMASK) {
-	    prerror(errline, "illegal character in uu data");
-	    skip_rest(fin);
-	    return enc_error;
-	}
-	if (len != 45 && (err & ~DEC_ERRMASK) < len)
-	    len = err & ~DEC_ERRMASK;
-	if (fwrite(b, 1, len, fout) != len) {
-	    /* XXX: handle disc full */
-	    prerror(errfile, "write error: %s\n", strerror(errno));
-	    skip_rest(fin);
-	    return enc_error;
-	}
-    }
-}
-
-
-
-enum enctype
-decode_base64(FILE *fin, FILE *fout)
-{
-    char *line;
-    unsigned char b[8192];
-    int n, err;
-    
-    while ((line=getline(fin))) {
-	err = decode_line(b, line, decode_table_base64);
-	n = err & ~DEC_ERRMASK;
-
-
-	if (fwrite(b, 1, n, fout) != n) {
-	    /* XXX: handle disc full */
-	    prerror(errfile, "write error: %s\n", strerror(errno));
-	    skip_rest(fin);
-	    return enc_error;
-	}
-	if (err & DEC_ERRMASK) {
-	    if (err & DEC_EOF) {
-		skip_rest(fin);
-		return enc_eof;
-	    }
-
-	    skip_rest(fin);
-	    /* XXX: error message */
-	    return enc_error;
-	}
-    }
-
-    return enc_base64;
-}
-
-
-
-enum enctype
-decode_binhex(FILE *fin, FILE **foutp, char **fn)
-{
-
-    if (!foutp) {
-	/* first part */
-    }
-    else {
-	/* other part */
-    }
-
-    skip_rest(fin);
-    return enc_binhex;
+    return 0;
 }
 
 
 
 int
-decode_line(unsigned char *buf, unsigned char *line, int *table)
+decode_file(stream *in, out_state *out, int *tbl)
 {
-    static int rest, no;
-    int i, b;
+    stream *stm;
 
-    if (line == NULL) {
-	switch (no) {
-	case 0:
-	    i = 0;
-	    break;
-	case 1:
-	    i = DEC_INCOMPLETE;
-	    break;
-	case 2:
-	    buf[0] = (rest >> 4) & 0xff;
-	    i = 1 | DEC_INCOMPLETE;
-	    break;
-	case 3:
-	    buf[0] = (rest >> 10) & 0xff;
-	    buf[1] = (rest >> 2) & 0xff;
-	    i = 2 | DEC_INCOMPLETE;
-	    break;
-	}
-	no = rest = 0;
-	return i;
-    }
-    
-    i = 0;
+    stm = stream_decode_open(in, tbl);
+    copy_stream(stm, out);
+    stream_close(stm);
 
-    while (*line) {
-	b = table[*(line++)];
-	if (b < 0) {
-	    switch (b) {
-	    case DEC_COLON:
-		if (no == 0) {
-		    rest = no = 0;
-		    return i | DEC_EOF;
-		}
-		else {
-		    rest = no = 0;
-		    return i | DEC_EOF | DEC_ILLEGAL;
-		}
-	    case DEC_EQUAL:
-		switch (no) {
-		case 0:
-		case 1:
-		    rest = no = 0;
-		    return i | DEC_ILLEGAL;
-		case 2:
-		    buf[i++] = rest >> 4;
-		    break;
-		case 3:
-		    buf[i++] = rest >> 10;
-		    buf[i++] = (rest>>2) & 0xff;
-		    break;
-		}
-		rest = no = 0;
-		return i | DEC_EOF;
-	    default:
-		rest = no = 0;
-		return i | DEC_ILLEGAL;
-	    }
-	}
-
-	rest = (rest << 6) | b;
-	no++;
-
-	if (no == 4) {
-	    buf[i++] = rest >> 16;
-	    buf[i++] = (rest>>8) & 0xff;
-	    buf[i++] = (rest & 0xff);
-	    rest = no = 0;
-	}
-	
-    }
-
-    return i;
+    return 0;
 }
+
+
+
+int
+decode_binhex(stream *in, out_state *out)
+{
+    token tok;
+    
+    /* XXX: extract file name */
+    /* XXX: handle multi-part */
+
+    output(out, token_set(&tok, TOK_FNAME, NULL));
+    decode_file(in, out, decode_table_binhex);
+    output(out, TOKEN_EOF);
+
+    return 0;
+}
+

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -7,14 +8,19 @@ void _mime_lws(char **s);
 symbol _mime_token(char **s);
 char * _mime_value(char **s);
 
-#define MIME_MAX 5
+#define MIME_MAX 10
 
 char *mime_string[MIME_MAX] = {
     "message/partial",
     "message/multipart",
+    "multipart/mixed",
     "base64",
     "filename",
-    "name"
+    "name",
+    "boundary",
+    "id",
+    "number",
+    "total"
 };
 
 symbol mime_sym[MIME_MAX];
@@ -183,4 +189,18 @@ _mime_value(char **s)
 	*s = p;
 	return r;
     }
+}
+
+
+
+char *
+mime_option_get(struct mime_hdr *m, symbol name)
+{
+    int i;
+
+    for (i=0; m->option[i].name; i++)
+	if (m->option[i].name == name)
+	    return m->option[i].value;
+    
+    return NULL;
 }

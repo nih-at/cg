@@ -1,3 +1,9 @@
+#ifndef _HAD_DECODE_H
+#define _HAD_DECODE_H
+
+#include "stream.h"
+#include "output.h"
+
 enum enctype {
     enc_unknown, enc_error, enc_eof, enc_nodata,
     enc_uu, enc_binhex, enc_base64
@@ -9,8 +15,8 @@ enum enctype {
 #define DEC_ILLEGAL	0x4000
 
 #define DEC_ILL		-1
-#define DEC_COLON	-2
-#define DEC_EQUAL	-3
+#define DEC_END		-2
+#define DEC_PAD		-3
 
 extern int decode_table_base64[256];
 extern int decode_table_uuencode[256];
@@ -18,6 +24,6 @@ extern int decode_table_binhex[256];
 
 
 
-enum enctype decode_file(FILE *fin, FILE **foutp, enum enctype type);
-int decode_line(unsigned char *buf, unsigned char *line, int *table);
+int decode(stream *in, out_state *out);
 
+#endif /* decode.h */

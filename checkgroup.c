@@ -9,6 +9,8 @@
 #include <getopt.h>
 #include <regex.h>
 #include <map.h>
+
+#include "stream.h"
 #include "ranges.h"
 #include "util.h"
 #include "decode.h"
@@ -117,7 +119,7 @@ long complete (map *parts, long no_file, struct file **todec);
 long *choose (struct file **todec, long no_complete, char *group);
 int parse(map *parts, FILE *f);
 char *extract(char *s, regmatch_t m);
-int decode(struct file *value);
+int do_decode(struct file *value);
 int nntp_resp(void);
 int nntp_put(char *fmt, ...);
 int writerc(char *group);
@@ -323,7 +325,7 @@ main(int argc, char **argv)
 	gute=0;
 	
 	for (j=0; toget[j]!=-1;j++) {
-	    if (save_and_quit || (decode(todec[toget[j]]) == 0)) {
+	    if (save_and_quit || (do_decode(todec[toget[j]]) == 0)) {
 		for (k=0; k<todec[toget[j]]->npart; k++)
 		    range_clear(rcmap, todec[toget[j]]->artno[k]);
 		if (todec[toget[j]]->part0 != -1)
@@ -683,8 +685,10 @@ save_comment(FILE *fin)
 
 
 int
-decode(struct file *val)
+do_decode(struct file *val)
 {
+    /* XXX: adapt to new decode routines */
+#if 0
     enum enctype type, oldtype;
     FILE *fout;
     char b[60];
@@ -767,6 +771,7 @@ decode(struct file *val)
     errfilename[0] = '\0';
     errpartno = 0;
     return 1;
+#endif
 }
 
 

@@ -1,4 +1,10 @@
+#ifndef _HAD_UTIL_H
+#define _HAD_UTIL_H
+
 #include <stdlib.h>
+
+#include "decode.h"
+#include "stream.h"
 
 #define BUFSIZE 8192
 #define ERRFILESIZE 8192
@@ -10,10 +16,16 @@ enum errtype {errnone, errfile, errpart, errline};
 
 
 
-void *xmalloc(size_t size);
-void *xrealloc(void *p, size_t size);
+void copy_stream(stream *in, out_state *out);
+void debug(out_state *out, char *fmt, ...);
 char *expand(char *path);
-char *getline(FILE *f);
 FILE *fopen_uniq(char **s);
+char *getline(FILE *f);
 void prerror(enum errtype, char *fmt, ...);
 void skip_rest(FILE *f);
+token *skip_to(stream *in, enum token_type type);
+void *xmalloc(size_t size);
+void *xrealloc(void *p, size_t size);
+char *xstrdup(char *s);
+
+#endif /* util.h */

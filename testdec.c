@@ -1,6 +1,10 @@
-#include <err.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "decode.h"
+#include "header.h"
+#include "mime.h"
+#include "stream_types.h"
 #include "util.h"
 
 char *prg;
@@ -8,35 +12,21 @@ char *prg;
 int
 main(int argc, char *argv[])
 {
-    FILE *in, *out;
-    int i;
-    char buf[100];
-    enum enctype type;
+    stream *stm;
+    out_state *out;
+    int ret;
 
     prg = argv[0];
 
-    i = 1;
-    while (i < argc) {
-	in = fopen(argv[i], "r");
-	snprintf(buf, sizeof(buf), "OUTPUT.%03d", i);
+    header_init();
+    mime_init();
 
-	if (in == NULL) {
-	    warn("can't open input file `%s'", argv[i]);
-	}
-	else {
-	    /* init */
-	    decode_line(buf, NULL, NULL);
-	    type = enc_unknown;
-	    out = NULL;
-	    type = decode_file(in, &out, type);
+    stm = stream_fcat_open(argc-1, argv+1);
+    out = output_new();
 
-	    if (out)
-		fclose(out);
+    ret = decode(stm, out) ? 1 : 0;
 
-	    printf("decoded `%s', output: %d\n", argv[i], type);
-	}
-	i++;
-    }
+    output_free(out);
 
-    return 0;
+    exit(ret);
 }

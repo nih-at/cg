@@ -9,6 +9,7 @@
 #include <pwd.h>
 
 #include "util.h"
+#include "stream.h"
 
 #define HOUSENUMBER 102400
 
@@ -211,4 +212,62 @@ skip_rest(FILE *f)
 {
     while (getline(f) != NULL)
 	;
+}
+
+
+
+char *
+xstrdup(char *s)
+{
+    char *t;
+
+    if (s == NULL)
+	return NULL;
+
+    t = xmalloc(strlen(s)+1);
+    strcpy(t, s);
+
+    return t;
+}
+
+
+
+token *
+skip_to(stream *in, enum token_type type)
+{
+    token *t;
+
+    while ((t=stream_get(in))->type != TOK_EOF && t->type != type)
+	;
+
+    return t;
+}
+
+
+
+void
+copy_stream(stream *in, out_state *out)
+{
+    token *t;
+
+    while ((t=stream_get(in))->type != TOK_EOF)
+	output(out, t);
+}
+
+
+
+void
+debug(out_state *out, char *fmt, ...)
+{
+    token t;
+    char *s;
+    va_list argp;
+
+    va_start(argp, fmt);
+    vasprintf(&s, fmt, argp);
+    va_end(argp);
+
+    output(out, token_set(&t, TOK_DEBUG, s));
+
+    free(s);
 }

@@ -1,3 +1,8 @@
+#ifndef _HAD_HEADER_H
+#define _HAD_HEADER_H
+
+#include "output.h"
+#include "stream.h"
 #include "symbol.h"
 
 struct header {
@@ -18,10 +23,10 @@ extern symbol hdr_sym[];
 
 
 
-void header_init(void);
-
-struct header *header_read(FILE *f, int dotp);
+struct header *header_read(stream *stm, out_state *out);
 void header_free(struct header *h);
 char *header_get(struct header *header, symbol field);
+void header_init(void);
 int header_print(FILE *f, struct header *header);
 
+#endif /* header.h */
