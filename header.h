@@ -1,6 +1,7 @@
 #include "symbol.h"
 
 struct header {
+    strucht header *next;
     symbol type;
     char *value;
 };
@@ -30,6 +31,7 @@ symbol hdr_sym[HDR_MAX];
 int header_init(void);
 
 struct header *header_read(FILE *f, int dotp);
-int header_print(FILE *f, struct header *header);
+void header_free(struct header *h);
 char *header_get(struct header *header, symbol field);
+int header_print(FILE *f, struct header *header);
 
