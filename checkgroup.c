@@ -187,12 +187,9 @@ main(int argc, char **argv)
     }
 
     nntp_put("mode reader");
-    nntp_resp();
 
     for (i=optind;i<argc;i++) {
-	nntp_put("group %s", argv[i]);
-
-	if (nntp_resp() != 211) {
+	if (nntp_put("group %s", argv[i]) != 211) {
 	    fprintf(stderr, "%s: group %s failed: %s\n", prg, argv[i],
 		    nntp_response);
 	    continue;
@@ -218,9 +215,7 @@ main(int argc, char **argv)
 	
 	readrc(argv[i], lower, upper, no_art);
 	
-	nntp_put("xover %ld-%ld", lower, upper);
-
-	if (nntp_resp() != 224) {
+	if (nntp_put("xover %ld-%ld", lower, upper) != 224) {
 	    fprintf(stderr, "%s: xover for group %s failed: %s\n", prg,
 		    argv[i], nntp_response);
 	    continue;
@@ -591,8 +586,7 @@ decode(struct file *val)
     filename = NULL;
 
     for (i=0; i<val->npart; i++) {
-	nntp_put("article %ld", val->artno[i]);
-	if (nntp_resp() != 220) {
+	if (nntp_put("article %ld", val->artno[i]) != 220) {
 	    fprintf(stderr, "%s: article %ld failed: %s\n",
 		    prg, val->artno[i], nntp_response);
 	    return 0;
@@ -646,23 +640,24 @@ decode(struct file *val)
 int
 nntp_put(char *fmt, ...)
 {
-	char buf[BUFSIZE];
-	va_list argp;
+    int ret;
+    char buf[BUFSIZE];
+    va_list argp;
+    
+    if (conout == NULL)
+	return -1;
+    
+    va_start(argp, fmt);
+    vsprintf(buf, fmt, argp);
+    va_end(argp);
+    
+    fprintf(conout, "%s\r\n", buf);
+    
+    if (fflush(conout) || ferror(conout))
+	return -1;
 
-	if (conout == NULL)
-	    return -1;
-
-	va_start(argp, fmt);
-	vsprintf(buf, fmt, argp);
-	va_end(argp);
-
-	fprintf(conout, "%s\r\n", buf);
-
-	if (fflush(conout) || ferror(conout))
-	    return -1;
-
-	return 0;
-}	
+    return nntp_resp();
+}
 
 
 
