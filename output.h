@@ -7,7 +7,13 @@ struct out_state {
     int infile;
     int warned;
     int ndata;
+    int do_debug;
+    int do_fdesc;
+    char tempdesc[64];
+    int fdescnl;
     FILE *fout;
+    FILE *debug;
+    FILE *fdesc;
 };
 
 typedef struct out_state out_state;
