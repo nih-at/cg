@@ -54,7 +54,7 @@ cat_get(struct stream_cat *this)
     int ret;
 
     if (this->st.source == NULL) {
-	if (this->i >= this->file->npart) {
+	if (this->i > this->file->npart) {
 	    close_current(this);
 	    return TOKEN_EOF;
 	}
