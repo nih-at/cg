@@ -1,5 +1,5 @@
 * check if errfilename is set 
-
+* skip rest of stream when filename can't be created (e.g. "xy on 7/8/99.mp3")
 
 * better error messages (partno, lineno, etc.)
 * remove/move broken files

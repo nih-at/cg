@@ -128,6 +128,7 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type)
 			putc('\n', fdesc);
 		    nel = 0;
 		}
+		/* XXX: write even if fopen 10 lines above failed ??? */
 		fprintf(fdesc, "%s\n", line);
 	    }
 	}
@@ -217,6 +218,8 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
 	prerror(errnone, "can't create %s: %s", filename,
 		strerror(errno));
 	free(filename);
+	/* XXX: next line okay? */
+	skip_rest(fin);
 	return enc_error;
     }
 
