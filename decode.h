@@ -12,9 +12,9 @@ enum enctype {
 #define DEC_COLON	-2
 #define DEC_EQUAL	-3
 
-int decode_table_base64[256];
-int decode_table_uuencode[256];
-int decode_table_binhex[256];
+extern int decode_table_base64[256];
+extern int decode_table_uuencode[256];
+extern int decode_table_binhex[256];
 
 
 
