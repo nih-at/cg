@@ -6,14 +6,11 @@ IRIX64		6.2	n
 NetBSD/i386 	1.4.2	y	10
 NetBSD/i386	1.5.2	y	10
 OSF1		4.0	n
-Solaris		2.7	y*	10
+Solaris		2.7	y	10
 SUSE Linux	fsmat	y	10
 
 IRIX
-	compile failure: zlib.h not found
+	compile failure: missing snprintf, vsnprintf
 
 OSF1 4.0
 	compile failure: missing snprintf, vsnprintf
-
-Solaris
-	compile problem: -R/usr/local/include needed
