@@ -145,24 +145,27 @@ _mime_value(char **s)
     
     if (**s == '"') {
 	/* quoted string */
+	p = *s;
 	for (;;) {
-	    switch (**(++s)) {
+	    switch (*(++p)) {
 	    case '"':
-		s++;
+		p++;
 		/* fallthrough */
 	    case '\0':
 		b[i++]='\0';
+		*s = p;
 		return strdup(b);
 	    case '\\':
-		if (**s == '\0') {
+		if (*p == '\0') {
 		    b[i++]='\0';
+		    *s = p;
 		    return strdup(b);
 		}
 		else
-		    b[i++]=**(++s);
+		    b[i++]=*(++p);
 		break;
 	    default:
-		b[i++]=**s;
+		b[i++]=*p;
 		break;
 	    }
 	}
