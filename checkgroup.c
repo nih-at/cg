@@ -249,6 +249,17 @@ main(int argc, char **argv)
 	}
 
 	toget=choose(todec, no_complete, argv[i]);
+	/* XXX: The lines below are just a patch -- better handling ??*/
+	if (toget == NULL) {       /* error handling */
+	    for (j=0; j<no_complete; j++) {
+		free(todec[j]->comment);
+		free(todec[j]->tag);
+		free(todec[j]->artno);
+		free(todec[j]);
+	    }	    
+	    free(todec);
+	    continue;
+	}
 	
 	gute=0;
 	
