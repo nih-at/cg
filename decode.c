@@ -47,8 +47,8 @@ decode(stream *in, out_state *out)
 		stream_close(st2);
 		stream_close(stm);
 	    }
-	    else if (m->type == MIME_CT_MULTI_MIX) {
-		debug(out, "found: MIME multipart/mixed");
+	    else if (strncasecmp(m->type, "multipart/", 10) == 0) {
+		debug(out, "found: MIME %s", m->type);
 		
 		stm = stream_msg_multi_open(in, m);
 
