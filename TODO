@@ -2,7 +2,8 @@
 * decoder
 * user interface
 * newsreader
-* filesize *2
+* filesize (parts same size)
 * leftmost " - "
 * NNTPSERVER from environment
-* .decoderc-> ~/.newsrc
+* xref handling
+* [x of y]

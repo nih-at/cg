@@ -1,6 +1,5 @@
 /* -*- fundamental -*- */
 %{
-
     #include "ranges.h"
     #include <string.h>
     static char *group;

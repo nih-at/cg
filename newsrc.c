@@ -54,6 +54,7 @@ writerc(char *group)
 
     if (modified == 0) {
 	sprintf(b, "%s~", newsrc);
+	unlink(b);
 	if (link(newsrc, b) < 0) {
 	    fprintf(stderr, "%s: can't backup newsrc `%s' (left unchanged): "
 		    "%s\n",
@@ -92,13 +93,13 @@ writerc(char *group)
 	    while (b[strlen(b)-1] != '\n') {
 		if (!bool)
 		    fputs(b, copy);
-		if (fgets (b, BUFSIZE, rc) != NULL)
+		if (fgets (b, BUFSIZE, rc) == NULL)
 		    break;
 	    }
 	    if (!bool)
 		fputs(b, copy);
 	    
-	    if (found == 1) {
+	    if ((found == 1) && bool) {
 		writegrouptorc(copy, compstr);
 	    }
 	    

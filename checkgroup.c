@@ -22,24 +22,26 @@ struct file {
     char *tag;
     char *comment;
     int npart;
-    long *msgid;
+    long *artno;
     int new;
+    long size;
 };
 
-#define MAX_PATTERNS 3
+#define MAX_PATTERNS 4
 
-char *spattern[MAX_PATTERNS] = {
+char *spattern[MAX_PATTERNS] = {  /* ! ( ! */
     "(.*) - (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])]", /* "c - n ()" */
     "- (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])] *(.*)", /* "- n () c" mac groups */
-    "(.*)()[[(]([0-9]*)/([0-9]*)[])]" /* "n ()" desperate */
+    "(.*)()[[(]([0-9]*)/([0-9]*)[])]",            /* "n ()" desperate */
+    "(.*)[[(]([0-9]+) of ([0-9]+)[])](.*)"            /* "n[x of y]c" */
 };
 
 regex_t pattern[MAX_PATTERNS]; 
 
-int pat_key[MAX_PATTERNS] =     { 2, 1, 1 };
-int pat_comment[MAX_PATTERNS] = { 1, 4, 2 };
-int pat_part[MAX_PATTERNS] =    { 3, 2, 3 };
-int pat_npart[MAX_PATTERNS] =   { 4, 3, 4 };
+int pat_key[MAX_PATTERNS] =     { 2, 1, 1, 1 };
+int pat_comment[MAX_PATTERNS] = { 1, 4, 2, 4 };
+int pat_part[MAX_PATTERNS] =    { 3, 2, 3, 2 };
+int pat_npart[MAX_PATTERNS] =   { 4, 3, 4, 3 };
 
 char *prg;
 char *nntp_response;
@@ -243,7 +245,7 @@ main(int argc, char **argv)
 	for (j=0; j<no_complete; j++) {
 	    free(todec[j]->comment);
 	    free(todec[j]->tag);
-	    free(todec[j]->msgid);
+	    free(todec[j]->artno);
 	    free(todec[j]);
 	}	    
 	free(toget);
@@ -267,7 +269,6 @@ long
 complete (map *parts, long no_file, struct file **todec)
 {
     long i,j;
-    int old;
     map_iter *iterate;
     char *key;
     struct file *value;
@@ -278,23 +279,23 @@ complete (map *parts, long no_file, struct file **todec)
     }
 
     for (i=0; map_next(iterate, (void *)&key, (void *)&value) == 0; ) {
-	if (new) {
+	if (value->new) {
 	    for (j=0; j<value->npart; j++) {
-		if (value->msgid[j] == -1)
+		if (value->artno[j] == -1)
 		    break;
 	    }
 	}
-	if ((j == value->npart) && new) {
+	if ((j == value->npart) && value->new) {
 	    todec[i++]=value;
 	    if (mark_complete) {
 		for (j=0; j<value->npart; j++)
-		    range_set(rcmap, value->msgid[j]);
+		    range_set(rcmap, value->artno[j]);
 	    }
 	}
 	else {
 	    free(value->comment);
 	    free(value->tag);
-	    free(value->msgid);
+	    free(value->artno);
 	    free(value);
 	}
     }
@@ -323,8 +324,8 @@ choose (struct file **todec, long no_complete, char *group)
     }
 
     for (i=0; i<no_complete; i++) {
-	/* XXX Filesize */
-	fprintf(temp,"%5ld %.80s --- %s\n", i+1, todec[i]->tag,
+	fprintf(temp,"%5ld [%5ldk] %.80s --- %s\n", i+1,
+		(todec[i]->size+1023)/1024, todec[i]->tag,
 		todec[i]->comment);
     }
 
@@ -382,7 +383,7 @@ parse(map *parts, FILE *f)
     char *key, *s, *subj, *comment;
     char b[8192];
     int npart, part, i, end, l;
-    long msgid, no_file;
+    long artno, no_file, size;
 
     end = 0;
     no_file = 0;
@@ -402,12 +403,29 @@ parse(map *parts, FILE *f)
 	}
 
 	s = strtok(b, "\t");
-	msgid = strtol(s, NULL, 10);
+	artno = strtol(s, NULL, 10);
 
 	subj = strtok(NULL, "\t");
 
-	/* the rest is egal */
+	/* auth = */  strtok(NULL, "\t");
+	/* date = */  strtok(NULL, "\t");
+	/* msgid = */ strtok(NULL, "\t");
 
+	s = strtok(NULL, "\t");
+	while (s != NULL && s[0] == '<')
+	    s = strtok(NULL, "\t");
+	if (s == NULL) {
+	    /* DEBUG */ fprintf(dfile,
+				"%s: xover for article %ld is weird\n",
+				prg, artno);
+	    size = 0;
+	}
+	else {
+	    size = strtol(s, NULL, 10);
+	    /* lines = */ strtok(NULL, "\t");
+	    /* xref = */ strtok(NULL, "\t");
+	}
+	
 	for (i=0; i<MAX_PATTERNS; i++) {
 	    if (regexec(&pattern[i], subj, 6, match, 0) == 0)
 		break;
@@ -432,7 +450,7 @@ parse(map *parts, FILE *f)
 	    free(key);
 	    free(comment);
 	    if (!mark_complete)
-		range_set(rcmap, msgid);
+		range_set(rcmap, artno);
 	    continue;
 	}
 
@@ -441,7 +459,7 @@ parse(map *parts, FILE *f)
 	    free(key);
 	    free(comment);
 	    if (!mark_complete)
-		range_set(rcmap, msgid);
+		range_set(rcmap, artno);
 	    continue;
 	}
 
@@ -456,14 +474,15 @@ parse(map *parts, FILE *f)
 	    val->tag = key;
 	    val->comment = comment;
 	    val->npart = npart;
-	    if (((val->msgid=(long *)malloc(sizeof(long)*npart))
+	    if (((val->artno=(long *)malloc(sizeof(long)*npart))
 		 == NULL)) {
 		fprintf(stderr, "%s: malloc failure\n", prg);
 		exit(1);
 	    }
 	    for (i=0; i<npart; i++)
-		val->msgid[i] = -1;
+		val->artno[i] = -1;
 	    val->new=0;
+	    val->size = 0;
 
 	    *valp = val;
 	}
@@ -473,20 +492,22 @@ parse(map *parts, FILE *f)
 	    free(comment);
 	}
 
-	if (val->msgid[part-1] != -1 ) {
+	if (val->artno[part-1] != -1 ) {
 	    /* DEBUG  fprintf(dfile, "%s: ignored: duplicate part %d\n",
 	       val->tag, part); */
 	    if (!mark_complete)
-		range_set(rcmap, msgid);
+		range_set(rcmap, artno);
 	    continue;
 	}
 
-	val->msgid[part-1] = msgid;
-	if (!range_isin(rcmap, msgid))
+	val->artno[part-1] = artno;
+	if (!range_isin(rcmap, artno))
 	    val->new=1;
 
+	val->size += 3*size/4;
+	
 	if (!mark_complete)
-	    range_set(rcmap, msgid);
+	    range_set(rcmap, artno);
 
     }
     
@@ -530,14 +551,14 @@ decode(struct file *val)
     }
 
     for (i=0; i<val->npart; i++) {
-	nntp_put("article %ld", val->msgid[i]);
+	nntp_put("article %ld", val->artno[i]);
 	if (nntp_resp() != 220) {
 	    fprintf(stderr, "%s: article %ld failed: %s\n",
-		    prg, val->msgid[i], nntp_response);
+		    prg, val->artno[i], nntp_response);
 	    return 0;
 	}
 
-	sprintf(b, ".decode-%ld", val->msgid[i]);
+	sprintf(b, ".decode-%ld", val->artno[i]);
 	if ((f=fopen(b, "w")) == NULL) {
 	    fprintf(stderr, "%s: can't create %s: %s\n",
 		    prg, b, strerror(errno));

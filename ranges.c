@@ -93,6 +93,17 @@ range_fill(struct range *r, int lower, int upper, int bit)
 {
     int first, length, loff, roff;
 
+    if (upper < lower) {
+	lower ^= upper;
+	upper ^= lower;
+	lower ^= upper;
+    }
+
+    if (bit && upper < r->first)
+	return;
+    if (!bit && lower >= r->first+r->length)
+	return;
+
     if (lower < r->first) {
 	if (bit)
 	    lower = r->first;
