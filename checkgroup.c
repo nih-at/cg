@@ -1,5 +1,5 @@
 /*
-  $NiH: checkgroup.c,v 1.44 2002/04/17 17:46:28 dillo Exp $
+  $NiH: checkgroup.c,v 1.45 2002/05/13 16:27:28 wiz Exp $
 
   checkgroup.c -- main program
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -432,8 +432,9 @@ choose (struct file **todec, long no_complete, char *group)
     sprintf(fname, "00-%s-%d", group, (int)getpid());
 
     if ((temp=fopen(fname, "w")) == NULL) {
-	fprintf(stderr,"%s: tempfile failure: Und Tschuess!\n", prg);
-	exit(2);
+	fprintf(stderr,"%s: cannot create temp file `%s': %s\n",
+		prg, fname, strerror(errno));
+	return NULL;
     }
 
     for (i=0; i<no_complete; i++) {
