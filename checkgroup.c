@@ -23,6 +23,7 @@ struct file {
     char *comment;
     int npart;
     long *msgid;
+    int new;
 };
 
 #define MAX_PATTERNS 3
@@ -47,6 +48,7 @@ struct range *rcmap;
 
 char *newsrc;
 #define DEFAULT_NEWSRC  "~/.newsrc"
+int mark_complete;
 
 FILE *conin, *conout, *dfile;
 
@@ -72,22 +74,23 @@ char help_string[] = "\
 \n\
   -m, --mac             call hexbin decoder\n\
   -n, --newsrc FILE     use FILE as newsrc file\n\
+  -c, --mark-complete   mark only parts of complete files as read\n\
 \n\
 Report bugs to <cg-bugs@giga.or.at>.\n";
 
-#define OPTIONS	"hVmn:"
+#define OPTIONS	"hVmn:c"
 
 struct option options[] = {
-    { "help",      0, 0, 'h' },
-    { "version",   0, 0, 'V' },
-    { "mac",       0, 0, 'm' },
-    { "newsrc",    1, 0, 'n' },
-    { NULL,        0, 0, 0   }
+    { "help",          0, 0, 'h' },
+    { "version",       0, 0, 'V' },
+    { "mac",           0, 0, 'm' },
+    { "newsrc",        1, 0, 'n' },
+    { "mark-complete", 0, 0, 'c' },
+    { NULL,            0, 0, 0   }
 };
 
 
 /* extern */
-int parserc (char *gname, FILE *rc, long lo, long hi, long no_arts);
 int sopen(char *host, char *service);
 
 /* intern */
@@ -116,6 +119,7 @@ main(int argc, char **argv)
     prg = argv[0];
 
     newsrc = DEFAULT_NEWSRC;
+    mark_complete = 0;
 
     opterr = 0;
     while ((c=getopt_long(argc, argv, OPTIONS, options, 0)) != EOF) {
@@ -125,6 +129,9 @@ main(int argc, char **argv)
 	    break;
 	case 'n':
 	    newsrc = optarg;
+	    break;
+	case 'c':
+	    mark_complete = 0;
 	    break;
 
 	case 'h':
@@ -271,18 +278,17 @@ complete (map *parts, long no_file, struct file **todec)
     }
 
     for (i=0; map_next(iterate, (void *)&key, (void *)&value) == 0; ) {
-	old=1;
-	for (j=0; j<value->npart; j++) {
-	    if (value->msgid[j] == -1)
-		break;
-	    else
-		if (range_isin(rcmap, value->msgid[j]) == 0)
-		    old=0;
-	}
-	if ((j == value->npart) && (old == 0)) {
-	    todec[i++]=value;
+	if (new) {
 	    for (j=0; j<value->npart; j++) {
-		range_set(rcmap, value->msgid[j]);
+		if (value->msgid[j] == -1)
+		    break;
+	    }
+	}
+	if ((j == value->npart) && new) {
+	    todec[i++]=value;
+	    if (mark_complete) {
+		for (j=0; j<value->npart; j++)
+		    range_set(rcmap, value->msgid[j]);
 	    }
 	}
 	else {
@@ -411,7 +417,7 @@ parse(map *parts, FILE *f)
 	    /* DEBUG */	fprintf(dfile, "%s\n", subj);
 	    continue;
 	}
-	    
+
 	key = extract(subj, match[pat_key[i]]);
 	comment = extract(subj, match[pat_comment[i]]);
 	s = extract(subj, match[pat_part[i]]);
@@ -425,6 +431,8 @@ parse(map *parts, FILE *f)
 	    /* XXX save info */
 	    free(key);
 	    free(comment);
+	    if (!mark_complete)
+		range_set(rcmap, msgid);
 	    continue;
 	}
 
@@ -432,6 +440,8 @@ parse(map *parts, FILE *f)
 	    /* DEBUG */ fprintf(dfile,"%s: ignored: number of parts zero\n", subj);
 	    free(key);
 	    free(comment);
+	    if (!mark_complete)
+		range_set(rcmap, msgid);
 	    continue;
 	}
 
@@ -453,6 +463,7 @@ parse(map *parts, FILE *f)
 	    }
 	    for (i=0; i<npart; i++)
 		val->msgid[i] = -1;
+	    val->new=0;
 
 	    *valp = val;
 	}
@@ -465,10 +476,17 @@ parse(map *parts, FILE *f)
 	if (val->msgid[part-1] != -1 ) {
 	    /* DEBUG  fprintf(dfile, "%s: ignored: duplicate part %d\n",
 	       val->tag, part); */
+	    if (!mark_complete)
+		range_set(rcmap, msgid);
 	    continue;
 	}
 
 	val->msgid[part-1] = msgid;
+	if (!range_isin(rcmap, msgid))
+	    val->new=1;
+
+	if (!mark_complete)
+	    range_set(rcmap, msgid);
 
     }
     

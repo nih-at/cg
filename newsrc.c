@@ -10,6 +10,7 @@
 
 extern char *newsrc;
 
+extern int parserc (char *gname, FILE *rc, long lo, long hi, long no_arts);
 static void writegrouptorc (FILE *copy, char *compstr);
 
 
@@ -45,9 +46,22 @@ readrc(char *group, long lower, long upper, long no_art)
 int
 writerc(char *group)
 {
+    static int modified = 0;
+    
     FILE *rc, *copy;
     int bool, found;
     char *temp, b[BUFSIZE], *compstr;
+
+    if (modified == 0) {
+	sprintf(b, "%s~", newsrc);
+	if (link(newsrc, b) < 0) {
+	    fprintf(stderr, "%s: can't backup newsrc `%s' (left unchanged): "
+		    "%s\n",
+		    prg, newsrc, strerror(errno));
+	    return 1;
+	}
+	modified = 1;
+    }
 
     if ((rc=fopen(newsrc, "r")) == NULL) {
 	if (errno != ENOENT)
