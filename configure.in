@@ -17,7 +17,9 @@ AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
 AC_REPLACE_FUNCS(hstrerror)
 
 # we need zlib for CRC32
-AC_CHECK_LIB(z, crc32, [], [echo Zlib is needed.; exit 1])
-AC_CHECK_HEADER(zlib.h, [], [echo Zlib is needed.; exit 1])
+AC_CHECK_LIB(z, crc32, [], 
+	AC_MSG_ERROR([needed library zlib not found]))
+AC_CHECK_HEADER(zlib.h, [], 
+	AC_MSG_ERROR([needed include file for zlib not found]))
 
 AC_OUTPUT(Makefile regress/Makefile)
