@@ -1,20 +1,18 @@
 * better error messages (partno, lineno, etc.)
-* signature to desc file
 * remove/move broken files
 
 * save part 0
 * user interface
 * newsreader
-* filesize (parts same size)
-* leftmost " - "
-* NNTPSERVER from environment
-* xref handling
-* reconnect upon timeout
-* table based uu decoding
 
-* report no encoded data found
-* remove failed files
+* filesize (parts same size)
+
+* xref handling
+(* reconnect upon timeout)
+
 * investigate no end founds
-* binhex, base64, mime
+* binhex, mime
 * header values
+
 * more smarts in ignoring pointless descriptions
+* signature to desc file

@@ -12,7 +12,7 @@
 #include "util.h"
 #include "decode.h"
 
-#define NNTPHOST "news.tuwien.ac.at"
+#define NNTPHOSTFILE "/etc/nntpserver"
 #define DEFAULTEDITOR "vi"
 #define DECODER "uudeview -f -i -n -q"
 #define BINHEX "bhdeview"
@@ -47,7 +47,7 @@ int pat_part[MAX_PATTERNS] =    {/* 3 */ 4, 2, 3, 1, 0 };
 int pat_npart[MAX_PATTERNS] =   {/* 4 */ 5, 3, 4, 3, 0 };
 
 char *prg;
-char *nntp_response;
+char *nntp_response, *nntp_group, *nntp_host;
 char *decoder = DECODER;
 struct range *rcmap;
 
@@ -120,9 +120,11 @@ main(int argc, char **argv)
     long no_art, lower, upper, no_complete, *toget, gute, j, no_file;
     char b[BUFSIZE];
     struct file **todec;
-
+    FILE *fp;
+    
     prg = argv[0];
 
+    nntp_group = NULL;
     newsrc = DEFAULT_NEWSRC;
     mark_complete = 0;
 
@@ -138,7 +140,6 @@ main(int argc, char **argv)
 	case 'c':
 	    mark_complete = 0;
 	    break;
-
 	case 'h':
 	    printf(usage_string, prg);
 	    fputs(help_string, stdout);
@@ -173,15 +174,35 @@ main(int argc, char **argv)
     
     err = 0;
 
+    if ((nntp_host=getenv("NNTPSERVER")) == NULL) {
+	if ((fp=fopen(NNTPHOSTFILE, "r")) == NULL) {
+	    prerror("can't open %s: %s", NNTPHOSTFILE, strerror(errno));
+	    exit(7);
+	}
+	if (fgets(b, BUFSIZE, fp) == NULL) {
+	    prerror("can't read newsserver from %s: %s", NNTPHOSTFILE,
+		    strerror(errno));
+	    exit(7);
+	}
+	fclose(fp);
+	if (b[strlen(b)-1]=='\n')
+	    b[strlen(b)-1]='\0';
+	if ((nntp_host=strdup(b)) == NULL) {
+	    prerror("can't strdup nntp_host from `%s': shoot me", b);
+	    exit(77);
+	}
+    }
+    
+    
     /* talk to server */
-    if ((fd=sopen(NNTPHOST, "nntp")) == -1)
+    if ((fd=sopen(nntp_host, "nntp")) == -1)
 	return -1;
     
     conin = fdopen(fd, "r");
     conout = fdopen(fd, "w");
 
-    if (nntp_resp() != 200) {
-	fprintf(stderr, "%s: server %s says: %s\n", prg, NNTPHOST,
+    if ((nntp_resp() & ~1) != 200) {
+	fprintf(stderr, "%s: server %s says: %s\n", prg, nntp_host,
 		nntp_response);
 	exit(3);
     }
@@ -243,7 +264,7 @@ main(int argc, char **argv)
 	    continue;
 	}
 
-	toget=choose(todec, no_complete, argv[i]);
+	toget = choose(todec, no_complete, argv[i]);
 	/* XXX: The lines below are just a patch -- better handling ??*/
 	if (toget == NULL) {       /* error handling */
 	    for (j=0; j<no_complete; j++) {
@@ -364,7 +385,7 @@ choose (struct file **todec, long no_complete, char *group)
     if (editor == NULL)
 	editor=DEFAULTEDITOR;
 
-    sprintf(b,"%s %s",editor, fname);
+    sprintf(b,"%s %s", editor, fname);
     system(b);
 
     if ((temp=fopen(fname,"r")) == NULL) {
@@ -380,7 +401,7 @@ choose (struct file **todec, long no_complete, char *group)
     while (fgets(b, BUFSIZE, temp) != NULL) {
 	j = 0;
 	sscanf(b,"%ld",&j);
-	if (j != 0)
+	if ((j > 0) && (j < no_complete+1))
 	    chosen[i++]=j-1;
     }
 
@@ -640,9 +661,11 @@ decode(struct file *val)
 int
 nntp_put(char *fmt, ...)
 {
-    int ret;
+    int fd, ret, tries, writeerr;
     char buf[BUFSIZE];
     va_list argp;
+
+    ret = tries = writeerr = 0;
     
     if (conout == NULL)
 	return -1;
@@ -650,13 +673,70 @@ nntp_put(char *fmt, ...)
     va_start(argp, fmt);
     vsprintf(buf, fmt, argp);
     va_end(argp);
-    
-    fprintf(conout, "%s\r\n", buf);
-    
-    if (fflush(conout) || ferror(conout))
-	return -1;
 
-    return nntp_resp();
+    for (;;) {
+	fprintf(conout, "%s\r\n", buf);
+    
+	if (fflush(conout) || ferror(conout))
+	    writeerr = 1;
+	else 
+	    ret = nntp_resp();
+	
+	/* connection to server closed -- reconnect */
+	if (writeerr || (ret == 400) || (ret == 503)) {
+	    writeerr = 0;
+	    if (tries == 0) {
+		tries++;
+		fclose(conin);
+		fclose(conout);
+
+		if ((fd=sopen(nntp_host, "nntp")) == -1)
+		    return -1;
+		
+		conin = fdopen(fd, "r");
+		conout = fdopen(fd, "w");
+
+		if ((nntp_resp() & ~1) != 200) {
+		    fprintf(stderr, "%s: server %s says: %s\n", prg, nntp_host,
+			    nntp_response);
+		    return -1;
+		}
+
+		fprintf(conout, "mode reader\r\n");
+		if (fflush(conout) || ferror(conout)) /* XXX: retry? */
+		    return -1;
+		
+		nntp_resp();
+
+		if (nntp_group != NULL) {
+		    fprintf(conout, "%s\r\n", nntp_group);
+		    if (fflush(conout) || ferror(conout)) /* XXX: retry? */
+			return -1;
+		    
+		    if (nntp_resp() != 211) {
+			fprintf(stderr, "%s: timed out -- can't reconnect",
+				prg);
+			return -1;
+		    }
+		}
+			
+		fprintf(stderr, "%s: timed out -- but reconnected\n", prg);
+	    }
+	    else {
+		fprintf(stderr, "%s: timed out -- can't reconnect\n", prg);
+		return -1;
+	    }
+	}
+	else
+	    break;
+    }
+
+    if (strncasecmp(buf, "group ", 6) == 0) {
+	free(nntp_group);
+	nntp_group = strdup(buf);
+    }
+    
+    return ret;
 }
 
 
