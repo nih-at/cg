@@ -28,5 +28,4 @@ remember duplicate parts, sort and failover
 * header values
 
 * more smarts in ignoring pointless descriptions
-* save part 0
 * signature to desc file
