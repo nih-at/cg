@@ -183,7 +183,7 @@ main(int argc, char **argv)
 	exit(1);
     }
 
-    prdebug_init(DEBUG_ALL^(DEBUG_SUBJ),
+    prdebug_init(DEBUG_ALL^(DEBUG_SUBJ|DEBUG_DEBUG),
 		 DEBUG_ALL^(DEBUG_LINE|DEBUG_SUBJ|DEBUG_PART|DEBUG_TOK));
 
     newsrc = expand(newsrc);
