@@ -8,7 +8,7 @@ struct file {
     long *artno;
     int new;
     long size;
-    int part0;
+    long part0;
 };
 
 
