@@ -1,6 +1,7 @@
 AC_INIT(checkgroup.c)
-AM_INIT_AUTOMAKE(checkgroup, 0.3)
+AM_INIT_AUTOMAKE(checkgroup, 0.4)
 AM_CONFIG_HEADER(config.h)
+AC_CONFIG_SUBDIRS(libmap)
 AC_SUBST(LIBOBJS)
 
 # We want these before the checks, so the checks can modify their values.
