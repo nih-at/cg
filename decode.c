@@ -363,6 +363,75 @@ decode_base64(FILE *fin, FILE *fout)
 enum enctype
 decode_binhex(FILE *fin, FILE **foutp, char **fn)
 {
+
+    if (!foutp) {
+	/* first part */
+    }
+    else {
+	/* other part */
+    }
+
     skip_rest(fin);
     return enc_binhex;
+}
+
+
+
+int
+decode_line(unsigned char *buf, char *line, int *table)
+{
+    static int rest, no;
+    int i;
+
+    if (line == NULL) {
+	if (no != 0)
+	    i =  DEC_INCOMPLETE;
+	else
+	    i =  0;
+	no = rest = 0;
+	return i;
+    }
+    
+    i = 0;
+
+    while (*line) {
+	b = table[*(line++)];
+	if (b < 0) {
+	    switch (b) {
+	    case DEC_COLON:
+		if (no == 0) 
+		    return i | DEC_EOF;
+		else
+		    return i | DEC_EOF | DEC_ILL;
+	    case DEC_EQUAL:
+		switch (no) {
+		case 0:
+		case 1:
+		    return i | DEC_ILL;
+		case 2:
+		    buf[i++] = rest >> 4;
+		    break;
+		case 3:
+		    buf[i++] = rest >> 10;
+		    buf[i++] = (rest>>2) & 0xff;
+		}
+		return i | DEC_EOF;
+	    default:
+		return i | DEC_ILL;
+	    }
+	}
+
+	rest = (rest << 6) | b;
+	no++;
+
+	if (no == 4) {
+	    buf[i++] = rest >> 16;
+	    buf[i++] = (rest>>8) & 0xff;
+	    buf[i++] = (rest & 0xff);
+	    rest = no = 0;
+	}
+	
+    }
+
+    return i;
 }
