@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -z ${srcdir} ]
+then
+    srcdir=.
+fi
+
+exec ${srcdir}/runtest uu-multi 0 xteddy_color.xpm xteddy_color.xpm.desc
