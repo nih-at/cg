@@ -5,7 +5,7 @@
 
 
 void
-header_init(void)
+mime_init(void)
 {
     int i;
 

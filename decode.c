@@ -1,3 +1,12 @@
+#include <stdio.h>
+#include <string.h>
+
+#include "decode.h"
+#include "header.h"
+#include "mime.h"
+
+
+
 enum enctype
 decode(FILE *fin, FILE **foutp, enum enctype type)
 {
