@@ -114,6 +114,8 @@ uux_get(struct stream_uux *this)
 		break;
 
 	    case UU_POST:
+		if (old_state == UU_PRE)
+		    state = old_state;
 		break;
 
 	    default:
