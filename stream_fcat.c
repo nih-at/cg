@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_fcat.c,v 1.3 2002/04/10 16:23:33 wiz Exp $
+  $NiH: stream_fcat.c,v 1.4 2002/04/16 22:46:12 wiz Exp $
 
   stream_fcat.c -- concatenate files
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -22,7 +22,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <stddef.h>
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "stream.h"
 #include "stream_types.h"
@@ -81,7 +83,9 @@ fcat_get(struct stream_fcat *this)
 	    return TOKEN_EOF;
 	}
 	if ((this->cur=fopen(this->names[this->i++], "r")) == NULL) {
-	    /* XXX: proper handling of fopen failure */
+	    token_printf3(stream_enqueue((stream *)this), TOK_ERR, 1,
+			  "cannot open file `%s': %s",
+			  this->names[this->i-1], strerror(errno));
 	    return token_set(&this->st.tok, TOK_EOA, NULL);
 	}
 	this->st.source = stream_file_open(this->cur, 0);

@@ -7,7 +7,6 @@ multipart/appledouble: better handling if filename same
 stream_quot_print can't handle NUL chars (it returns TOK_LINEs)
 handle quoted-printable uuencode stuff
 decode(): don't count broken files in return value
-stream_fcat: report file open errors [malloc()ed strings in tokens]
 
 multiple nntp servers as input
 [cleanup nntp support to ease above]

@@ -1,5 +1,5 @@
 /*
-  $NiH: token.c,v 1.3 2002/04/10 16:23:39 wiz Exp $
+  $NiH: token.c,v 1.4 2002/04/16 22:46:17 wiz Exp $
 
   token.c -- token handling
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -22,6 +22,9 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <stdarg.h>
+#include <stdlib.h>
+
 #include "stream.h"
 #include "util.h"
 
@@ -29,6 +32,24 @@ token *
 token_new(enum token_type type, char *line)
 {
     return token_set(xmalloc(sizeof(token)), type, line);
+}
+
+
+
+token *
+token_printf3(token *t, enum token_type type, int n, char *fmt, ...)
+{
+    char *s;
+    va_list argp;
+
+    va_start(argp, fmt);
+    vasprintf(&s, fmt, argp);
+    va_end(argp);
+
+    token_set3(t, type, n, s);
+    t->alloced = 1;
+
+    return t;
 }
 
 
@@ -44,6 +65,7 @@ token_set(token *t, enum token_type type, char *line)
 token *
 token_set3(token *t, enum token_type type, int n, char *line)
 {
+    t->alloced = 0;
     t->type = type;
     t->n = n;
     t->line = line;
@@ -59,7 +81,8 @@ token_free(token *t)
     if (t == NULL)
 	return;
 
-    free(t->line);
+    if (t->alloced)
+	free(t->line);
     free(t);
 }
 

@@ -1,5 +1,5 @@
 /*
-  $NiH: stream.c,v 1.5 2002/04/11 08:22:30 dillo Exp $
+  $NiH: stream.c,v 1.6 2002/04/16 22:46:11 wiz Exp $
 
   stream.c -- stream interface
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -27,7 +27,7 @@
 
 
 
-static token _tok_eof = { TOK_EOF, 0, NULL };
+static token _tok_eof = { TOK_EOF, 0, 0, NULL };
 token * TOKEN_EOF = &_tok_eof;
 
 
@@ -37,6 +37,10 @@ stream_get(stream *st)
 {
     token *t;
 
+    if (st->tok_cleanup) {
+	token_clean(st->tok_cleanup);
+	st->tok_cleanup = NULL;
+    }
     if (st->queue_cleanup) {
 	stream_dequeue(st);
 	st->queue_cleanup = 0;
@@ -55,6 +59,8 @@ stream_get(stream *st)
 	t = stream_queue_peek(st);
 	st->queue_cleanup = 1;
     }
+    else
+	st->tok_cleanup = t;
     if (t->type == TOK_EOF)
 	st->eof = 1;
 
@@ -71,6 +77,8 @@ stream_get(stream *st)
 int
 stream_close(stream *st)
 {
+    if (st->tok_cleanup)
+	token_clean(st->tok_cleanup);
     while (st->queue_len > 0)
 	stream_dequeue(st);
 
@@ -90,6 +98,7 @@ stream_new(size_t size, token *(*get)(), int (*close)(), stream *source)
     st->source = source;
     st->eof = 0;
 
+    st->tok_cleanup = NULL;
     st->queue.next = NULL;
     st->queue_tail = &st->queue;
     st->queue_len = 0;
@@ -148,6 +157,7 @@ stream_dequeue(stream *st)
     if (--st->queue_len == 0)
 	st->queue_tail = &st->queue;
 
+    token_clean(&(e->tok));
     free(e);
 }
 
