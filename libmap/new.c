@@ -33,7 +33,7 @@ map_new(int size)
     map *m;
     int i;
 
-    if (i < 0)
+    if (size < 0)
 	return NULL;
 
     if ((m=(map *)malloc(sizeof(map))) == NULL)
