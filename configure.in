@@ -1,5 +1,5 @@
 AC_INIT(checkgroup.c)
-AM_INIT_AUTOMAKE(cg, 0.4)
+AM_INIT_AUTOMAKE(cg, 0.4a)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SUBDIRS(libmap)
 
