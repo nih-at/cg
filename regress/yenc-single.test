@@ -1,8 +1,2 @@
-#!/bin/sh
-
-if [ -z ${srcdir} ]
-then
-    srcdir=.
-fi
-
-exec ${srcdir}/runtest yenc-single 0 testfile.txt
+return 0
+output testfile.txt testfile.txt

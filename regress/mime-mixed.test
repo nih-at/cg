@@ -1,8 +1,3 @@
-#!/bin/sh
-
-if [ -z ${srcdir} ]
-then
-    srcdir=.
-fi
-
-exec ${srcdir}/runtest mime-mixed 0 test.zip test.zip.desc
+return 0
+output test.zip test.zip
+output mime-mixed.desc test.zip.desc

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#  $NiH: runtest,v 1.3 2002/04/11 23:52:45 dillo Exp $
+#  $NiH: runtest,v 1.4 2002/04/12 14:42:50 wiz Exp $
 #
 #  runtest -- run regression tests
 #  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -23,14 +23,21 @@
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 # runtest TESTNAME EXIT-CODE OUTPUT-FILENAMES
-# 
+#
 # files: 
-#   input files are TESTNAME.in*
-#   testdec output is compared to TESTNAME.log
-#   output files are compared to TESTNAME.out.*
+#   TESTNAME.test: test scenario
+#   TESTNAME.in*: input files
+#   TESTNAME.log: expected testdec output
+#
+# test scenario:
+#   the first line must contain `return RET' where RET is the expected \
+#	exit code of testdec.
+#   all other line must contain `output EXPECTED_FILE CREATED_FILE' where
+#	CREATED_FILE names a file created by testdec, which will be compared
+#	against EXPECTED_FILE.  CREATED_FILE may contain white space.
 # 
 # environment variables:
-#   VERBOSE: if set, be more verbose (e.g., output diffs)
+#   VERBOSE: if set, be more verbose (e. g., output diffs)
 #   NOCLEANUP: if set, don't delete directory test is run in
 
 die() {
@@ -76,15 +83,21 @@ checkfile() {
 			fi
 			fail "$3"
 		fi
-		rm "$2"
+		echo "$2" >> .files.need
+	fi
+}
+
+check_in() {
+	if [ ! "$1" = "$2" ]
+	then
+		die "unexpected directive in test file: got '$1', expeced '$2'"
 	fi
 }
 
 
-TEST=$1
+TEST=`echo $1 | sed 's/\.test$//'`
 shift
-RET=$1
-shift
+
 DIR=${TEST}.d$$
 if [ -z ${srcdir} ]
 then
@@ -104,6 +117,11 @@ fi
 mkdir ${DIR} || ( die "cannot create test directory ${DIR}" )
 cd ${DIR} || ( die "cannot cd to test directory ${DIR}" )
 
+{
+
+read c RET
+check_in $c return
+
 if [ ! -z ${VERBOSE} ]
 then
 	echo "running: ${TESTDEC} ${srcdir}/${TEST}.in*"
@@ -116,18 +134,24 @@ then
 	fail "unexpected exit status: got $ret, expected ${RET}"
 fi
 
+ls > .files.got
+
 checkfile ${srcdir}/${TEST}.log testdec.out "unexpected output"
 
-i=1
-for f in "$@"
+while read c EXP OUT
 do
-	checkfile ${srcdir}/${TEST}.out.$i "$f" "unexpected file content: '$f'"
-	i=`expr $i + 1`
+    check_in $c output
+
+    checkfile ${srcdir}/${EXP} "${OUT}" "unexpected file content: '${OUT}'"
 done
 
-if [ `ls | wc -l` -ne 0 ]
+sort .files.need | diff -u - .files.got | grep '+' > .files.extra
+
+if [ `wc -l .files.extra | awk '{print $1}'` -ne 0 ]
 then
-	fail "unexpected files: `ls -m`"
+	fail "unexpected files: `sed 's/+ \(.*\)/\1,/'`"
 fi
 
 succeed
+
+} < ${srcdir}/${TEST}.test

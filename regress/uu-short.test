@@ -1,8 +1,2 @@
-#!/bin/sh
-
-if [ -z ${srcdir} ]
-then
-    srcdir=.
-fi
-
-exec ${srcdir}/runtest uu-short 0 true
+return 0
+output true.sh true
