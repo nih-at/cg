@@ -1,7 +1,7 @@
 /* -*- c -*- */
 
 /*
-  $NiH: parserc.l,v 1.4 2002/04/10 16:21:18 wiz Exp $
+  $NiH: parserc.l,v 1.5 2002/04/10 16:23:30 wiz Exp $
 
   parserc.l -- parse .newsrc
   Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -97,6 +97,8 @@ parserc (char *gname, FILE *rc, long lo, long hi, long no_arts)
     return(0);
 }
 
-
-
-
+int
+yywrap(void)
+{
+    return 1;
+}
