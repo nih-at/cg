@@ -1,34 +1,28 @@
+man page or similar
+test cases: mime: unknown CTE, errors
+
+IPv6
 binhex support
 multipart/appledouble: better handling if filename same
 
-portability fixes
-test cases: mime: unknown CTE, errors
-IPv6
 stream_quot_print can't handle NUL chars (it returns TOK_LINEs)
+handle quoted-printable uuencode stuff
 decode(): don't count broken files in return value
-stream_fcat: report file open errors
+stream_fcat: report file open errors [malloc()ed strings in tokens]
+
 multiple nntp servers as input
 [cleanup nntp support to ease above]
 saving parts to files and use as input
-remember duplicate parts, sort and failover
-investigate no end founds
-handle quoted-printable uuencode stuff
-man page or similar
-
+remember duplicate parts, sort (size, author, ...) and failover
+enforce minimum file size, e.g. >1k
 testdec: uudeview replacement
 
----- Before rewrite
+better error messages (partno, lineno, etc.)
 
-* enforce minimum file size, e.g. >1k
-* progressbar?
+user interface
+newsreader
+progressbar?
 
-* better error messages (partno, lineno, etc.)
+xref handling
 
-* user interface
-* newsreader
-
-* filesize (parts same size)
-
-* xref handling
-
-* more smarts in ignoring pointless descriptions
+more smarts in ignoring pointless descriptions
