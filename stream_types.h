@@ -16,5 +16,7 @@ stream *stream_msg_partial_open(stream *source, struct mime_hdr *m);
 stream *stream_msg_multi_open(stream *source, struct mime_hdr *m);
 stream *stream_section_open(stream *source, char *boundary);
 stream *stream_uuextract_open(stream *source);
+stream *stream_yenc_open(struct stream *source, char *ybegin);
+
 
 #endif /* stream_types.h */

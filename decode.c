@@ -18,6 +18,7 @@ int decode_file(stream *in, out_state *out, int *tbl);
 int decode_mime(stream *in, out_state *out, struct header *h,
 		struct mime_hdr *ct, struct mime_hdr *te);
 int decode_mime_uu(stream *in, out_state *out, char *fname);
+static int decode_yenc(stream *in, out_state *out, char *ybegin);
 
 
 
@@ -95,6 +96,11 @@ decode(stream *in, out_state *out)
 		    output(out, TOKEN_EOF);
 		    stream_close(stm);
 		}
+	    }
+	    else if (strncmp(t->line, "=ybegin ", 8) == 0) {
+		debug(out, "found: yEnc");
+		
+		ret = decode_acum_ret(ret, decode_yenc(in, out, t->line));
 	    }
 	    else if (strcmp(t->line, BINHEX_TAG) == 0) {
 		debug(out, "found: binhex");
@@ -253,4 +259,18 @@ decode_acum_ret(int ret1, int ret2)
 	return -1;
     else
 	return ret1+ret2;
+}
+
+
+
+static int
+decode_yenc(stream *in, out_state *out, char *ybegin)
+{
+    stream *stm;
+
+    stm = stream_yenc_open(in, ybegin);
+    copy_stream(stm, out);
+    stream_close(stm);
+
+    return 1;
 }
