@@ -1,5 +1,5 @@
 /*
-  $NiH: checkgroup.c,v 1.43 2002/04/16 22:46:03 wiz Exp $
+  $NiH: checkgroup.c,v 1.44 2002/04/17 17:46:28 dillo Exp $
 
   checkgroup.c -- main program
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -102,6 +102,7 @@ char help_string[] = "\
   -V, --version         display version number\n\
 \n\
   -c, --mark-complete   mark only parts of complete files as read\n\
+  -d, --debug           write debugging information to .debug\n\
   -n, --newsrc FILE     use FILE as newsrc file\n\
   -p, --pass PASS       specify password for authentication\n\
   -s, --server SERVER   NNTP server\n\
@@ -109,16 +110,17 @@ char help_string[] = "\
 \n\
 Report bugs to <nih@giga.or.at>.\n";
 
-#define OPTIONS	"hVn:cu:p:s:"
+#define OPTIONS	"hVn:cdu:p:s:"
 
 struct option options[] = {
+    { "debug",         0, 0, 'd' },
     { "help",          0, 0, 'h' },
-    { "version",       0, 0, 'V' },
-    { "newsrc",        1, 0, 'n' },
     { "mark-complete", 0, 0, 'c' },
-    { "user",          1, 0, 'u' },
+    { "newsrc",        1, 0, 'n' },
     { "pass",          1, 0, 'p' },
     { "server",        1, 0, 's' },
+    { "user",          1, 0, 'u' },
+    { "version",       0, 0, 'V' },
     { NULL,            0, 0, 0   }
 };
 
@@ -149,7 +151,7 @@ int
 main(int argc, char **argv)
 {
     map *parts;
-    int err, fd, verbose, i, c, k;
+    int debug, err, fd, verbose, i, c, k;
     long no_art, lower, upper, no_complete, *toget, ndecoded, j, no_file;
     char b[BUFSIZE];
     struct file **todec;
@@ -160,7 +162,7 @@ main(int argc, char **argv)
 
     nntp_group = NULL;
     newsrc = DEFAULT_NEWSRC;
-    mark_complete = 0;
+    debug = mark_complete = 0;
 
     mime_init();
     header_init();
@@ -171,14 +173,14 @@ main(int argc, char **argv)
     opterr = 0;
     while ((c=getopt_long(argc, argv, OPTIONS, options, 0)) != EOF) {
 	switch (c) {
-	case 'n':
-	    newsrc = optarg;
-	    break;
 	case 'c':
 	    mark_complete = 1;
 	    break;
-	case 'u':
-	    nntp_user = optarg;
+	case 'd':
+	    debug = 1;
+	    break;
+	case 'n':
+	    newsrc = optarg;
 	    break;
 	case 'p':
 	    nntp_pass = optarg;
@@ -186,6 +188,10 @@ main(int argc, char **argv)
 	case 's':
 	    nntp_host = optarg;
 	    break;
+	case 'u':
+	    nntp_user = optarg;
+	    break;
+
 	case 'h':
 	    printf(usage_string, prg);
 	    fputs(help_string, stdout);
@@ -204,7 +210,7 @@ main(int argc, char **argv)
 	exit(1);
     }
 
-    prdebug_init(DEBUG_ALL^(DEBUG_SUBJ|DEBUG_DEBUG),
+    prdebug_init(debug ? (DEBUG_ALL^(DEBUG_SUBJ|DEBUG_DEBUG)) : 0,
 		 DEBUG_ALL^(DEBUG_LINE|DEBUG_SUBJ|DEBUG_PART|DEBUG_TOK));
 
     newsrc = expand(newsrc);

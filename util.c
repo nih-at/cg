@@ -1,5 +1,5 @@
 /*
-  $NiH: util.c,v 1.25 2002/04/15 11:19:25 dillo Exp $
+  $NiH: util.c,v 1.26 2002/04/16 22:46:18 wiz Exp $
 
   util.c -- miscellaneous functions
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -405,7 +405,7 @@ prdebug_init(int do_file, int do_stdout)
 {
     if (do_file) {
 	if ((debug_file=fopen(DEBUG_FILE_NAME, "w")) == NULL)
-	    do_file = INT_MAX;
+	    do_file = 0;
     }
     do_debug_file = do_file;
     do_debug_stdout = do_stdout;
