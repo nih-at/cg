@@ -1,0 +1,5 @@
+found: MIME message/partial
+found: MIME (single part)
+found: MIME base64
+writing `test.zip'
+[119 bytes]

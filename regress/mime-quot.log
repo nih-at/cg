@@ -1,0 +1,5 @@
+found: MIME multipart/mixed
+found: MIME (single part)
+found: MIME quoted-printable
+writing `testlatin.txt'
+[25 bytes]

@@ -1,0 +1,3 @@
+return 0
+output testlatin.txt testlatin.txt
+output mime-quot.desc testlatin.txt.desc

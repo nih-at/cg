@@ -1,0 +1,22 @@
+From: Dillo
+Subject: foo
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary="yrj/dFKFPuw6o+aM"
+Content-Disposition: inline
+
+
+--yrj/dFKFPuw6o+aM
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+This is an ISO Latin 1 test file.
+
+--yrj/dFKFPuw6o+aM
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: attachment; filename="testlatin.txt"
+Content-Transfer-Encoding: quoted-printable
+
+=BB=A1=DCml=E4uter =DF=FFn=F0=3D=20=
+sch=F8n!=AB
+--yrj/dFKFPuw6o+aM--
+
