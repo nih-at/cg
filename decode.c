@@ -248,6 +248,8 @@ decode_uu(FILE *fin, FILE *fout, int inp)
     
 
     end = len2[0] = 0;
+
+    /* heuristically find uu data -- no 'begin' found */
     while (!inp) {
 	if ((line=getline(fin)) == NULL) {
 	    prerror(errpart, "no uu data found");
@@ -325,11 +327,9 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 		}
 	    }
 	    len = 45;
-	    end = 0;
 	}
 	else if (line[0] > ' ' && line[0] < 'M') {
 	    len = line[0] - ' ';
-	    end = 0;
 	    if ((strlen(line)-1+3)/4 != (len+2)/3) {
 		/* XXX: wrong line */
 		skip_rest(fin);
@@ -337,28 +337,20 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 	    }
 	}
 	else if (line[0] == ' ' || line[0] == '`') {
-	    end = 1;
 	    continue;
 	}
 	else if (strcmp(line, "end") == 0) {
-	    if (end) {
-		len = (decode_line(b, NULL, NULL) & ~DEC_ERRMASK);
+	    len = (decode_line(b, NULL, NULL) & ~DEC_ERRMASK);
 
-		if (len != 0 && fwrite(b, 1, len, fout) != len) {
-		    /* XXX: handle disc full */
-		    prerror(errfile, "write error: %s\n", strerror(errno));
-		    skip_rest(fin);
-		    return enc_error;
-		}
+	    if (len != 0 && fwrite(b, 1, len, fout) != len) {
+		/* XXX: handle disc full */
+		prerror(errfile, "write error: %s\n", strerror(errno));
+		skip_rest(fin);
+		return enc_error;
+	    }
 		
-		skip_rest(fin);
-		return enc_eof;
-	    }
-	    else {
-		/* XXX: wrong line */
-		skip_rest(fin);
-		return enc_uu;
-	    }
+	    skip_rest(fin);
+	    return enc_eof;
 	}
 	else {
 	    /* XXX: wrong line */
