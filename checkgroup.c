@@ -21,10 +21,7 @@
 
 #define NNTPHOSTFILE "/etc/nntpserver"
 #define DEFAULTEDITOR "vi"
-#define DECODER "uudeview -f -i -n -q"
-#define BINHEX "bhdeview"
 #define BUFSIZE 8192
-#define RCNAME ".decoderc"
 
 
 #define MAX_PATTERNS 6
@@ -48,7 +45,6 @@ int pat_npart[MAX_PATTERNS] =   { 4,  5, 3, 4, 3 /* 3 */, 0 };
 char *prg;
 char *nntp_response, *nntp_group;
 char *nntp_host, *nntp_user, *nntp_pass;
-char *decoder = DECODER;
 struct range *rcmap;
 
 char *newsrc;
@@ -80,7 +76,6 @@ char help_string[] = "\
   -V, --version         display version number\n\
 \n\
   -c, --mark-complete   mark only parts of complete files as read\n\
-  -m, --mac             call hexbin decoder\n\
   -n, --newsrc FILE     use FILE as newsrc file\n\
   -p, --pass PASS       specify password for authentication\n\
   -s, --server SERVER   NNTP server\n\
@@ -88,12 +83,11 @@ char help_string[] = "\
 \n\
 Report bugs to <cg-bugs@giga.or.at>.\n";
 
-#define OPTIONS	"hVmn:cu:p:s:"
+#define OPTIONS	"hVn:cu:p:s:"
 
 struct option options[] = {
     { "help",          0, 0, 'h' },
     { "version",       0, 0, 'V' },
-    { "mac",           0, 0, 'm' },
     { "newsrc",        1, 0, 'n' },
     { "mark-complete", 0, 0, 'c' },
     { "user",          1, 0, 'u' },
@@ -158,9 +152,6 @@ main(int argc, char **argv)
     opterr = 0;
     while ((c=getopt_long(argc, argv, OPTIONS, options, 0)) != EOF) {
 	switch (c) {
-	case 'm':
-	    decoder = BINHEX;
-	    break;
 	case 'n':
 	    newsrc = optarg;
 	    break;
@@ -685,7 +676,7 @@ do_decode(struct file *val, out_state *out)
     stream *stm, *st2;
     token t;
 
-    printf("decoding `%s'\n", val->tag);
+    prdebug(DEBUG_PACK, "decoding `%s'", val->tag);
 
     stm = stream_cat_open(val);
     st2 = stream_article_open(stm);
@@ -696,91 +687,6 @@ do_decode(struct file *val, out_state *out)
     output(out, token_set(&t, TOK_EOP, NULL));
 
     return err;
-
-#if 0
-    enum enctype type, oldtype;
-    FILE *fout;
-    char b[60];
-    int i, ret;
-
-    printf("decoding `%s'\n", val->tag);
-    sprintf(errfilename, "[%s]", val->tag);
-    
-    decode_line(b, NULL, NULL);
-
-    type = enc_unknown;
-    fout = NULL;
-
-    for (i=0; i<val->npart; i++) {
-	errpartno = i+1;
-	ret = nntp_put("article %ld", val->artno[i]);
- 	if (ret != 220 && ret != 224) {
-	    prerror(errpart, "article %ld failed: %s\n",
-		    val->artno[i], nntp_response);
-	    errfilename[0] = '\0';
-	    errpartno = 0;
-	    return 0;
-	}
-	errlineno = 0;
-
-	oldtype = type;
-	type = decode_file(conin, &fout, type);
-
-	switch(type) {
-	case enc_nodata:
-	    prerror(errpart, "no encoded data found");
-	    
-	case enc_error:
-	    if (fout)
-		fclose(fout);
-	    /* XXX: next line should be removed when error handling below ok */
-	    prerror(errpart, "decoding failed");
-	    errfilename[0] = '\0';
-	    errpartno = 0;
-	    return 0;
-	    
-	case enc_eof:
-	    if (i != val->npart-1) {
-		prerror(errpart, "premature end of encoded data (%d"
-			"parts expected)", val->npart);
-		if (fout)
-		    fclose(fout);
-		errfilename[0] = '\0';
-		errpartno = 0;
-		return 0;
-	    }
-	    break;
-	default:
-	    break;
-	}
-    }
-
-    if (fout)
-	fclose(fout);
-    
-    if (oldtype != enc_base64 && type != enc_eof) {
-	prerror(errfile, "end of encoded data not found");
-	errfilename[0] = '\0';
-	errpartno = 0;
-	return 0;
-    }
-
-    /* save comment */
-    if (val->part0 != -1) {
-	ret = nntp_put("article %ld", val->part0);
- 	if (ret != 220 && ret != 224) {
-	    prerror(errpart, "article %ld [comment, ignored] failed: %s\n",
-		    val->part0, nntp_response);
-	}
-	else {
-	    save_comment(conin);
-	}
-    }
-
-    errfilename[0] = '\0';
-    errpartno = 0;
-    return 1;
-#endif
 }
 
 
