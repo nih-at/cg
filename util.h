@@ -23,9 +23,6 @@
 #define DEBUG_ALL	0xffff	/* all debugging */
 
 extern char *prg;
-extern char errfilename[];
-extern int errlineno, errpartno;
-enum errtype {errnone, errfile, errpart, errline};
 
 
 
@@ -37,7 +34,6 @@ FILE *fopen_uniq(char **s);
 char *getline(FILE *f);
 void prdebug(int level, char *fmt, ...);
 void prdebug_init(int do_file, int do_stdout);
-void prerror(enum errtype, char *fmt, ...);
 void skip_rest(FILE *f);
 token *skip_to(stream *in, enum token_type type);
 char *our_basename(char *name);
