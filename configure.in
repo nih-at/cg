@@ -15,4 +15,4 @@ AM_PROG_LEX
 
 AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile regress/Makefile)

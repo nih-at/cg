@@ -1,6 +1,6 @@
 INCLUDES=-I$(srcdir)/libmap
 
-SUBDIRS=libmap
+SUBDIRS=libmap regress
 
 bin_PROGRAMS=cg
 noinst_PROGRAMS=testdec

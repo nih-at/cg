@@ -1,0 +1,99 @@
+#!/bin/sh
+
+die() {
+	echo "$0: $*" >&2;
+	cleanup;
+	exit 2;
+}
+
+fail() {
+	echo "${TEST} -- FAILED: $*";
+	cleanup;
+	exit 1;
+}
+
+succeed() {
+	if [ ! -z ${VERBOSE} ]
+	then
+		echo "${TEST} -- passed";
+	fi
+	cleanup;
+	exit 0;
+}
+
+cleanup() {
+	cd ..;
+	if [ -z "${NOCLEANUP}" ]
+	then
+		rm -r ${DIR};
+	fi
+}
+
+checkfile() {
+	if [ ! -f "$2" ]
+	then
+		fail "missing output file: '$2'"
+	else
+		diff -q "$1" "$2"
+		if [ $? -ne 0 ]
+		then
+			if [ ! -z ${VERBOSE} ]
+			then
+				diff -u "$1" "$2"
+			fi
+			fail "$3"
+		fi
+		rm "$2"
+	fi
+}
+
+
+TEST=$1
+shift
+RET=$1
+shift
+DIR=${TEST}.d$$
+if [ -z ${srcdir} ]
+then
+    srcdir=..
+else
+	# XXX: fix for absolute srcdir?
+	srcdir=../${srcdir}
+fi
+
+if [ -z ${TESTDEC} ]
+then
+    TESTDEC=../../testdec
+fi
+
+# XXX: set up trap to cleanup
+
+mkdir ${DIR} || ( die "cannot create test directory ${DIR}" )
+cd ${DIR} || ( die "cannot cd to test directory ${DIR}" )
+
+if [ ! -z ${VERBOSE} ]
+then
+	echo "running: ${TESTDEC} ${srcdir}/${TEST}.in*"
+fi
+${TESTDEC} ${srcdir}/${TEST}.in* > testdec.out 2>&1
+ret=$?
+
+if [ $ret -ne ${RET} ]
+then
+	fail "unexpected exit status: got $ret, expected ${RET}"
+fi
+
+checkfile ${srcdir}/${TEST}.log testdec.out "unexpected output"
+
+i=1
+for f in "$@"
+do
+	checkfile ${srcdir}/${TEST}.out.$i "$f" "unexpected file content: '$f'"
+done
+
+if [ `ls | wc -l` -ne 0 ]
+then
+	fail "unexpected files: `ls -m`"
+fi
+
+succeed
