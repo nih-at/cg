@@ -21,10 +21,14 @@ AC_CHECK_LIB(socket, main)
 AC_CHECK_LIB(nsl, main)
 AC_CHECK_LIB(resolv, main)
 
+dnl headers
+
+NIH_CHECK_DECL([#include "netdb.h"], h_errno)
+
 dnl functions
 
 AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
-AC_REPLACE_FUNCS(hstrerror)
+AC_REPLACE_FUNCS(hstrerror getaddrinfo)
 need_snprintf=no
 AC_CHECK_FUNCS(snprintf vsnprintf vasprintf, , [need_snprintf=yes])
 if test $need_snprintf = yes

@@ -1,5 +1,5 @@
 /*
-  $NiH: checkgroup.c,v 1.42 2002/04/16 02:26:07 dillo Exp $
+  $NiH: checkgroup.c,v 1.43 2002/04/16 22:46:03 wiz Exp $
 
   checkgroup.c -- main program
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -40,6 +40,7 @@
 #include "mime.h"
 #include "newsrc.h"
 #include "ranges.h"
+#include "sockets.h"
 #include "stream.h"
 #include "stream_types.h"
 #include "util.h"
@@ -123,10 +124,6 @@ struct option options[] = {
 
 
 
-/* extern */
-int sopen(char *host, char *service);
-
-/* intern */
 long complete(map *parts, long no_file, struct file **todec);
 long *choose(struct file **todec, long no_complete, char *group);
 int parse(map *parts, FILE *f);
@@ -248,7 +245,7 @@ main(int argc, char **argv)
     }
 
     /* talk to server */
-    if ((fd=sopen(nntp_host, "nntp")) == -1)
+    if ((fd=sopen(nntp_host, "nntp", AF_UNSPEC)) == -1)
 	return -1;
 
     conin = fdopen(fd, "r");
@@ -715,7 +712,7 @@ nntp_put(char *fmt, ...)
 		fclose(conin);
 		fclose(conout);
 
-		if ((fd=sopen(nntp_host, "nntp")) == -1)
+		if ((fd=sopen(nntp_host, "nntp", AF_UNSPEC)) == -1)
 		    return -1;
 
 		conin = fdopen(fd, "r");

@@ -1,11 +1,12 @@
 /*
-  $NiH: sockets.c,v 1.3 2002/04/10 16:23:31 wiz Exp $
+  $NiH$
+  (cftp: NiH: sockets.c,v 1.24 2001/12/20 05:44:15 dillo Exp)
 
-  sockets.c -- auxiliary socket functions
-  Copyright (C) 1996, 1997 Dieter Baron
+  sockets -- auxiliary socket functions
+  Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001 Dieter Baron
 
   This file is part of cftp, a fullscreen ftp client.
-  The author can be contacted at <dillo@giga.or.at>
+  The author can be contacted at <dillo@giga.or.at>.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -31,61 +32,57 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "config.h"
+#include "sockets.h"
 
 extern char *prg;
-
-#ifndef H_ERRNO_DECLARED
-extern int h_errno;
-#endif
-
-#ifndef HAVE_HSTRERROR
-char *hstrerror(int);
-#endif
 
 
 
 int
-sopen(char *host, char *service)
+sopen(char *host, char *service, int family)
 {
-    int s;
-    struct hostent *hp;
-    struct sockaddr_in sa;
-    u_short port;
-    struct servent *serv;
+    struct addrinfo hints, *res0, *res;
+    int s, err;
+    char *cause;
+    
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = family;
+    hints.ai_socktype = SOCK_STREAM;
+    
+    if ((err=getaddrinfo(host, service, &hints, &res0)) != 0) {
+	fprintf(stderr, "%s: cannot get host/service %s/%s: %s\n",
+		prg, host, service, gai_strerror(err));
+	return -1;
+    }
 
-    if ((serv = getservbyname(service, "tcp")) == NULL) {
-	if ((port=atoi(service)) == 0 && service[0] != '0') {
-	    fprintf(stderr, "%s: unknown service: %s\n",
-		    prg, service);
-	    return -1;
+    s = -1;
+    for (res = res0; res; res = res->ai_next) {
+	if ((s=socket(res->ai_family, res->ai_socktype,
+		      res->ai_protocol)) < 0) {
+	    cause = "create socket";
+	    continue;
 	}
-	else
-	    port = htons(port);
-    }
-    else
-	port = (u_short)serv->s_port;
 
-    if ((hp = gethostbyname(host)) == NULL) {
-	fprintf(stderr, "%s: can't get host %s: %s\n",
-		prg, host, hstrerror(h_errno));
-	return -1;
+	if (connect(s, res->ai_addr, res->ai_addrlen) < 0) {
+	    cause = "connect";
+	    close(s);
+	    s = -1;
+	    continue;
+	}
+
+	/* okay we got one */
+	break;
     }
-    memcpy(&sa.sin_addr, hp->h_addr, hp->h_length);
-    sa.sin_family = hp->h_addrtype;
-    sa.sin_port = port;
-    if ((s = socket(hp->h_addrtype, SOCK_STREAM, 0)) < 0) {
-	fprintf(stderr, "%s: can't allocate socket: %s\n",
-		prg, strerror(errno));
-	return -1;
-    }
-    if (connect(s, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
-	fprintf(stderr, "%s: can't connect: %s\n",
-		prg, strerror(errno));
-	return -1;
-    }
+    if (s < 0)
+	fprintf(stderr, "%s: cannot %s: %s",
+		prg, cause, strerror(errno));
+
+    freeaddrinfo(res0);
 
     return s;
 }
