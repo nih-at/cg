@@ -604,7 +604,7 @@ decode(struct file *val)
     enum enctype type, oldtype;
     FILE *fout;
     char b[60];
-    int i;
+    int i, ret;
 
     printf("decoding `%s'\n", val->tag);
     sprintf(errfilename, "[%s]", val->tag);
@@ -616,7 +616,8 @@ decode(struct file *val)
 
     for (i=0; i<val->npart; i++) {
 	errpartno = i+1;
-	if (nntp_put("article %ld", val->artno[i]) != 220) {
+	ret = nntp_put("article %ld", val->artno[i]);
+ 	if (ret != 220 && ret != 224) {
 	    prerror(errpart, "article %ld failed: %s\n",
 		    val->artno[i], nntp_response);
 	    errfilename[0] = '\0';

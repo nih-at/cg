@@ -7,9 +7,10 @@ AC_SUBST(LIBOBJS)
 test -z "$CFLAGS" && CFLAGS='-g -Wall' auto_cflags=1
 
 AC_PROG_CC
-AC_PROG_LEX
+AM_PROG_LEX
 
-AC_DECL_YYTEXT
+# covered by LEX-test above
+# AC_DECL_YYTEXT
 
 AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
 
