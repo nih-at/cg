@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#  $NiH: testdec.c,v 1.10 2002/04/11 10:55:02 dillo Exp $
+#  $NiH: runtest,v 1.2 2002/04/11 14:13:19 dillo Exp $
 #
 #  runtest -- run regression tests
 #  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -67,7 +67,7 @@ checkfile() {
 	then
 		fail "missing output file: '$2'"
 	else
-		diff -q "$1" "$2"
+		diff -q "$1" "$2" > /dev/null
 		if [ $? -ne 0 ]
 		then
 			if [ ! -z ${VERBOSE} ]
@@ -122,6 +122,7 @@ i=1
 for f in "$@"
 do
 	checkfile ${srcdir}/${TEST}.out.$i "$f" "unexpected file content: '$f'"
+	i=`expr $i + 1`
 done
 
 if [ `ls | wc -l` -ne 0 ]
