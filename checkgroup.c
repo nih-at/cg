@@ -45,6 +45,9 @@ char *nntp_response;
 char *decoder = DECODER;
 struct range *rcmap;
 
+char *newsrc;
+#define DEFAULT_NEWSRC  "~/.newsrc"
+
 FILE *conin, *conout, *dfile;
 
 
@@ -68,15 +71,17 @@ char help_string[] = "\
   -V, --version         display version number\n\
 \n\
   -m, --mac             call hexbin decoder\n\
+  -n, --newsrc FILE     use FILE as newsrc file\n\
 \n\
 Report bugs to <cg-bugs@giga.or.at>.\n";
 
-#define OPTIONS	"hVm"
+#define OPTIONS	"hVmn:"
 
 struct option options[] = {
     { "help",      0, 0, 'h' },
     { "version",   0, 0, 'V' },
     { "mac",       0, 0, 'm' },
+    { "newsrc",    1, 0, 'n' },
     { NULL,        0, 0, 0   }
 };
 
@@ -110,11 +115,16 @@ main(int argc, char **argv)
 
     prg = argv[0];
 
+    newsrc = DEFAULT_NEWSRC;
+
     opterr = 0;
     while ((c=getopt_long(argc, argv, OPTIONS, options, 0)) != EOF) {
 	switch (c) {
 	case 'm':
 	    decoder = BINHEX;
+	    break;
+	case 'n':
+	    newsrc = optarg;
 	    break;
 
 	case 'h':
@@ -134,6 +144,8 @@ main(int argc, char **argv)
 	fprintf(stderr, usage_string, prg);
 	exit(1);
     }
+
+    newsrc = expand(newsrc);
 
     dfile = fopen(".debug", "w");
 
@@ -238,160 +250,6 @@ main(int argc, char **argv)
     }
 
     exit(0);
-}
-
-
-
-int
-readrc(char *group, long lower, long upper, long no_art)
-{
-    FILE *rc;
-
-    if ((rc=fopen(RCNAME, "r")) == NULL) {
-	if (errno != ENOENT)
-	    fprintf(stderr, "%s: couldn't open %s for reading\n", prg,
-		    RCNAME);
-	rcmap = range_init(lower, upper, no_art);
-	return 0;
-    }
-
-    rcmap = NULL;
-    
-    parserc(group, rc, lower, upper, no_art);
-
-    if (rcmap == NULL) {
-	rcmap = range_init(lower, upper, no_art);
-    }
-    
-    fclose(rc);
-    return(0);
-}
-
-
-
-
-int
-writerc(char *group)
-{
-    FILE *rc, *copy;
-    int bool, found;
-    char *temp, b[BUFSIZE], *compstr;
-
-    if ((rc=fopen(RCNAME, "r")) == NULL) {
-	if (errno != ENOENT)
-	    fprintf(stderr, "%s: couldn't open %s for reading\n", prg,
-		    RCNAME);
-    }
-
-    temp=(char *)xmalloc(strlen(RCNAME)+11);
-    sprintf(temp, "%s.%d", RCNAME, (int)getpid());
-    
-    if ((copy=fopen(temp, "w")) == NULL) {
-	fprintf(stderr, "%s: couldn't open %s for writing\n", prg,
-		temp);
-	if (rc)
-	    fclose(rc);
-	return 1;
-    }
-
-    compstr=xmalloc(strlen(group)+2);
-    sprintf(compstr, "%s:", group);
-
-    found=0;
-    if (rc)
-	while(!ferror(rc) && fgets(b, BUFSIZE, rc) != NULL) {
-	    /* is this the group that gets rewritten ? */
-	    found+=bool=!strncmp(compstr, b, strlen(compstr));
-	
-	    while (b[strlen(b)-1] != '\n') {
-		if (!bool)
-		    fputs(b, copy);
-		if (fgets (b, BUFSIZE, rc) != NULL)
-		    break;
-	    }
-	    if (!bool)
-		fputs(b, copy);
-	    
-	    if (found == 1) {
-		writegrouptorc(copy, compstr);
-	    }
-	    
-	    if (ferror(copy)) {
-		fprintf(stderr, "%s: couldn't write to %s: %s\n",
-			prg, temp, strerror(errno));
-		fclose(copy);
-		fclose(rc);
-		free(temp);
-		free(compstr);
-		unlink(temp);
-		return(-1);
-	    }
-	}
-
-    if (!found)
-	writegrouptorc(copy, compstr);
-    if (ferror(copy)) {
-	fprintf(stderr, "%s: couldn't write to %s: %s\n",
-		prg, temp, strerror(errno));
-	fclose(copy);
-	if (rc)
-	    fclose(rc);
-	free(temp);
-	free(compstr);
-	unlink(temp);
-	return(-1);
-    }
-    
-    free(compstr);
-    
-    if (rc && ferror(rc)) {
-	fprintf(stderr, "%s: couldn't read from %s: %s\n",
-		prg, RCNAME, strerror(errno));
-	fclose(copy);
-	fclose(rc);
-	unlink(temp);
-	free(temp);
-	return(-1);
-    }
-
-    if (rc)
-	fclose(rc);
-    fclose(copy);
-
-    if (rename(temp, RCNAME) != 0) {
-	fprintf(stderr, "%s: couldn't rename %s to %s: %s\n",
-		prg, temp, RCNAME, strerror(errno));
-	free(temp);
-	return -1;
-    }
-    
-    free(temp);
-
-    range_free(rcmap);
-    
-    return(0);
-}
-
-
-
-void
-writegrouptorc (FILE *copy, char *compstr)
-{
-    int lower, upper;
-    
-    fprintf(copy, "%s ", compstr);
-    
-    lower=upper=0;
-    while (range_get(rcmap, &lower, &upper, 1) == 0) {
-	if (lower==upper) {
-	    fprintf(copy, "%s%d", (lower == 1) ? "" : ",",
-		    lower);
-	}
-	else
-	    fprintf(copy, "%s%d-%d", (lower == 1) ? "" : ",",
-		    lower, upper);
-    }
-    putc('\n', copy);
 }
 
 

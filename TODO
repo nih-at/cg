@@ -4,3 +4,5 @@
 * newsreader
 * filesize *2
 * leftmost " - "
+* NNTPSERVER from environment
+* .decoderc-> ~/.newsrc
