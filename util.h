@@ -22,6 +22,8 @@ void debug(out_state *out, char *fmt, ...);
 char *expand(char *path);
 FILE *fopen_uniq(char **s);
 char *getline(FILE *f);
+void prdebug(int level, char *fmt, ...);
+void prdebug_init(int do_file, int do_stdout);
 void prerror(enum errtype, char *fmt, ...);
 void skip_rest(FILE *f);
 token *skip_to(stream *in, enum token_type type);

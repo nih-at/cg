@@ -19,11 +19,10 @@ output_new()
     out = xmalloc(sizeof(*out));
 
     out->infile = out->warned = out->ndata = 0;
-    out->do_debug = 1;
     out->do_fdesc = -1;
     out->fdescnl = 0;
     out->prev_fdesc = NULL;
-    out->fout = out->debug = out->fdesc = NULL;
+    out->fout = out->fdesc = NULL;
 
     return out;
 }
@@ -40,8 +39,6 @@ output_free(out_state *out)
 	fclose(out->fout);
     close_fdesc(out);
     free(out->prev_fdesc);
-    if (out->do_debug)
-	fclose(out->debug);
 
     free(out);
 }
@@ -56,7 +53,6 @@ output(out_state *out, token *t)
 	"error"
     };
     static char **tname = _foo+1;
-    char debugfilename[] = ".debug";
     char *outfilename;
     char *fdescname;
     int fd;
@@ -65,13 +61,13 @@ output(out_state *out, token *t)
 	out->ndata++;
     else {
 	if (out->ndata)
-	    printf(">data [%d]\n", out->ndata);
+	    prdebug(2, ">data [%d]", out->ndata);
 	out->ndata = 0;
     }
 
     switch (t->type) {
     case TOK_FNAME:
-	printf(">%s: %s\n", tname[t->type], t->line ? t->line : "(null)");
+	prdebug(2, ">%s: %s", tname[t->type], t->line ? t->line : "(null)");
 
 	if (out->infile) {
 	    fprintf(stderr, "ERROR: fname while in file (missing EOF)\n");
@@ -108,25 +104,11 @@ output(out_state *out, token *t)
 	break;
 
     case TOK_DEBUG:
-	if (out->do_debug && out->debug == NULL) {
-	    if ((out->debug=fopen(debugfilename, "w")) == NULL) {
-		fprintf(stderr, "SYSERR: cannot create debug file `%s': %s\n",
-		       debugfilename, strerror(errno));
-		out->do_debug = 0;
-	    }
-	}
-	if (out->do_debug) {
-	    if (fprintf(out->debug, "%s\n", t->line) != 0) {
-		fprintf(stderr, "SYSERR: cannot write to debug file `%s': "
-			"%s\n", debugfilename, strerror(errno));
-		out->do_debug = 0;
-	    }
-	}
-	printf(">%s: %s\n", tname[t->type], t->line);
+	prdebug(5, ">debug: %s", t->line);
 	break;
 	
     case TOK_LINE:
-	printf(">%s: %s\n", tname[t->type], t->line);
+	prdebug(1, ">%s: %s", tname[t->type], t->line);
 	if (out->infile) {
 	    if (out->fout != NULL) {
 		fprintf(out->fout, "%s\n", t->line);
@@ -202,7 +184,7 @@ output(out_state *out, token *t)
 	/* fallthrough */
 	
     case TOK_EOF:
-	printf(">%s\n", tname[t->type]);
+	prdebug(2, ">%s", tname[t->type]);
 
 	if (out->infile && out->fout)
 	    fclose(out->fout);
@@ -232,7 +214,7 @@ output(out_state *out, token *t)
 	break;
 
     default:
-	printf(">%s\n", tname[t->type]);
+	prdebug(2, ">%s", tname[t->type]);
 	break;
     }
 

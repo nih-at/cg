@@ -19,6 +19,8 @@ main(int argc, char *argv[])
 
     prg = argv[0];
 
+    prdebug_init(1, 1);
+
     header_init();
     mime_init();
 

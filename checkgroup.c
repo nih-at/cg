@@ -55,7 +55,7 @@ char *newsrc;
 #define DEFAULT_NEWSRC  "~/.newsrc"
 int mark_complete;
 
-FILE *conin, *conout, *dfile;
+FILE *conin, *conout;
 
 volatile int save_and_quit;
 
@@ -136,7 +136,7 @@ main(int argc, char **argv)
 {
     map *parts;
     int err, fd, verbose, i, c, k;
-    long no_art, lower, upper, no_complete, *toget, gute, j, no_file;
+    long no_art, lower, upper, no_complete, *toget, ndecoded, j, no_file;
     char b[BUFSIZE];
     struct file **todec;
     FILE *fp;
@@ -154,10 +154,6 @@ main(int argc, char **argv)
     header_init();
 
     nntp_host = nntp_user = nntp_pass = NULL;
-
-    /* signal handling */
-    save_and_quit = 0;
-    signal(SIGINT, sighandle);
 
     opterr = 0;
     while ((c=getopt_long(argc, argv, OPTIONS, options, 0)) != EOF) {
@@ -198,9 +194,9 @@ main(int argc, char **argv)
 	exit(1);
     }
 
-    newsrc = expand(newsrc);
+    prdebug_init(1, 1);
 
-    dfile = fopen(".debug", "w");
+    newsrc = expand(newsrc);
 
     for (i=0;i<MAX_PATTERNS;i++) {
 	if ((err=regcomp(&pattern[i], spattern[i], REG_EXTENDED|REG_ICASE))
@@ -316,7 +312,11 @@ main(int argc, char **argv)
 	    continue;
 	}
 	
-	gute=0;
+	/* signal handling */
+	save_and_quit = 0;
+	signal(SIGINT, sighandle);
+	
+	ndecoded = 0;
 	out = output_new();
 	
 	for (j=0; toget[j]!=-1;j++) {
@@ -327,7 +327,7 @@ main(int argc, char **argv)
 		    range_clear(rcmap, todec[toget[j]]->part0);
 	    }
 	    else
-		gute++;
+		ndecoded++;
 	}
 		
 	output_free(out);
@@ -347,7 +347,7 @@ main(int argc, char **argv)
 	
 	if (verbose)
 	    printf("%s: %ld found, %ld chosen, %ld decoded\n",
-		   argv[i], no_complete, no_file, gute);
+		   argv[i], no_complete, no_file, ndecoded);
 
 	if (save_and_quit) {
 	    printf("quitting after interrupt signal\n");
@@ -512,17 +512,13 @@ parse(map *parts, FILE *f)
 	while (s != NULL && s[0] == '<')
 	    s = strtok(NULL, "\t"); /* message-ID & references */
 	if (s == NULL) {
-	    /* DEBUG */ fprintf(dfile,
-				"%s: xover for article %ld is weird\n",
-				prg, artno);
+	    prdebug(5, "xover for article %ld is weird\n", artno);
 	    size = 0;
 	}
 	else {
 	    size = strtol(s, NULL, 10);
 	    if ((s=strtok(NULL, "\t")) == NULL) {
-		/* DEBUG */ fprintf(dfile,
-				    "%s: xover for article %ld is weird\n",
-				    prg, artno);
+		prdebug(5, "xover for article %ld is weird\n", artno);
 		lines = 0;
 	    }
 	    else {
@@ -546,7 +542,7 @@ parse(map *parts, FILE *f)
 		npart = 1;
 	    }
 	    else {
-		/* DEBUG */	fprintf(dfile, "%s\n", subj);
+		prdebug(0, "unrecognized subject: %s", subj);
 		continue;
 	    }
 	}
@@ -571,8 +567,7 @@ parse(map *parts, FILE *f)
 
 	if ((npart == 0) || (npart > 10000) || (part > 10000)
 	    || (part > npart)) {
-	    /* DEBUG */ fprintf(dfile,"%s: ignored: part %d of %d\n",
-				subj, part, npart);
+	    prdebug(5, "%s: ignored: part %d of %d\n", subj, part, npart);
 	    free(key);
 	    free(comment);
 	    if (!mark_complete)
@@ -615,8 +610,8 @@ parse(map *parts, FILE *f)
 	}
 
 	if (val->artno[part-1] != -1 ) {
-	    /* DEBUG  fprintf(dfile, "%s: ignored: duplicate part %d\n",
-	       val->tag, part); */
+	    prdebug(5, "%s: ignored: duplicate part %d\n",
+		    val->tag, part);
 	    if (!mark_complete)
 		range_set(rcmap, artno);
 	    continue;

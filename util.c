@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +13,11 @@
 #include "stream.h"
 
 #define HOUSENUMBER 102400
+
+#define DEBUG_FILE_NAME ".debug"
+
+static FILE *debug_file;
+static int do_debug_file, do_debug_stdout;
 
 char errfilename[ERRFILESIZE+1];
 int errpartno, errlineno;
@@ -327,4 +333,40 @@ our_basename(char *name)
     if ((p=strrchr(name, '\\')))
 	return p+1;
     return name;
+}
+
+
+
+void
+prdebug(int level, char *fmt, ...)
+{
+    char *s;
+    va_list argp;
+
+    if (level < do_debug_file &&  level < do_debug_stdout)
+	return;
+
+    va_start(argp, fmt);
+    vasprintf(&s, fmt, argp);
+    va_end(argp);
+
+    if (level >= do_debug_file)
+	fprintf(debug_file, "%s\n", s);
+    if (level >= do_debug_stdout)
+	puts(s);
+
+    free(s);    
+}
+
+
+
+void
+prdebug_init(int do_file, int do_stdout)
+{
+    if (do_file < INT_MAX) {
+	if ((debug_file=fopen(DEBUG_FILE_NAME, "w")) == NULL)
+	    do_file = INT_MAX;
+    }
+    do_debug_file = do_file;
+    do_debug_stdout = do_stdout;
 }
