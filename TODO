@@ -1,6 +1,7 @@
 binhex support
 multipart/appledouble: better handling if filename same
 
+stream_fcat: report file open errors
 multiple nntp servers as input
 [cleanup nntp support to ease above]
 saving parts to files and use as input
