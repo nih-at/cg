@@ -13,7 +13,7 @@ IRIX
 	compile failure: zlib.h not found
 
 OSF1 4.0
-	compile failure: warnings, can't find zlib.h, yywrap unresolved
+	compile failure: missing snprintf, vsnprintf
 
 Solaris
 	compile problem: -R/usr/local/include needed
