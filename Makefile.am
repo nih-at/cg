@@ -22,5 +22,5 @@ testdec_SOURCES=testdec.c crc.c decode.c util.c mime.c tables.c header.c \
 
 #stest_SOURCES=stest.c util.c stream.c token.c stream_file.c stream_section.c
 
-noinst_HEADERS=checkgroup.h decode.h getopt.h globals.h header.h mime.h \
+noinst_HEADERS=checkgroup.h crc.h decode.h getopt.h globals.h header.h mime.h \
 	newsrc.h output.h ranges.h stream.h stream_types.h symbol.h util.h
