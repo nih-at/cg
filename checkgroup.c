@@ -1,3 +1,27 @@
+/*
+  $NiH$
+  
+  checkgroup.c -- main program
+  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
+
+  This file is part of cg, a program to assemble and decode binary Usenet
+  postings.  The authors can be contacted at <nih@giga.or.at>
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,13 +35,14 @@
 #include <map.h>
 
 #include "checkgroup.h"
-#include "stream.h"
-#include "ranges.h"
-#include "util.h"
 #include "decode.h"
-#include "mime.h"
 #include "header.h"
+#include "mime.h"
+#include "newsrc.h"
+#include "ranges.h"
+#include "stream.h"
 #include "stream_types.h"
+#include "util.h"
 
 #define NNTPHOSTFILE "/etc/nntpserver"
 #define DEFAULTEDITOR "vi"
@@ -61,7 +86,7 @@ volatile int save_and_quit;
 
 char version_string[] = 
 PACKAGE " " VERSION "\n\
-Copyright (C) 1997, 2001 Dieter Baron, Thomas Klausner\n"
+Copyright (C) 1997, 2001, 2002 Dieter Baron, Thomas Klausner\n"
 PACKAGE " comes with ABSOLUTELY NO WARRANTY, to the extent permitted by law.\n\
 You may redistribute copies of\n"
 PACKAGE " under the terms of the GNU General Public License.\n\
@@ -81,7 +106,7 @@ char help_string[] = "\
   -s, --server SERVER   NNTP server\n\
   -u, --user USER       specify user for authentication\n\
 \n\
-Report bugs to <cg-bugs@giga.or.at>.\n";
+Report bugs to <nih@giga.or.at>.\n";
 
 #define OPTIONS	"hVn:cu:p:s:"
 
@@ -109,8 +134,6 @@ char *extract(char *s, regmatch_t m);
 int do_decode(struct file *value, out_state *out);
 int nntp_resp(void);
 int nntp_put(char *fmt, ...);
-int writerc(char *group);
-int readrc(char *group, long lower, long upper, long no_art);
 void writegrouptorc(FILE *copy, char *compstr);
 
 

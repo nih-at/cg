@@ -1,5 +1,7 @@
 /*
-  hstrerror -- get resolver error message string
+  $NiH$
+
+  hstrerror.c -- get resolver error message string
   Copyright (C) 1996, 1997 Dieter Baron
 
   The author can be contacted at <dillo@giga.or.at>

@@ -1,8 +1,10 @@
 /*
-  sockets -- auxiliary socket functions
+  $NiH$
+
+  sockets.c -- auxiliary socket functions
   Copyright (C) 1996, 1997 Dieter Baron
 
-  This file is part of cftp, a fullscreen ftp client
+  This file is part of cftp, a fullscreen ftp client.
   The author can be contacted at <dillo@giga.or.at>
 
   This program is free software; you can redistribute it and/or modify
