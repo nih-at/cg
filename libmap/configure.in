@@ -5,7 +5,6 @@ dnl init
 AC_INIT(strhash.c)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE(libmap, 0.2)
-AC_SUBST(LIBOBJS)
 
 # We want these before the checks, so the checks can modify their values.
 test -z "$CFLAGS" && CFLAGS=-g auto_cflags=1
@@ -24,8 +23,7 @@ dnl structures
 dnl compiler characteristics
 dnl library functions
 
-AC_SUBST(LIBOBJS)
-AC_CHECK_FUNCS(strdup, , [LIBOBJS="$LIBOBJS $ac_func"])
+AC_CHECK_FUNCS(strdup, , [AC_LIBOBJ(strdup)])
 
 dnl system services
 
