@@ -22,7 +22,7 @@ range_init(int lower, int upper, int num)
     /* XXX: check for enormous (>100000) ranges */
 
     r->first = lower;
-    r->length = (upper-lower+7)/8;
+    r->length = (upper-lower+1+7)/8;
     r->length = r->length*8;
     r->bitmap=(char *)xmalloc(r->length/8);
 

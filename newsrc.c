@@ -32,9 +32,8 @@ readrc(char *group, long lower, long upper, long no_art)
     
     parserc(group, rc, lower, upper, no_art);
 
-    if (rcmap == NULL) {
+    if (rcmap == NULL)
 	rcmap = range_init(lower, upper, no_art);
-    }
     
     fclose(rc);
     return(0);
@@ -55,7 +54,7 @@ writerc(char *group)
     if (modified == 0) {
 	sprintf(b, "%s~", newsrc);
 	unlink(b);
-	if (link(newsrc, b) < 0) {
+	if (link(newsrc, b) < 0 && errno != ENOENT) {
 	    fprintf(stderr, "%s: can't backup newsrc `%s' (left unchanged): "
 		    "%s\n",
 		    prg, newsrc, strerror(errno));

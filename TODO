@@ -6,4 +6,4 @@
 * leftmost " - "
 * NNTPSERVER from environment
 * xref handling
-* [x of y]
+* reconnect upon timeout

@@ -27,21 +27,22 @@ struct file {
     long size;
 };
 
-#define MAX_PATTERNS 4
+#define MAX_PATTERNS 5
 
 char *spattern[MAX_PATTERNS] = {  /* ! ( ! */
-    "(.*) - (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])]", /* "c - n ()" */
+    "(.*) - (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])]",  /* "c - n ()" */
     "- (.*[^ ]) *[[(]([0-9]*)/([0-9]*)[])] *(.*)", /* "- n () c" mac groups */
-    "(.*)()[[(]([0-9]*)/([0-9]*)[])]",            /* "n ()" desperate */
-    "(.*)[[(]([0-9]+) of ([0-9]+)[])](.*)"            /* "n[x of y]c" */
+    "(.*)()[[(]([0-9]*)/([0-9]*)[])]",             /* "n ()" desperate */
+    "(.*)[[( ]([0-9]+) of ([0-9]+)[]) ](.*)",       /* "c[x of y]n" */
+    "(.*)  *([^ ]*\\.[rst][a0-9][r0-9]) *$"        /* "c n.rar" */
 };
 
 regex_t pattern[MAX_PATTERNS]; 
 
-int pat_key[MAX_PATTERNS] =     { 2, 1, 1, 1 };
-int pat_comment[MAX_PATTERNS] = { 1, 4, 2, 4 };
-int pat_part[MAX_PATTERNS] =    { 3, 2, 3, 2 };
-int pat_npart[MAX_PATTERNS] =   { 4, 3, 4, 3 };
+int pat_key[MAX_PATTERNS] =     { 2, 1, 1, 2, 2 };
+int pat_comment[MAX_PATTERNS] = { 1, 4, 2, 4, 1 };
+int pat_part[MAX_PATTERNS] =    { 3, 2, 3, 1, 0 };
+int pat_npart[MAX_PATTERNS] =   { 4, 3, 4, 3, 0 };
 
 char *prg;
 char *nntp_response;
@@ -67,7 +68,7 @@ PACKAGE " under the terms of the GNU General Public License.\n\
 For more information about these matters, see the files named COPYING.\n";
 
 char usage_string[] = "\
-Usage: %s [-m] group ...\n";
+Usage: %s [-cm] [-n rcfile] group ...\n";
 
 char help_string[] = "\
 \n\
@@ -202,6 +203,17 @@ main(int argc, char **argv)
 	    continue;
 	}
 
+	if (no_art == 0) {
+	    printf("%s: no new files found in %s\n", prg, argv[i]);
+	    continue;
+	}
+
+	if (lower > upper || no_art < 0 || lower < 0 || upper < 0) {
+	    fprintf(stderr, "%s: invalid response from newsserver"
+		    " for group %s: %s\n", prg, argv[i], nntp_response);
+	    continue;
+	}
+	
 	readrc(argv[i], lower, upper, no_art);
 	
 	nntp_put("xover %ld-%ld", lower, upper);
@@ -438,12 +450,20 @@ parse(map *parts, FILE *f)
 
 	key = extract(subj, match[pat_key[i]]);
 	comment = extract(subj, match[pat_comment[i]]);
-	s = extract(subj, match[pat_part[i]]);
-	part = atoi(s);
-	free(s);
-	s = extract(subj, match[pat_npart[i]]);
-	npart = atoi(s);
-	free(s);
+	if (pat_part[i]) {
+	    s = extract(subj, match[pat_part[i]]);
+	    part = atoi(s);
+	    free(s);
+	}
+	else
+	    part = 1;
+	if (pat_npart[i]) {
+	    s = extract(subj, match[pat_npart[i]]);
+	    npart = atoi(s);
+	    free(s);
+	}
+	else
+	    npart = 1;
 	
 	if (part == 0) {
 	    /* XXX save info */
