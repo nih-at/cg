@@ -1,7 +1,6 @@
 install man page, translate to man format when needed
 test cases: mime: unknown CTE, errors
 
-IPv6
 uuencode-base64 support
 binhex support
 multipart/appledouble: better handling if filename same
