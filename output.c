@@ -195,6 +195,7 @@ output(out_state *out, token *t)
 
     case TOK_ERR:
 	fprintf(stderr, "Error token type %d: %s\n", t->n, t->line);
+	prdebug(DEBUG_TOK, ">error: type %d: %s", t->n, t->line);
 	break;
 
     case TOK_DATA:
