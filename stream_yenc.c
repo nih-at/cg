@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_yenc.c,v 1.6 2002/04/16 02:26:08 dillo Exp $
+  $NiH: stream_yenc.c,v 1.7 2002/04/16 22:46:15 wiz Exp $
 
   stream_yenc.c -- extract and decode yenc data
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -142,8 +142,8 @@ yenc_get(struct stream_yenc *this)
 		break;
 	    else if (strncmp(t->line, "=ybegin ", 8) == 0) {
 		if (old_state != Y_PRE) {
-		    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			       "unexpected =ybegin line");
+		    token_set3(stream_enqueue((stream *)this), TOK_ERR,
+			       TOK_ERR_ERROR, "unexpected =ybegin line");
 		    break;
 		}
 
@@ -153,8 +153,8 @@ yenc_get(struct stream_yenc *this)
 	    }
 	    else if (strncmp(t->line, "=ypart ", 7) == 0) {
 		if (old_state != Y_BEGIN) {
-		    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			       "unexpected =ypart line");
+		    token_set3(stream_enqueue((stream *)this), TOK_ERR,
+			       TOK_ERR_ERROR, "unexpected =ypart line");
 		    break;
 		}
 
@@ -164,8 +164,8 @@ yenc_get(struct stream_yenc *this)
 	    }
 	    else if (strncmp(t->line, "=yend ", 6) == 0) {
 		if (old_state != Y_DATA && old_state != Y_BEGIN) {
-		    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			       "unexpected =yend line");
+		    token_set3(stream_enqueue((stream *)this), TOK_ERR,
+			       TOK_ERR_ERROR, "unexpected =yend line");
 		    break;
 		}
 
@@ -186,7 +186,8 @@ yenc_get(struct stream_yenc *this)
 			if (*p == '=') {
 			    if (*p++ == 0) {
 				token_set3(stream_enqueue((stream *)this),
-					   TOK_ERR, 1, "escape char = "
+					   TOK_ERR, TOK_ERR_ERROR,
+					   "escape char = "
 					   "at end of yenc line");
 				break;
 			    }
@@ -216,14 +217,14 @@ yenc_get(struct stream_yenc *this)
 
 	case TOK_EOA:
 	    if (old_state != Y_POST)
-		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			   "missing =yend in yenc stream");
+		token_set3(stream_enqueue((stream *)this), TOK_ERR,
+			   TOK_ERR_ERROR, "missing =yend in yenc stream");
 	    state = Y_HEADER;
 	    break;
 
 	case TOK_EOF:
-	    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-		       "missing =yend in yenc stream");
+	    token_set3(stream_enqueue((stream *)this), TOK_ERR,
+		       TOK_ERR_ERROR, "missing =yend in yenc stream");
 	    return TOKEN_EOF;
 
 	case TOK_EOH:
@@ -297,6 +298,7 @@ _yenc_handle_begin(struct stream_yenc *this, char *ybegin, int firstp)
     symbol s;
     char *p;
     unsigned long size;
+    int i;
 
     if (firstp) {
 	this->part = 0;
@@ -316,9 +318,10 @@ _yenc_handle_begin(struct stream_yenc *this, char *ybegin, int firstp)
 	s = _yenc_parse(&ybegin);
 
 	if (s == YENC_PART) {
-	    if (_yenc_get_int(ybegin) != this->part) {
-		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			   "unexpected yEnc part");
+	    if ((i=_yenc_get_int(ybegin)) != this->part) {
+		token_printf3(stream_enqueue((stream *)this), TOK_ERR,
+			      TOK_ERR_ERROR, "unexpected yEnc part, "
+			      "expected %d, got %d", this->part, i);
 	    }
 	}
 	else if (s == YENC_SIZE) {
@@ -326,8 +329,10 @@ _yenc_handle_begin(struct stream_yenc *this, char *ybegin, int firstp)
 	    if (firstp)
 		this->size = size;
 	    else if (this->size != size) {
-		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			   "yEnc: size mismatch between parts");
+		token_printf3(stream_enqueue((stream *)this), TOK_ERR,
+			      TOK_ERR_ERROR, "yEnc: size mismatch between "
+			      "parts, expected %ld, got %ld", this->size,
+			      size);
 	    }
 	}
 	else if (s == YENC_NAME) {
@@ -344,7 +349,8 @@ _yenc_handle_begin(struct stream_yenc *this, char *ybegin, int firstp)
 	    }
 	    else {
 		if (strcmp(this->name, ybegin) != 0) {
-		    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
+		    token_set3(stream_enqueue((stream *)this), TOK_ERR,
+			       TOK_ERR_ERROR,
 			       "yEnc: file name mismatch between parts");
 		}
 	    }
@@ -360,42 +366,53 @@ static void
 _yenc_handle_end(struct stream_yenc *this, char *line)
 {
     symbol s;
-    unsigned long size;
+    unsigned long size, partcrc;
+    int i;
 
     do {
 	line = strchr(line, ' ');
 	s = _yenc_parse(&line);
 
 	if (s == YENC_PART) {
-	    if (_yenc_get_int(line) != this->part) {
-		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			   "unexpected yEnc part");
+	    if ((i=_yenc_get_int(line)) != this->part) {
+		token_printf3(stream_enqueue((stream *)this), TOK_ERR,
+			      TOK_ERR_ERROR, "unexpected yEnc part, "
+			      "expected %d, got %d", this->part, i);
 	    }
 	}
 	else if (s == YENC_SIZE) {
 	    size = _yenc_get_long(line);
 	    if (this->pbegin+size != this->pos) {
-		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			   "yEnc: part size wrong");
+		token_printf3(stream_enqueue((stream *)this), TOK_ERR,
+			      TOK_ERR_ERROR, "yEnc: part size wrong, "
+			      "expected %ld, got %ld", this->pos-this->pbegin,
+			      size);
 	    }
 	}
 	else if (s == YENC_PCRC32) {
-	    if (this->pcrc != _yenc_get_hex(line)) {
-		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			   "yEnc: part crc wrong");
+	    partcrc = _yenc_get_hex(line);
+	    if (this->pcrc != partcrc) {
+		token_printf3(stream_enqueue((stream *)this), TOK_ERR,
+			      TOK_ERR_ERROR, "yEnc: part crc wrong, "
+			      "expected %08lx, got %08lx", this->pcrc,
+			      partcrc);
 	    }
 	}
 	else if (s == YENC_CRC32) {
-	    if (this->crc != _yenc_get_hex(line)) {
-		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			   "yEnc: file crc wrong");
+	    partcrc=_yenc_get_hex(line);
+	    if (this->crc != partcrc) {
+		token_printf3(stream_enqueue((stream *)this), TOK_ERR,
+			      TOK_ERR_ERROR, "yEnc: file crc wrong, "
+			      "expected %08lx, got %08lx", this->crc,
+			      partcrc);
 	    }
 	}
     } while (s);
 
     if (this->pend != -1 && this->pos != this->pend) {
-	token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-		   "yEnc: part end wrong");
+	token_printf3(stream_enqueue((stream *)this), TOK_ERR, TOK_ERR_ERROR,
+		      "yEnc: part end wrong, expected %ld, got %ld",
+		      this->pend, this->pos);
     }
 }
 
@@ -405,15 +422,18 @@ static void
 _yenc_handle_part(struct stream_yenc *this, char *line)
 {
     symbol s;
+    long size;
 
     do {
 	line = strchr(line, ' ');
 	s = _yenc_parse(&line);
 
 	if (s == YENC_BEGIN) {
-	    if (this->pbegin != _yenc_get_int(line)-1) {
-		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			   "yEnc part begin wrong");
+	    size = _yenc_get_int(line)-1;
+	    if (this->pbegin != size) {
+		token_printf3(stream_enqueue((stream *)this), TOK_ERR,
+			      TOK_ERR_ERROR, "yEnc part begin wrong, "
+			      "expected %ld, got %ld", this->pbegin, size);
 	    }
 	}
 	else if (s == YENC_END)

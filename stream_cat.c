@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_cat.c,v 1.6 2002/04/10 16:23:33 wiz Exp $
+  $NiH: stream_cat.c,v 1.7 2002/04/16 22:46:12 wiz Exp $
 
   stream_cat.c -- concatenate multiple article streams
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -40,6 +40,8 @@ struct stream_cat {
 static void close_current(struct stream_cat *this);
 static int cat_close(struct stream_cat *st);
 static token *cat_get(struct stream_cat *st);
+
+extern char *nntp_response;
 
 
 
@@ -89,8 +91,9 @@ cat_get(struct stream_cat *this)
 
 	ret = nntp_put("article %ld", this->file->artno[this->i++]);
 	if (ret != 220 && ret != 224) {
-	    token_set3(stream_enqueue((stream *)this),
-		       TOK_ERR, 0, "article failed");
+	    token_printf3(stream_enqueue((stream *)this),
+			  TOK_ERR, TOK_ERR_ERROR, "article %ld failed: %s",
+			  this->file->artno[this->i-1], nntp_response);
 	    return token_set(&this->st.tok, TOK_EOA, NULL);
 	}
 

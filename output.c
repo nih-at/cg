@@ -1,5 +1,5 @@
 /*
-  $NiH: output.c,v 1.18 2002/04/10 16:23:30 wiz Exp $
+  $NiH: output.c,v 1.19 2002/04/16 22:46:09 wiz Exp $
 
   output.c -- output part of the decoder
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -241,7 +241,7 @@ output(out_state *out, token *t)
     case TOK_ERR:
 	fprintf(stderr, "Error token type %d: %s\n", t->n, t->line);
 	prdebug(DEBUG_ERROR, ">error: type %d: %s", t->n, t->line);
-	if (out->infile && out->broken == 0) {
+	if (t->n == TOK_ERR_ERROR && out->infile && out->broken == 0) {
 	    /* rename file to .broken */
 	    brokenfilename = malloc(strlen(out->filename)+8);
 	    sprintf(brokenfilename, "%s.broken", out->filename);

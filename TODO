@@ -1,5 +1,4 @@
 test cases: mime: unknown CTE, errors
-error token: use token_printf3, differntiate between error/warning.
 
 uuencode-base64 support
 binhex support

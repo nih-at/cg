@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_fcat.c,v 1.4 2002/04/16 22:46:12 wiz Exp $
+  $NiH: stream_fcat.c,v 1.5 2002/04/22 22:12:31 dillo Exp $
 
   stream_fcat.c -- concatenate files
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -83,8 +83,8 @@ fcat_get(struct stream_fcat *this)
 	    return TOKEN_EOF;
 	}
 	if ((this->cur=fopen(this->names[this->i++], "r")) == NULL) {
-	    token_printf3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			  "cannot open file `%s': %s",
+	    token_printf3(stream_enqueue((stream *)this), TOK_ERR,
+			  TOK_ERR_ERROR, "cannot open file `%s': %s",
 			  this->names[this->i-1], strerror(errno));
 	    return token_set(&this->st.tok, TOK_EOA, NULL);
 	}

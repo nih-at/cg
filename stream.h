@@ -2,7 +2,7 @@
 #define _HAD_STREAM_H
 
 /*
-  $NiH: stream.h,v 1.5 2002/04/16 22:46:11 wiz Exp $
+  $NiH: stream.h,v 1.6 2002/04/22 22:12:31 dillo Exp $
 
   stream.h -- stream interface
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -40,6 +40,9 @@ struct token {
     int alloced;		/* is line malloc()ed? */
     char *line;
 };
+
+#define TOK_ERR_WARNING	0
+#define TOK_ERR_ERROR	1
 
 typedef struct token token;
 

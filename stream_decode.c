@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_decode.c,v 1.4 2002/04/12 01:16:41 dillo Exp $
+  $NiH: stream_decode.c,v 1.5 2002/04/16 22:46:12 wiz Exp $
 
   stream_decode.c -- low-level decoding
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -87,9 +87,10 @@ dec_get(struct stream_decode *this)
 
     switch (this->state) {
     case DS_ILL:
-	/* XXX: error number and text */
+	/* XXX: specify exact error */
 	this->state = DS_EOF;
-	return token_set(&this->st.tok, TOK_ERR, NULL);
+	return token_printf3(&this->st.tok, TOK_ERR, TOK_ERR_ERROR,
+			     "illegal character in encoded data");
 
     case DS_EOF:
 	return TOKEN_EOF;

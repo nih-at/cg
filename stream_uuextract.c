@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_uuextract.c,v 1.6 2002/04/12 01:16:41 dillo Exp $
+  $NiH: stream_uuextract.c,v 1.7 2002/04/16 22:46:15 wiz Exp $
 
   stream_uuextract.c -- extrace uuencode data
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -114,7 +114,8 @@ uux_get(struct stream_uux *this)
 
 	    case UU_EMPTY:
 		if (old_state == UU_EMPTY) {
-		    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
+		    token_set3(stream_enqueue((stream *)this), TOK_ERR,
+			       TOK_ERR_WARNING,
 			       "end expected after empty line");
 		}
 		break;
@@ -122,16 +123,16 @@ uux_get(struct stream_uux *this)
 	    case UU_FULL:
 		if (old_state != UU_FULL && old_state != UU_PRE) {
 		    /* error: end or empty expected */
-		    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			       "long line unexpected");
+		    token_set3(stream_enqueue((stream *)this), TOK_ERR,
+			       TOK_ERR_ERROR, "long line unexpected");
 		}
 		this->state = UU_FULL;
 		return token_set(&this->st.tok, TOK_LINE, t->line+1);
 
 	    case UU_SHORT:
 		if (old_state != UU_FULL && old_state != UU_PRE) {
-		    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			       "unexpected short line");
+		    token_set3(stream_enqueue((stream *)this), TOK_ERR,
+			       TOK_ERR_ERROR, "unexpected short line");
 		}
 		strcpy(this->buf, t->line+1);
 		/* some encoders output complete quadruples; truncate them */
@@ -157,7 +158,7 @@ uux_get(struct stream_uux *this)
 	case TOK_EOF:
 	    if (line_kept)
 		token_set(stream_enqueue((stream *)this), TOK_LINE, this->buf);
-	    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
+	    token_set3(stream_enqueue((stream *)this), TOK_ERR, TOK_ERR_ERROR,
 		       "missing end in uu stream");
 	    return TOKEN_EOF;
 
@@ -168,7 +169,7 @@ uux_get(struct stream_uux *this)
 	default:
 	    return t;
 #if 0
-	    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
+	    token_set3(stream_enqueue((stream *)this), TOK_ERR, TOK_ERR_ERROR,
 		       "unexpected token type");
 	    if (old_state == UU_PRE || old_state == UU_HEADER)
 		state = old_state;

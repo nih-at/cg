@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_quot_print.c,v 1.3 2002/04/10 16:23:35 wiz Exp $
+  $NiH: stream_quot_print.c,v 1.4 2002/04/16 22:46:14 wiz Exp $
 
   stream_quot_print.c -- decode MIME quoted printables
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -98,7 +98,8 @@ qp_get(struct stream_quot_print *this)
 		    if (tok->type != TOK_LINE) {
 			token_copy(stream_enqueue((stream*)this), tok);
 			token_set3(stream_enqueue((stream*)this), TOK_ERR,
-				   1, "no line after continuation");
+				   TOK_ERR_ERROR,
+				   "no line after continuation");
 			return token_set(&this->st.tok, TOK_LINE, this->buf);
 		    }
 		    s = tok->line;

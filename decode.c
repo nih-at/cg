@@ -1,5 +1,5 @@
 /*
-  $NiH: decode.c,v 1.33 2002/04/10 16:23:27 wiz Exp $
+  $NiH: decode.c,v 1.34 2002/04/16 22:46:04 wiz Exp $
 
   decode.c -- main decode logic
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -236,7 +236,7 @@ decode_mime_uu(stream *in, out_state *out, char *fname)
 	    if (strncmp(t->line, "begin ", 6) == 0) {
 		s = t->line+6 + strspn(t->line+6, "01234567");
 		if (s == t->line+6 || *s != ' ') {
-		    output(out, token_set3(&tok, TOK_ERR, 0,
+		    output(out, token_set3(&tok, TOK_ERR, TOK_ERR_ERROR,
 					   "unparsable begin line"));
 		    skip_to(in, TOK_EOS);
 		    return -1;
@@ -256,7 +256,8 @@ decode_mime_uu(stream *in, out_state *out, char *fname)
 	case TOK_EOF:
 	case TOK_EOS:
 	case TOK_EOA:
-	    output(out, token_set3(&tok, TOK_ERR, 0, "no begin line found"));
+	    output(out, token_set3(&tok, TOK_ERR, TOK_ERR_ERROR,
+				   "no begin line found"));
 	    return -1;
 
 	default:

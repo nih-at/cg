@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_msg_partial.c,v 1.4 2002/04/10 16:23:34 wiz Exp $
+  $NiH: stream_msg_partial.c,v 1.5 2002/04/16 22:46:13 wiz Exp $
 
   stream_msg_partial.c -- assemble MIME partial message
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -61,17 +61,19 @@ stream_msg_partial_open(struct stream *source, struct mime_hdr *m)
     this->state = MP_BODY;
 
     if ((this->id=xstrdup(mime_option_get(m, MIME_CT_ID))) == NULL)
-	token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
+	token_set3(stream_enqueue((stream *)this), TOK_ERR, TOK_ERR_ERROR,
 		   "message/partial missing id");
 
     if ((this->i = get_int(m, MIME_CT_NUMBER)) < 0)
-	token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
+	token_set3(stream_enqueue((stream *)this), TOK_ERR, TOK_ERR_ERROR,
 		   "message/partial missing number");
     else if (this->i != 1)
-	token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-		   "message/partial: unexpected part");
+	token_printf3(stream_enqueue((stream *)this), TOK_ERR,
+		      TOK_ERR_ERROR,
+		      "message/partial: unexpected part %d (expected %d)",
+		      this->i, 1);
     if ((this->n = get_int(m, MIME_CT_TOTAL)) < 0)
-	token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
+	token_set3(stream_enqueue((stream *)this), TOK_ERR, TOK_ERR_ERROR,
 		   "message/partial missing total");
 
     return (stream *)this;
@@ -114,39 +116,46 @@ mprt_get(struct stream_mprt *this)
 		    this->ct_seen = 1;
 		    s = t->line + 13;
 		    if ((m=mime_parse(s+strspn(s, " \t"))) == NULL) {
-			token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
+			token_set3(stream_enqueue((stream *)this),
+				   TOK_ERR, TOK_ERR_ERROR,
 				   "cannot parse Content-Type header");
 		    }
 		    else {
 			if (m->type != MIME_CT_MSG_PART)
-			    token_set3(stream_enqueue((stream *)this),
-				       TOK_ERR, 1,
-				       "part not of type message/partial");
+			    token_printf3(stream_enqueue((stream *)this),
+					  TOK_ERR, TOK_ERR_ERROR,
+					  "part not of type message/partial, "
+					  "but %s", m->type);
 			else {
 			    if (this->id) {
 				if ((s=mime_option_get(m, MIME_CT_ID)) == NULL)
 				    token_set3(stream_enqueue((stream *)this),
-					       TOK_ERR, 1, "part missing id");
+					       TOK_ERR, TOK_ERR_ERROR,
+					       "part missing id");
 				else if (strcmp(this->id, s) != 0)
-				    token_set3(stream_enqueue((stream *)this),
-					       TOK_ERR, 1, "id mismatch");
+				    token_printf3(stream_enqueue((stream *)this),
+						  TOK_ERR, TOK_ERR_ERROR,
+						  "id mismatch: expected `%s'"
+						  ", got `%s'", this->id, s);
 			    }
 			    if (this->i > 0) {
 				if ((i=get_int(m, MIME_CT_NUMBER)) < 0) {
 				    token_set3(stream_enqueue((stream *)this),
-					       TOK_ERR, 1,
+					       TOK_ERR, TOK_ERR_ERROR,
 					       "part missing number");
 				}
 				else if (this->i+1 != i)
-				    token_set3(stream_enqueue((stream *)this),
-					       TOK_ERR, 1,
-					       "unexpected part number");
+				    token_printf3(stream_enqueue((stream *)this),
+						  TOK_ERR, TOK_ERR_ERROR,
+						  "unexpected part number, "
+						  "expected %d, got %d",
+						  this->i+1, i);
 				this->i++;
 			    }
 			    if (this->n > 0) {
 				if (this->i > this->n)
 				    token_set3(stream_enqueue((stream *)this),
-					       TOK_ERR, 1,
+					       TOK_ERR, TOK_ERR_ERROR,
 					       "more than total parts");
 				if ((i=get_int(m, MIME_CT_TOTAL)) < 0) {
 				    token_set3(stream_enqueue((stream *)this),
@@ -154,8 +163,10 @@ mprt_get(struct stream_mprt *this)
 					       "part missing total");
 				}
 				else if (this->n != i)
-				    token_set3(stream_enqueue((stream *)this),
-					       TOK_ERR, 1, "total mismatch");
+				    token_printf3(stream_enqueue((stream *)this),
+						  TOK_ERR, TOK_ERR_ERROR,
+						  "total mismatch, expected "
+						  "%d, got %d", this->n, i);
 			    }
 			    mime_free(m);
 			}
@@ -169,7 +180,8 @@ mprt_get(struct stream_mprt *this)
 	    this->state = MP_BODY;
 	    if (!this->ct_seen)
 		return token_set3(&this->st.tok,
-				  TOK_ERR, 1, "missing Content-Type header");
+				  TOK_ERR, TOK_ERR_ERROR,
+				  "missing Content-Type header");
 	    break;
 
 	case TOK_EOA:
@@ -179,8 +191,8 @@ mprt_get(struct stream_mprt *this)
 
 	case TOK_EOF:
 	    if (this->i>0 && this->n>0 && this->i != this->n)
-		token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			   "EOF before last part");
+		token_set3(stream_enqueue((stream *)this), TOK_ERR,
+			   TOK_ERR_ERROR, "EOF before last part");
 	    return TOKEN_EOF;
 
 	default:
