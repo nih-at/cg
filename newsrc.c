@@ -53,7 +53,7 @@ writerc(char *group)
 
     if (modified == 0) {
 	sprintf(b, "%s~", newsrc);
-	unlink(b);
+	remove(b);
 	if (link(newsrc, b) < 0 && errno != ENOENT) {
 	    fprintf(stderr, "%s: can't backup newsrc `%s' (left unchanged): "
 		    "%s\n",
@@ -163,19 +163,23 @@ writerc(char *group)
 static void
 writegrouptorc (FILE *copy, char *compstr)
 {
-    int lower, upper;
+    int lower, upper, first;
     
     fprintf(copy, "%s ", compstr);
     
-    lower=upper=0;
+    lower = upper = first = 0;
+
     while (range_get(rcmap, &lower, &upper, 1) == 0) {
 	if (lower==upper) {
-	    fprintf(copy, "%s%d", (lower == 1) ? "" : ",",
+	    fprintf(copy, "%s%d", (first == 0) ? "" : ",",
 		    lower);
 	}
 	else
-	    fprintf(copy, "%s%d-%d", (lower == 1) ? "" : ",",
+	    fprintf(copy, "%s%d-%d", (first == 0) ? "" : ",",
 		    lower, upper);
+
+	if (first == 0)
+	    first = 1;
     }
     putc('\n', copy);
 }
