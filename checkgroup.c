@@ -1,5 +1,5 @@
 /*
-  $NiH: checkgroup.c,v 1.45 2002/05/13 16:27:28 wiz Exp $
+  $NiH: checkgroup.c,v 1.46 2002/07/27 12:36:08 dillo Exp $
 
   checkgroup.c -- main program
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -422,7 +422,7 @@ complete (map *parts, long no_file, struct file **todec)
 
 
 long *
-choose (struct file **todec, long no_complete, char *group)
+choose(struct file **todec, long no_complete, char *group)
 {
     char b[BUFSIZE], fname[BUFSIZE], *editor;
     long i, j;
