@@ -6,10 +6,6 @@
 #include "util.h"
 #include "ranges.h"
 
-extern char *prg;
-
-extern FILE *dfile;
-
 static void _range_grow_left(struct range *r, int low);
 static void _range_grow_right(struct range *r, int high);
 static int _range_findbit(struct range *r, int first, int bit);
@@ -64,8 +60,6 @@ range_isin(struct range *r, int n)
 void
 range_set(struct range *r, int n)
 {
-    fprintf(dfile, "range_set: %d\n", n);
-
     if (n < r->first)
 	return;
     if (n >= r->first+r->length) {
@@ -98,8 +92,6 @@ void
 range_fill(struct range *r, int lower, int upper, int bit)
 {
     int first, length, loff, roff;
-
-    fprintf(dfile, "range_fill: %d-%d\n", lower, upper);
 
     if (lower < r->first) {
 	if (bit)
@@ -252,6 +244,5 @@ _range_findbit(struct range *r, int first, int bit)
     }
 
     /* can't happen */
-    fprintf(dfile, "range_findbit: chequebot!\n");
     return -1;
 }

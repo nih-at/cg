@@ -162,6 +162,9 @@ main(int argc, char **argv)
 	exit(3);
     }
 
+    nntp_put("mode reader");
+    nntp_resp();
+
     for (i=optind;i<argc;i++) {
 	nntp_put("group %s", argv[i]);
 
@@ -601,8 +604,8 @@ parse(map *parts, FILE *f)
 	}
 
 	if (val->msgid[part-1] != -1 ) {
-	    /* DEBUG */ fprintf(dfile, "%s: ignored: duplicate part %d\n",
-		   val->tag, part);
+	    /* DEBUG  fprintf(dfile, "%s: ignored: duplicate part %d\n",
+	       val->tag, part); */
 	    continue;
 	}
 
