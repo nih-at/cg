@@ -12,7 +12,7 @@
 enum enctype decode_mime(FILE *fin, FILE **foutp, char **fnamep,
 			 struct header *h);
 enum enctype decode_uu(FILE *fin, FILE *fout, int inp);
-void decode_uu_line(FILE *fout, char *line);
+void decode_uu_line(FILE *fout, unsigned char *line);
 enum enctype decode_base64(FILE *fin, FILE *fout);
 enum enctype decode_binhex(FILE *fin, FILE **foutp, char **fn);
 
@@ -80,6 +80,7 @@ decodefile(FILE *fin, FILE **foutp, enum enctype type)
 	    if ((line=getline(fin)) == NULL) {
 		/* no encoded data found */
 		type = enc_nodata;
+		break;
 	    }
 	    if (strncasecmp(line, "begin ", 6) == 0) {
 		s = line+6 + strspn(line+6, "01234567");
@@ -216,7 +217,7 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
 enum enctype
 decode_uu(FILE *fin, FILE *fout, int inp)
 {
-    char *line, b0[62], b1[62], b[45];
+    unsigned char *line, b0[62], b1[62], b[45];
     int len, len0, len1, end, i, j;
     long l;
     
@@ -254,7 +255,8 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 		    len1 = 0;
 		}
 	    }
-	    len0 = 0;
+	    else
+		len0 = 0;
 	}
     }
 
@@ -290,8 +292,10 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 		return enc_uu;
 	    }
 	}
-	if (line[0] == ' ' || line[0] == '`')
+	else if (line[0] == ' ' || line[0] == '`') {
 	    end = 1;
+	    continue;
+	}
 	else if (strcmp(line, "end") == 0) {
 	    if (end) {
 		skip_rest(fin);
@@ -303,41 +307,46 @@ decode_uu(FILE *fin, FILE *fout, int inp)
 		return enc_uu;
 	    }
 	}
+	else {
+	    /* XXX: wrong line */
+	    skip_rest(fin);
+	    return enc_uu;
+	}
 
 	for (j=1,i=0; i<len; j+=4) {
-	    l = ((line[j]&0x3f)<<18)
-		| ((line[j+1]&0x3f)<<12)
-		| ((line[j+2]&0x3f)<<6)
-		| (line[j+3]&0x3f);
+	    l = (((line[j]-' ')&0x3f)<<18)
+		| (((line[j+1]-' ')&0x3f)<<12)
+		| (((line[j+2]-' ')&0x3f)<<6)
+		| ((line[j+3]-' ')&0x3f);
 	    b[i++] = l >> 16;
 	    b[i++] = (l>>8) & 0xff;
 	    b[i++] = l & 0xff;
 	}
-	fwrite(b, 1, 3, fout);
+	fwrite(b, 1, len, fout);
     }
 }
 
 
 
 void
-decode_uu_line(FILE *fout, char *line)
+decode_uu_line(FILE *fout, unsigned char *line)
 {
     int len, i, j;
     long l;
-    char b[45];
+    unsigned char b[45];
     
     len = line[0] - ' ';
 
     for (j=1,i=0; i<len; j+=4) {
-	l = ((line[j]&0x3f)<<18)
-	    | ((line[j+1]&0x3f)<<12)
-	    | ((line[j+2]&0x3f)<<6)
-	    | (line[j+3]&0x3f);
+	l = (((line[j]-' ')&0x3f)<<18)
+	    | (((line[j+1]-' ')&0x3f)<<12)
+	    | (((line[j+2]-' ')&0x3f)<<6)
+	    | ((line[j+3]-' ')&0x3f);
 	b[i++] = l >> 16;
 	b[i++] = (l>>8) & 0xff;
 	b[i++] = l & 0xff;
     }
-    fwrite(b, 1, 3, fout);
+    fwrite(b, 1, len, fout);
 }
 
 

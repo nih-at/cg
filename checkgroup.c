@@ -588,12 +588,16 @@ decode(struct file *val)
 	switch(type) {
 	case enc_nodata:
 	case enc_error:
+	    if (fout)
+		fclose(fout);
 	    return 0;
 	    
 	case enc_eof:
 	    if (i != val->npart-1) {
 		prerror("`%s': premature end of encoded data in part %d of %d",
 			val->tag, i+1, val->npart);
+		if (fout)
+		    fclose(fout);
 		return 0;
 	    }
 	    break;
@@ -602,12 +606,15 @@ decode(struct file *val)
 	}
     }
 
+    if (fout)
+	fclose(fout);
+    
     if (oldtype != enc_base64 && type != enc_eof) {
 	prerror("`%s': end of encoded data not found",
 		val->tag);
 	return 0;
     }
-    
+
     return 1;
 }
 

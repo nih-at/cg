@@ -1,5 +1,4 @@
 * save part 0
-* decoder
 * user interface
 * newsreader
 * filesize (parts same size)
@@ -7,5 +6,11 @@
 * NNTPSERVER from environment
 * xref handling
 * reconnect upon timeout
+* table based uu decoding
 
-* read socket empty, don't hang
+* report no encoded data found
+* remove failed files
+* investigate no end founds
+* binhex, base64, mime
+* header values
+* more smarts in ignoring pointless descriptions

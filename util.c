@@ -118,7 +118,7 @@ fopen_uniq(char **fnp)
     }
     
     for (;;) {
-	if ((fd=open(b, O_CREAT | O_EXCL, 0666)) < 0) {
+	if ((fd=open(b, O_WRONLY | O_CREAT | O_EXCL, 0666)) < 0) {
 	    if (errno != EEXIST) {
 		return NULL;
 	    }
