@@ -89,7 +89,7 @@ decode_file(FILE *fin, FILE **foutp, enum enctype type, char **filenamep)
 		type = enc_nodata;
 		break;
 	    }
-	    if (strncasecmp(line, "begin ", 6) == 0) {
+	    if (strncmp(line, "begin ", 6) == 0) {
 		s = line+6 + strspn(line+6, "01234567");
 		if (s != line+6 && *s == ' ') {
 		    /* found uuencoded data */
