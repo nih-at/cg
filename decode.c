@@ -121,12 +121,10 @@ decode_mime(stream *in, out_state *out, struct header *h,
     struct mime_hdr *cd;
 
     filename = NULL;
+    cd = NULL;
 
-    if ((s=header_get(h, HDR_CONTENT_DISP)) && ((cd=mime_parse(s)))) {
+    if ((s=header_get(h, HDR_CONTENT_DISP)) && ((cd=mime_parse(s))))
 	filename = mime_option_get(cd, MIME_CD_FILENAME);
-	mime_free(cd);
-    }
-	
     if (filename == NULL)
 	filename = mime_option_get(ct, MIME_CT_NAME);
 
@@ -147,6 +145,8 @@ decode_mime(stream *in, out_state *out, struct header *h,
     else
 	debug(out, "no filename, unknown MIME transfer encoding: %s",
 	      te->type);
+
+    mime_free(cd);
 
     return 0;
 }
