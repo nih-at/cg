@@ -24,6 +24,7 @@ AC_CHECK_LIB(resolv, main)
 
 dnl headers
 
+AC_CHECK_HEADERS([stdarg.h])
 NIH_CHECK_DECL([#include "netdb.h"], h_errno)
 
 dnl functions
