@@ -1,3 +1,12 @@
+multipart/appledouble: better handling if filename same
+binhex support
+multiple nntp servers as input
+[cleanup nntp support to ease above]
+saving parts to files and use as input
+sane part0 handling
+
+---- Before rewrite
+
 * enforce minimum file size, e.g. >1k
 * progressbar?
 
