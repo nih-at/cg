@@ -19,12 +19,13 @@ struct mime_opt {
 #define MIME_CT_MSG_MULTI	mime_sym[1]
 #define MIME_CT_MULTI_MIX	mime_sym[2]
 #define MIME_TE_BASE64		mime_sym[3]
-#define MIME_CD_FILENAME	mime_sym[4]
-#define MIME_CT_NAME		mime_sym[5]
-#define MIME_CT_BOUNDARY	mime_sym[6]
-#define MIME_CT_ID		mime_sym[7]
-#define MIME_CT_NUMBER		mime_sym[8]
-#define MIME_CT_TOTAL		mime_sym[9]
+#define MIME_TE_X_UUENCODE	mime_sym[4]
+#define MIME_CD_FILENAME	mime_sym[5]
+#define MIME_CT_NAME		mime_sym[6]
+#define MIME_CT_BOUNDARY	mime_sym[7]
+#define MIME_CT_ID		mime_sym[8]
+#define MIME_CT_NUMBER		mime_sym[9]
+#define MIME_CT_TOTAL		mime_sym[10]
 
 extern symbol mime_sym[];
 

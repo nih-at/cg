@@ -17,6 +17,7 @@ int decode_binhex(stream *in, out_state *out);
 int decode_file(stream *in, out_state *out, int *tbl);
 int decode_mime(stream *in, out_state *out, struct header *h,
 		struct mime_hdr *ct, struct mime_hdr *te);
+int decode_mime_uu(stream *in, out_state *out, char *fname);
 
 
 
@@ -143,6 +144,11 @@ decode_mime(stream *in, out_state *out, struct header *h,
 	ret = decode_acum_ret(ret, decode_file(in, out, decode_table_base64));
 	output(out, TOKEN_EOF);
     }
+    else if (te->type == MIME_TE_X_UUENCODE) {
+	debug(out, "found: MIME x-uuencode");
+
+	ret = decode_acum_ret(ret, decode_mime_uu(in, out, filename));
+    }
     else if (filename) {
 	debug(out, "found: MIME %s", te->type);
 
@@ -158,6 +164,53 @@ decode_mime(stream *in, out_state *out, struct header *h,
     mime_free(cd);
 
     return ret;
+}
+
+
+
+int
+decode_mime_uu(stream *in, out_state *out, char *fname)
+{
+    token *t, tok;
+    char *s;
+    int ret;
+    stream *stm;
+
+    for (;;) {
+	t = stream_get(in);
+	
+	switch (t->type) {
+	case TOK_LINE:
+	    if (strncmp(t->line, "begin ", 6) == 0) {
+		s = t->line+6 + strspn(t->line+6, "01234567");
+		if (s == t->line+6 || *s != ' ') {
+		    output(out, token_set3(&tok, TOK_ERR, 0,
+					   "unparsable begin line"));
+		    skip_to(in, TOK_EOS);
+		    return -1;
+		}
+		if (fname == NULL)
+		    fname = s+1;
+
+		output(out, token_set(&tok, TOK_FNAME, fname));
+		stm = stream_uuextract_open(in);
+		ret = decode_file(stm, out, decode_table_uuencode);
+		stream_close(stm);
+		output(out, TOKEN_EOF);
+		return ret;
+	    }
+	    break;
+
+	case TOK_EOF:
+	case TOK_EOS:
+	case TOK_EOA:
+	    output(out, token_set3(&tok, TOK_ERR, 0, "no begin line found"));
+	    return -1;
+
+	default:
+	    output(out, t);
+	}
+    }
 }
 
 
