@@ -14,9 +14,11 @@
 #define DEBUG_XOVR	0x0004	/* weird xover lines */
 #define DEBUG_PACK	0x0008  /* subject line tags */
 #define DEBUG_LINE	0x0010	/* line tokens outside files */
-#define DEBUG_DTOK	0x0020	/* debug tokens */
+#define DEBUG_DEBUG	0x0020	/* debug output */
 #define DEBUG_TOK	0x0040	/* other tokens */
 #define DEBUG_FNAM	0x0080	/* output file name */
+#define DEBUG_ERROR	0x0100	/* error output */
+#define DEBUG_SIZE	0x0200	/* size of output file */
 
 #define DEBUG_ALL	0xffff	/* all debugging */
 

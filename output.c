@@ -21,6 +21,7 @@ output_new()
     out->infile = out->warned = out->ndata = 0;
     out->do_fdesc = -1;
     out->fdescnl = 0;
+    out->size = 0;
     out->prev_fdesc = NULL;
     out->fout = out->fdesc = NULL;
 
@@ -76,7 +77,7 @@ output(out_state *out, token *t)
 		fclose(out->fout);
 	}
 	outfilename = our_basename(t->line);
-	prdebug(DEBUG_FNAM, "writing to file `%s'", outfilename);
+	prdebug(DEBUG_FNAM, "writing `%s'", outfilename);
 
 	if ((out->fout=fopen_uniq(&outfilename)) == NULL) {
 	    fprintf(stderr, "SYSERR: cannot create output file `%s': %s\n",
@@ -102,11 +103,13 @@ output(out_state *out, token *t)
 	    free(outfilename);
 	}
 	close_fdesc(out);
+	out->size = 0;
 	out->infile = 1;
 	break;
 
     case TOK_DEBUG:
-	prdebug(DEBUG_DTOK, ">debug: %s", t->line);
+	prdebug(DEBUG_TOK, ">debug: %s", t->line);
+	prdebug(DEBUG_DEBUG, "(%s)", t->line);
 	break;
 	
     case TOK_LINE:
@@ -119,6 +122,8 @@ output(out_state *out, token *t)
 		    fclose(out->fout);
 		    out->fout = NULL;
 		}
+		else
+		    out->size += strlen(t->line)+1;
 	    }
 	}
 	else {
@@ -186,6 +191,8 @@ output(out_state *out, token *t)
 	/* fallthrough */
 	
     case TOK_EOF:
+	if (out->infile)
+	    prdebug(DEBUG_SIZE, "[%lu bytes]", out->size);
 	prdebug(DEBUG_TOK, ">%s", tname[t->type]);
 
 	if (out->infile && out->fout)
@@ -195,7 +202,7 @@ output(out_state *out, token *t)
 
     case TOK_ERR:
 	fprintf(stderr, "Error token type %d: %s\n", t->n, t->line);
-	prdebug(DEBUG_TOK, ">error: type %d: %s", t->n, t->line);
+	prdebug(DEBUG_ERROR, ">error: type %d: %s", t->n, t->line);
 	break;
 
     case TOK_DATA:
@@ -213,6 +220,8 @@ output(out_state *out, token *t)
 		fclose(out->fout);
 		out->fout = NULL;
 	    }
+	    else
+		out->size += t->n;
 	}
 	break;
 

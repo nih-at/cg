@@ -12,6 +12,7 @@ struct out_state {
     char *prev_fdesc;	/* name of previous description file */
     char tempdesc[64];	/* temporary name of description file */
     int fdescnl;	/* number of empty lines saved for description file */
+    unsigned long size;	/* length of data written */
     FILE *fout;		/* file we're decoding into */
     FILE *fdesc;	/* description file */
 };

@@ -184,7 +184,7 @@ main(int argc, char **argv)
     }
 
     prdebug_init(DEBUG_ALL^(DEBUG_SUBJ),
-		 DEBUG_ALL^(DEBUG_LINE|DEBUG_SUBJ|DEBUG_PART));
+		 DEBUG_ALL^(DEBUG_LINE|DEBUG_SUBJ|DEBUG_PART|DEBUG_TOK));
 
     newsrc = expand(newsrc);
 
@@ -637,7 +637,7 @@ do_decode(struct file *val, out_state *out)
     stream *stm, *st2;
     token t;
 
-    prdebug(DEBUG_PACK, "decoding `%s'", val->tag);
+    prdebug(DEBUG_PACK, "--> Decoding `%s':", val->tag);
 
     stm = stream_cat_open(val);
     st2 = stream_article_open(stm);
@@ -646,6 +646,9 @@ do_decode(struct file *val, out_state *out)
     stream_close(stm);
 
     output(out, token_set(&t, TOK_EOP, NULL));
+
+    if (err <= 0)
+	prdebug(DEBUG_ERROR, "no file found");
 
     return err;
 }
