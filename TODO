@@ -1,21 +1,23 @@
+* make it possible to CTRL-C to quit, but save status of what has and
+  hasn't been decoded so far to rcfile
+
 * check if errfilename is set 
 * skip rest of stream when filename can't be created (e.g. "xy on 7/8/99.mp3")
 
 * better error messages (partno, lineno, etc.)
 * remove/move broken files
 
-* save part 0
 * user interface
 * newsreader
 
 * filesize (parts same size)
 
 * xref handling
-(* reconnect upon timeout)
 
 * investigate no end founds
 * binhex, mime
 * header values
 
 * more smarts in ignoring pointless descriptions
+* save part 0
 * signature to desc file
