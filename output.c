@@ -8,6 +8,7 @@
 #include "util.h"
 
 static void close_fdesc(out_state *out);
+static void rename_fdesc(out_state *out);
 
 #define FDESC_NOTYET	0
 #define FDESC_OPEN	1
@@ -72,7 +73,6 @@ output(out_state *out, token *t)
     static char **tname = _foo+1;
     char *outfilename;
     char *brokenfilename;
-    char *fdescname;
     int fd;
 
     if (t->type == TOK_DATA)
@@ -102,24 +102,15 @@ output(out_state *out, token *t)
 	    if (out->do_fdesc == FDESC_OPEN) {
 		out->do_fdesc = FDESC_ERROR;
 		remove(out->tempdesc);
+		out->tempdesc[0] = '\0';
 	    }
 	}
 	else {
-	    /* rename description file */
-	    if (out->do_fdesc != FDESC_NOTYET) {
-		fdescname = xmalloc(strlen(outfilename)+6);
-		sprintf(fdescname, "%s.desc", outfilename);
-		if (rename(out->tempdesc, fdescname) != 0) {
-		    fprintf(stderr, "SYSERR: can't rename `%s' to `%s': %s\n",
-			    out->tempdesc, fdescname, strerror(errno));
-		    /* XXX: remove(out->tempdesc); */
-		}
-		if (out->fdescfilename)
-		    free(out->fdescfilename);
-		out->fdescfilename = fdescname;
-	    }
 	    free(out->filename);
 	    out->filename = outfilename;
+
+	    if (out->do_fdesc != FDESC_NOTYET)
+		rename_fdesc(out);
 	}
 	close_fdesc(out);
 	out->broken = 0;
@@ -161,6 +152,7 @@ output(out_state *out, token *t)
 			fprintf(stderr, "SYSERR: cannot fdopen "
 				"temporary description file `%s': %s\n",
 				out->tempdesc, strerror(errno));
+			out->tempdesc[0] = '\0';
 			out->do_fdesc = FDESC_ERROR;
 		    }
 		}
@@ -200,8 +192,12 @@ output(out_state *out, token *t)
 
 		append_file(out->fdescfilename, out->tempdesc,
 			    "\n[DATA]\n\n");
+		remove(out->tempdesc);
+		out->tempdesc[0] = '\0';
 	    }
-	    remove(out->tempdesc);
+	    else {
+		rename_fdesc(out);
+	    }
 	}
 	free(out->fdescfilename);
 	out->fdescfilename = NULL;
@@ -238,7 +234,7 @@ output(out_state *out, token *t)
 		out->filename = brokenfilename;
 
 		/* rename description file */
-		if (out->do_fdesc != FDESC_NOTYET) {
+		if (out->fdescfilename != NULL) {
 		    brokenfilename = malloc(strlen(out->filename)+6);
 		    sprintf(brokenfilename, "%s.desc", out->filename);
 
@@ -296,4 +292,29 @@ close_fdesc(out_state *out)
 
     out->fdescnl = 0;
     out->do_fdesc = FDESC_NOTYET;
+}
+
+
+
+static void
+rename_fdesc(out_state *out)
+{
+    char *fdescname;
+
+    if (out->filename == NULL)
+	return;
+
+    fdescname = xmalloc(strlen(out->filename)+6);
+    sprintf(fdescname, "%s.desc", out->filename);
+    if (rename(out->tempdesc, fdescname) != 0) {
+	fprintf(stderr, "SYSERR: can't rename `%s' to `%s': %s\n",
+		out->tempdesc, fdescname, strerror(errno));
+	/* XXX: remove(out->tempdesc); */
+    }
+
+    out->tempdesc[0] = '\0';
+    free(out->fdescfilename);
+    out->fdescfilename = fdescname;
+
+    return;
 }
