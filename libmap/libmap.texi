@@ -140,7 +140,7 @@ of types for keys and values.  In libmap, both are pointers to
 @c ================================================================
 @node Helper
 @chapter Helper Functions
-@findex helper function
+@cindex helper function
 
 The functions used to compute hash values from keys and test keys on
 equality depend on the type of keys used.  To keep libmap general, such
@@ -188,7 +188,7 @@ delete keys.
 @end deftypefn
 
 @deftypefn {Helper Function} void delval (void *@var{value})
-Used to delete @var{value} when @code{map_delete} or @code{free_map} is
+Used to delete @var{value} when @code{map_delete} or @code{map_free} is
 called with non-zero @var{delvaluep}.
 
 If this member in a map is a null pointer, no special action is taken to
@@ -215,26 +215,26 @@ obvious effect: following deletes use the new functions.
 @cindex creating
 @cindex destroying
 
-@deftypefun {map *} new_map (int @var{size})
-The @code{new_map} function creates a new map of @var{size}, or
+@deftypefun {map *} map_new (int @var{size})
+The @code{map_new} function creates a new map of @var{size}, or
 @code{map_def_size} if @var{size} is 0.  All helper functions are set to
 their default values.
 
-@code{new_map} returns the newly created map, or a null pointer if
+@code{map_new} returns the newly created map, or a null pointer if
 creation fails.
 @end deftypefun
 
-@deftypefun {map *} new_map2 (int @var{size}, int (*@var{equal})(), int (*@var{hash})(), void *(*@var{cpykey})(), void (*@var{delkey})(), void (*@var{delval})())
-The @code{new_map2} function is much like @code{map_new}, except that
+@deftypefun {map *} map_new2 (int @var{size}, int (*@var{equal})(), int (*@var{hash})(), void *(*@var{cpykey})(), void (*@var{delkey})(), void (*@var{delval})())
+The @code{map_new2} function is much like @code{map_new}, except that
 all helper functions are given as arguments.  If any of them is
 @code{MAP_DFL}, the corresponding default value is taken.
 
-@code{new_map2} returns the newly created map, or a null pointer if
+@code{map_new2} returns the newly created map, or a null pointer if
 creation fails.
 @end deftypefun
 
-@deftypefun void free_map (map *@var{m}, int @var{delvaluep})
-The function @code{free_map} deletes map @var{m} and frees all the
+@deftypefun void map_free (map *@var{m}, int @var{delvaluep})
+The function @code{map_free} deletes map @var{m} and frees all the
 storage used by it.
 
 If @var{delvaluep} is non-zero, the values stored in the
@@ -314,7 +314,7 @@ used by the @code{map_iter} structure.
 @chapter Default Values
 @cindex default values
 
-The default values used by @code{new_map} and @code{new_map2} are stored
+The default values used by @code{map_new} and @code{map_new2} are stored
 in global variables and can be changed by the application.
 
 The global variables and their values upon startup:

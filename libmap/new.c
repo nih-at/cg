@@ -27,7 +27,7 @@
 
 
 map *
-new_map(int size)
+map_new(int size)
 {
     map *m;
     int i;

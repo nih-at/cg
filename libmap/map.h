@@ -47,14 +47,14 @@ typedef struct map_iter {
 
 
 
-map *new_map(int size);
-map *new_map2(int size,
+map *map_new(int size);
+map *map_new2(int size,
 	      int (*equal)(void *key1, void *key2),
 	      unsigned int (*hash)(void *key, int size),
 	      void *(*cpykey)(void *key),
 	      void (*delkey)(void *key),
 	      void (*delval)(void *value));
-void free_map(map *m, int delvaluep);
+void map_free(map *m, int delvaluep);
 void *map_lookup(map *m, void *key);
 void **map_insert(map *m, void *key);
 void map_delete(map *m, void *key, int delvaluep);

@@ -27,7 +27,7 @@
 
 
 map *
-new_map2(int size,
+map_new2(int size,
 	 int (*equal)(void *key1, void *key2),
 	 unsigned int (*hash)(void *key, int size),
 	 void *(*cpykey)(void *key),

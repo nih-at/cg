@@ -27,7 +27,7 @@
 
 
 void
-free_map(map *m, int dv)
+map_free(map *m, int dv)
 {
     int i;
     map_entry *e, *p;
