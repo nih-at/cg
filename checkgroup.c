@@ -11,6 +11,8 @@
 #include "ranges.h"
 #include "util.h"
 #include "decode.h"
+#include "mime.h"
+#include "header.h"
 
 #define NNTPHOSTFILE "/etc/nntpserver"
 #define DEFAULTEDITOR "vi"
@@ -127,6 +129,9 @@ main(int argc, char **argv)
     nntp_group = NULL;
     newsrc = DEFAULT_NEWSRC;
     mark_complete = 0;
+
+    mime_init();
+    header_init();
 
     opterr = 0;
     while ((c=getopt_long(argc, argv, OPTIONS, options, 0)) != EOF) {
