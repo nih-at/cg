@@ -1,5 +1,7 @@
-OS		version	comile	tests
+OS		version	compile	tests
 ----------------------------------------------------------------
+HPUX		10.20	y	10
+HPUX		11.00	y	10
 IRIX64		6.2	n
 NetBSD/i386 	1.4.2	y	10
 NetBSD/i386	1.5.2	y	10
