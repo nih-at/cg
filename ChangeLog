@@ -1,3 +1,11 @@
+2005-03-07  Thomas Klausner  <wiz@danbala.tuwien.ac.at>
+
+	* snprintf.c (dopr): Fix compilation warnings on Interix.
+
+	* configure.ac: test for stdarg.h, for snprintf replacement.
+	* configure.ac: renamed from configure.in.
+	* configure.in: renamed to configure.ac.
+
 2004-07-10  Thomas Klausner  <wiz@danbala.tuwien.ac.at>
 
 	* output.h: add statusflag variable.
