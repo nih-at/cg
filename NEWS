@@ -1,4 +1,6 @@
 0.4:
+o yenc support
+o rename broken files to filename.broken
 o CTRL-C/SIGINT handling: write rc file and quit after completely decoding
   current file.
 o segfault fix (for postings of the type [422/7])
