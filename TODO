@@ -1,5 +1,4 @@
-portability: work around missing snprintf, vsnprintf
-man page or similar
+install man page, translate to man format when needed
 test cases: mime: unknown CTE, errors
 
 IPv6
