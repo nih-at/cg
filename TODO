@@ -8,6 +8,7 @@ multiple nntp servers as input
 saving parts to files and use as input
 remember duplicate parts, sort and failover
 investigate no end founds
+support yenc (http://www.winews.net/yenc/index.htm)
 
 testdec: uudeview replacement
 
