@@ -1,5 +1,5 @@
 /*
-  $NiH: checkgroup.c,v 1.47 2003/11/24 16:12:25 wiz Exp $
+  $NiH: checkgroup.c,v 1.48 2003/12/04 19:44:15 wiz Exp $
 
   checkgroup.c -- main program
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -743,7 +743,7 @@ nntp_put(char *fmt, ...)
 			return -1;
 
 		    if (nntp_resp() != 211) {
-			fprintf(stderr, "%s: timed out -- can't reconnect",
+			fprintf(stderr, "%s: timed out -- can't reconnect\n",
 				prg);
 			return -1;
 		    }

@@ -1,3 +1,7 @@
+2003-12-06  Thomas Klausner  <wiz@danbala.tuwien.ac.at>
+
+	* checkgroup.c (nntp_put): add newline to error message.
+
 2003-12-04  Dieter Baron  <dillo@danbala.tuwien.ac.at>
 
 	* checkgroup.c (nntp_resp): delete last nntp_response on read error
