@@ -1,0 +1,3 @@
+return 0
+output test.zip mime-test.zip
+output mime-xuu.desc mime-test.zip.desc

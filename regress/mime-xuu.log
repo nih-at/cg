@@ -1,0 +1,6 @@
+found: MIME multipart/mixed
+found: MIME (single part)
+found: MIME (single part)
+found: MIME x-uuencode
+writing `mime-test.zip'
+[119 bytes]

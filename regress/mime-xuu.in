@@ -1,0 +1,34 @@
+Subject: foo
+From: bar
+Mime-version: 1.0
+Content-Type: multipart/mixed;
+   boundary="MS_Mac_OE_3080531944_19165_MIME_Part"
+
+> This message is in MIME format. Since your mail reader does not understand
+this format, some or all of this message may not be legible.
+
+--MS_Mac_OE_3080531944_19165_MIME_Part
+Content-type: text/plain; charset="US-ASCII"
+Content-transfer-encoding: 7bit
+
+Another boring text part.
+
+
+
+--MS_Mac_OE_3080531944_19165_MIME_Part
+Content-type: application/octetstream; name="mime-test.zip";
+ x-mac-creator="4D4B4259";
+ x-mac-type="4A504547"
+Content-disposition: attachment
+Content-transfer-encoding: x-uuencode
+
+begin 644 test.zip
+M4$L#!`H```````I#T"J&S`67!0````4````(````=&5S="YT>'1T97-T(5!+
+M`0(4``H```````I#T"J&S`67!0````4````(``````````$`(`"V@0````!T
+=97-T+G1X=%!+!08``````0`!`#8````K````````
+`
+end
+--MS_Mac_OE_3080531944_19165_MIME_Part--
+
+
+

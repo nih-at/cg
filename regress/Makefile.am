@@ -4,12 +4,13 @@ EXTRA_DIST=runtest ${TESTCASES} \
 	mime-mixed.desc mime-mixed.in mime-mixed.log \
 	mime-multi.in.1 mime-multi.in.2 mime-multi.log \
 	mime-quot.desc mime-quot.in mime-quot.log \
+	mime-xuu.desc mime-xuu.in mime-xuu.log \
 	uu-multi.desc uu-multi.in.1 uu-multi.in.2 uu-multi.in.3 uu-multi.log \
 	uu-short.in uu-short.log \
 	yenc-multi.in.1 yenc-multi.in.2 yenc-multi.in.3 yenc-multi.log \
 	yenc-single.in yenc-single.log
 
-TESTCASES=mime-mixed.test mime-multi.test mime-quot.test \
+TESTCASES=mime-mixed.test mime-multi.test mime-quot.test mime-xuu.test \
 	uu-2in1.test uu-multi.test uu-short.test \
 	yenc-single.test yenc-multi.test
 
