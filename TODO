@@ -15,6 +15,7 @@ multiple nntp servers as input
 saving parts to files and use as input
 remember duplicate parts, sort (size, author, ...) and failover
 enforce minimum file size, e.g. >1k
+don't sort user list alphabetically, but by arrival time of last part [optional]
 testdec: uudeview replacement
 
 better error messages (partno, lineno, etc.)
