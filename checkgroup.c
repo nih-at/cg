@@ -43,10 +43,10 @@ char *spattern[MAX_PATTERNS] = {  /* ! ( ! */
 
 regex_t pattern[MAX_PATTERNS]; 
 
-int pat_key[MAX_PATTERNS] =     {/* 2 */ 3, 1, 1, 2, 2 };
-int pat_comment[MAX_PATTERNS] = {/* 1 */ 1, 4, 2, 4, 1 };
-int pat_part[MAX_PATTERNS] =    {/* 3 */ 4, 2, 3, 1, 0 };
-int pat_npart[MAX_PATTERNS] =   {/* 4 */ 5, 3, 4, 3, 0 };
+int pat_key[MAX_PATTERNS] =     {/* 2 */ 3, 1, 1, 4 /* 2 */, 2 };
+int pat_comment[MAX_PATTERNS] = {/* 1 */ 1, 4, 2, 1 /* 4 */, 1 };
+int pat_part[MAX_PATTERNS] =    {/* 3 */ 4, 2, 3, 2 /* 1 */, 0 };
+int pat_npart[MAX_PATTERNS] =   {/* 4 */ 5, 3, 4, 3 /* 3 */, 0 };
 
 char *prg;
 char *nntp_response, *nntp_group, *nntp_host;
