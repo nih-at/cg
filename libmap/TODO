@@ -1,5 +1,6 @@
-F test program & check target
+F write more thorough test program (collisions, insert/delete/insert)
 ---------------------------------------------------------------- done
+F test program & check target
 F map_version
 C add email address to copyright notice
 C name internal objects and functions _map_* instead of map__*
