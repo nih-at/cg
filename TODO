@@ -1,6 +1,7 @@
 binhex support
 multipart/appledouble: better handling if filename same
 
+fix uu-multi test case (YY get's appended to decoded file)
 decode(): don't count broken files in return value
 stream_fcat: report file open errors
 multiple nntp servers as input
