@@ -12,11 +12,13 @@
 #define DEBUG_SUBJ	0x0001	/* unrecognized subjects */
 #define DEBUG_PART	0x0002	/* duplicate/illegal parts */
 #define DEBUG_XOVR	0x0004	/* weird xover lines */
+#define DEBUG_PACK	0x0008  /* subject line tags */
 #define DEBUG_LINE	0x0010	/* line tokens outside files */
-#define DEBUG_DTOK	0x0011	/* debug tokens */
-#define DEBUG_TOK	0x0012	/* other tokens */
+#define DEBUG_DTOK	0x0020	/* debug tokens */
+#define DEBUG_TOK	0x0040	/* other tokens */
+#define DEBUG_FNAM	0x0080	/* output file name */
 
-#define DEBUG_ALL	0xffff	/* all debuging */
+#define DEBUG_ALL	0xffff	/* all debugging */
 
 extern char *prg;
 extern char errfilename[];

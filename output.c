@@ -76,7 +76,8 @@ output(out_state *out, token *t)
 		fclose(out->fout);
 	}
 	outfilename = our_basename(t->line);
-	
+	prdebug(DEBUG_FNAM, "writing to file `%s'", outfilename);
+
 	if ((out->fout=fopen_uniq(&outfilename)) == NULL) {
 	    fprintf(stderr, "SYSERR: cannot create output file `%s': %s\n",
 		   t->line, strerror(errno));
