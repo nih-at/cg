@@ -23,7 +23,7 @@
 
 
 unsigned int
-map__hash(void *key, int size)
+map_strhash(void *key, int size)
 {
     char *s;
     unsigned int i;
