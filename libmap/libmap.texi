@@ -130,7 +130,7 @@ about 5 times as large as the expected number of entries (to avoid
 collisions), but space can be traded off for time.
 
 For a thorough discussion of hash tables, see @cite{The Art of Computer
-Programming, Vol. III: Searching and Sorting}, by Donald E. Knuth.
+Programming, @w{Vol.@: III:} Searching and Sorting}, by Donald E. Knuth.
 
 Since C is a strongly typed language, care must be taken in the choice
 of types for keys and values.  In libmap, both are pointers to
@@ -346,7 +346,9 @@ Another global variable is included in libmap:
 
 @deftypevar {const char *} map_version
 This string contains both name and version of the library, in the form
-@code{"libmap (version @var{xxx})"}.
+@example
+"libmap (version @var{xxx})"@r{.}
+@end example
 @end deftypevar
 
 
