@@ -5,7 +5,6 @@ portability fixes
 test cases: mime: unknown CTE, errors
 IPv6
 stream_quot_print can't handle NUL chars (it returns TOK_LINEs)
-vasprintf replacement
 decode(): don't count broken files in return value
 stream_fcat: report file open errors
 multiple nntp servers as input
