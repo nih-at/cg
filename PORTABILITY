@@ -7,12 +7,9 @@ NetBSD/i386 	1.4.2	y	10
 NetBSD/i386	1.5.2	y	10
 NetBSD/i386	1.5ZC	y	10
 NetBSD/macppc	1.5ZC	y	10
-OSF1		4.0	n
+OSF1		4.0	y	10
 Solaris		2.7	y	10
 SUSE Linux	fsmat	y	10
 
 IRIX
-	compile failure: missing snprintf, vsnprintf
-
-OSF1 4.0
 	compile failure: missing snprintf, vsnprintf

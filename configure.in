@@ -24,7 +24,12 @@ AC_CHECK_LIB(resolv, main)
 dnl functions
 
 AC_CHECK_FUNCS(getopt_long, , [LIBOBJS="$LIBOBJS getopt1.o getopt.o"])
-AC_CHECK_FUNCS(snprintf vsnprintf vasprintf, , [LIBOBJS="$LIBOBJS snprintf.o"])
 AC_REPLACE_FUNCS(hstrerror)
+need_snprintf=no
+AC_CHECK_FUNCS(snprintf vsnprintf vasprintf, , [need_snprintf=yes])
+if test $need_snprintf = yes
+then
+	LIBOBJS="$LIBOBJS snprintf.o"
+fi
 
 AC_OUTPUT(Makefile regress/Makefile)
