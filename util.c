@@ -170,7 +170,7 @@ getline(FILE *f)
 	return NULL;
     }
 
-    len=strlen(b);
+    len = strlen(b);
     
     while (b[len-1] != '\n') {
 	/* line too long */
@@ -196,8 +196,11 @@ getline(FILE *f)
     if (b[0] == '.') {
 	if (b[1] == '\0')
 	    return NULL;
+	errlineno++;
 	return b+1;
     }
+
+    errlineno++;
     return b;    
 }
 

@@ -6,7 +6,7 @@
 extern char *prg;
 extern char errfilename[];
 extern int errlineno, errpartno;
-enum errtype={errnone, errfile, errpart, errline};
+enum errtype {errnone, errfile, errpart, errline};
 
 
 

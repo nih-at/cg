@@ -210,7 +210,7 @@ decode_mime(FILE *fin, FILE **foutp, char **fnamep, struct header *h)
 	}
     }
 
-    *s = filename;
+    s = filename;
     strncpy(errfilename, filename, ERRFILESIZE);
     if ((*foutp=fopen_uniq(&filename)) == NULL) {
 	prerror(errnone, "can't create %s: %s", filename,
