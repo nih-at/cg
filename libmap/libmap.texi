@@ -4,6 +4,7 @@
 @settitle libmap
 @setchapternewpage off
 @c %**end of header
+@synindex tp vr
 
 @include version.texi
 
@@ -89,7 +90,8 @@ libmap is a library that provides highly customizable associative
 arrays, implemented as hash tables with external linking.
 
 @menu
-* Introduction::	Design philosophy of libmap
+* Introduction::	Design Philosophy of libmap
+* Helper::              Helper Functions
 * Creating::            Creating and Destroying Maps
 * Manipulating::        Manipulating Maps
 * Iterating::           Iterating Through Maps
@@ -97,7 +99,7 @@ arrays, implemented as hash tables with external linking.
 
 * Index::
 * Index of Functions::
-* Index of Variables::
+* Index of Variables and Types::
 @end menu
 @end ifinfo
 
@@ -123,13 +125,55 @@ to store the key/value pairs in these lists (one for each hash value).
 This method is not the fastest, but does not pose an arbitrary limit on
 the size of the associative array.
 
-Still, to get good performance, the size of the hash tabel should be
+Still, to get good performance, the size of the hash table should be
 about 5 times as large as the expected number of entries (to avoid
 collisions), but space can be traded off for time.
 
-For a thorrough discussion of hash tables, see @cite{The Art of Computer
-Programming, Vol. II: Seminumerical Algorithms}, by Donald E. Knuth.
-@c XXX: correct volume?
+For a thorough discussion of hash tables, see @cite{The Art of Computer
+Programming, Vol. III: Searching and Sorting}, by Donald E. Knuth.
+
+
+@c ================================================================
+@node Helper
+@chapter Helper Functions
+@findex helper function
+
+The functions used to compute hash values from keys and test keys on
+equality depend on the type of keys used.  To keep libmap general, such
+functions can be provided by the application, altough reasonable default
+functions are provided for the most common case: strings.
+
+Also, a handfull of housekeeping functions can be provided by the
+application.  These functiosn are collectively called helper functions,
+and can be specified per map.
+
+@deftp {Data Type} map
+This is the type used to hold a map; a pointer to @code{map} is the first
+parameter of most functions in this library, specifying the map to
+operate on.
+
+It also holds pointers to the helper functions used by this map.
+@end deftp
+
+The helper functions are:
+
+@deftypefn {Helper Function} int equal (void *@var{key1}, void *@var{key2})
+Used to compare keys for equality.  It is called with two keys and is
+expected to 
+@c XXX: not neccecarily 
+@end deftypefn
+
+@deftypefn {Helper Function} int hash (void *@var{key})
+@end deftypefn
+
+@deftypefn {Helper Function} {void *} cpykey (void *@var{key})
+@end deftypefn
+
+@deftypefn {Helper Function} void delkey (void *@var{key})
+@end deftypefn
+
+@deftypefn {Helper Function} void delval (void *@var{value})
+@end deftypefn
 
 
 @c ================================================================
@@ -143,14 +187,25 @@ The @code{new_map} function creates a new map of @var{size}, or
 @code{map_def_size} if @var{size} is 0.  All helper functions are set to
 their default values.
 
-@code{new_map} returns the created map, or a null pointer if creation
-fails.
+@code{new_map} returns the newly created map, or a null pointer if
+creation fails.
 @end deftypefun
 
 @deftypefun {map *} new_map2 (int @var{size}, int (*@var{equal})(), int (*@var{hash})(), void *(*@var{cpykey})(), void (*@var{delkey})(), void (*@var{delval})())
+The @code{new_map2} function is much like @code{map_new}, except that
+all helper functions are given as arguments.  If any of them is a null
+pointer, the corresponding default value is taken.
+
+@code{new_map2} returns the newly created map, or a null pointer if
+creation fails.
 @end deftypefun
 
-@deftypefun void free_map (map *@var{m})
+@deftypefun void free_map (map *@var{m}, int @var{delvaluep})
+The function @code{free_map} deletes map @var{m} and frees all the
+storage used by it.
+
+If @var{delvaluep} is non-zero, the values stored in the
+map are deleted by the @code{delval} helper function.
 @end deftypefun
 
 
@@ -203,8 +258,8 @@ fails.
 
 @printindex fn
 
-@node Index of Variables
-@unnumbered Index of Variables
+@node Index of Variables and Types
+@unnumbered Index of Variables and Types
 
 @printindex vr
 
