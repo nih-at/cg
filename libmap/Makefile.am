@@ -15,7 +15,15 @@ include_HEADERS=map.h
 
 info_TEXINFOS=libmap.texi
 
+EXTRA_PROGRAMS=testmap
+testmap_SOURCES=testmap.c
+testmap_LDADD=libmap.a
+
+TESTS=testmap
+
 
 version.c: configure.in
 	echo 'const char map_version[] = "$PACAKGE (version $VERSION)";' \
 		> version.c
+
+
