@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#  $NiH: runtest,v 1.2 2002/04/11 14:13:19 dillo Exp $
+#  $NiH: runtest,v 1.3 2002/04/11 23:52:45 dillo Exp $
 #
 #  runtest -- run regression tests
 #  Copyright (C) 2002 Dieter Baron and Thomas Klaunser
@@ -26,11 +26,11 @@
 # 
 # files: 
 #   input files are TESTNAME.in*
-#   testdec output is compaared to TESTNAME.log
+#   testdec output is compared to TESTNAME.log
 #   output files are compared to TESTNAME.out.*
 # 
 # environment variables:
-#   VERBOSE: if set, be more verbose (e. g., output diffs)
+#   VERBOSE: if set, be more verbose (e.g., output diffs)
 #   NOCLEANUP: if set, don't delete directory test is run in
 
 die() {
