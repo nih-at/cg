@@ -12,6 +12,7 @@
 
 #define BINHEX_TAG "(This file must be converted with BinHex 4.0)"
 
+static int decode_acum_ret(int ret1, int ret2);
 int decode_binhex(stream *in, out_state *out);
 int decode_file(stream *in, out_state *out, int *tbl);
 int decode_mime(stream *in, out_state *out, struct header *h,
@@ -28,7 +29,9 @@ decode(stream *in, out_state *out)
     struct mime_hdr *m, *m2;
     token *t, tok;
     char *s;
-    
+    int ret;
+
+    ret = 0;
 
     while (!stream_eof(in)) {
 	if ((h=header_read(in, out)) == NULL) {
@@ -43,7 +46,7 @@ decode(stream *in, out_state *out)
 		
 		stm = stream_msg_partial_open(in, m);
 		st2 = stream_article_open(stm);
-		decode(st2, out);
+		ret = decode_acum_ret(ret, decode(st2, out));
 		stream_close(st2);
 		stream_close(stm);
 	    }
@@ -55,7 +58,7 @@ decode(stream *in, out_state *out)
 		while (!stream_eof(stm)) {
 		    st2 = stream_section_open(stm, NULL);
 		    st3 = stream_article_open(st2);
-		    decode(st3, out);
+		    ret = decode_acum_ret(ret, decode(st3, out));
 		    stream_close(st3);
 		    stream_close(st2);
 		}
@@ -67,7 +70,7 @@ decode(stream *in, out_state *out)
 		     && (m2=mime_parse(s))) {
 		debug(out, "found: MIME (single part)");
 		
-		decode_mime(in, out, h, m, m2);
+		ret = decode_acum_ret(ret, decode_mime(in, out, h, m, m2));
 		mime_free(m2);
 	    }
 	    mime_free(m);
@@ -85,7 +88,9 @@ decode(stream *in, out_state *out)
 		    
 		    output(out, token_set(&tok, TOK_FNAME, s+1));
 		    stm = stream_uuextract_open(in);
-		    decode_file(stm, out, decode_table_uuencode);
+		    ret = decode_acum_ret(ret,
+					  decode_file(stm, out,
+						      decode_table_uuencode));
 		    output(out, TOKEN_EOF);
 		    stream_close(stm);
 		}
@@ -93,7 +98,7 @@ decode(stream *in, out_state *out)
 	    else if (strcmp(t->line, BINHEX_TAG) == 0) {
 		debug(out, "found: binhex");
 		
-		decode_binhex(in, out);
+		ret = decode_acum_ret(ret, decode_binhex(in, out));
 	    }
 	    else {
 		/* XXX: ignore BEGIN, CUT HERE, etc. */
@@ -107,7 +112,7 @@ decode(stream *in, out_state *out)
 	}
     }
 
-    return 0;
+    return ret;
 }  
 
 
@@ -119,9 +124,12 @@ decode_mime(stream *in, out_state *out, struct header *h,
     token t;
     char *s, *filename;
     struct mime_hdr *cd;
+    int ret;
 
     filename = NULL;
     cd = NULL;
+
+    ret = 0;
 
     if ((s=header_get(h, HDR_CONTENT_DISP)) && ((cd=mime_parse(s))))
 	filename = mime_option_get(cd, MIME_CD_FILENAME);
@@ -132,7 +140,7 @@ decode_mime(stream *in, out_state *out, struct header *h,
 	debug(out, "found: MIME base64");
 
 	output(out, token_set(&t, TOK_FNAME, filename));
-	decode_file(in, out, decode_table_base64);
+	ret = decode_acum_ret(ret, decode_file(in, out, decode_table_base64));
 	output(out, TOKEN_EOF);
     }
     else if (filename) {
@@ -141,6 +149,7 @@ decode_mime(stream *in, out_state *out, struct header *h,
 	output(out, token_set(&t, TOK_FNAME, filename));
 	copy_stream(in, out);
 	output(out, TOKEN_EOF);
+	ret = decode_acum_ret(ret, 1);
     }
     else
 	debug(out, "no filename, unknown MIME transfer encoding: %s",
@@ -148,7 +157,7 @@ decode_mime(stream *in, out_state *out, struct header *h,
 
     mime_free(cd);
 
-    return 0;
+    return ret;
 }
 
 
@@ -162,7 +171,7 @@ decode_file(stream *in, out_state *out, int *tbl)
     copy_stream(stm, out);
     stream_close(stm);
 
-    return 0;
+    return 1;
 }
 
 
@@ -182,3 +191,13 @@ decode_binhex(stream *in, out_state *out)
     return 0;
 }
 
+
+
+static int
+decode_acum_ret(int ret1, int ret2)
+{
+    if (ret1 == -1 || ret2 == -1)
+	return -1;
+    else
+	return ret1+ret2;
+}
