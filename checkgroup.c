@@ -141,8 +141,6 @@ main(int argc, char **argv)
     nntp_group = NULL;
     newsrc = DEFAULT_NEWSRC;
     mark_complete = 0;
-    errfilename[0] = '\0';
-    errpartno = errlineno = 0;
 
     mime_init();
     header_init();
@@ -205,12 +203,12 @@ main(int argc, char **argv)
     if (nntp_host == NULL) {
 	if ((nntp_host=getenv("NNTPSERVER")) == NULL) {
 	    if ((fp=fopen(NNTPHOSTFILE, "r")) == NULL) {
-		prerror(errnone, "can't open %s: %s", NNTPHOSTFILE,
+		fprintf(stderr, "can't open %s: %s", NNTPHOSTFILE,
 			strerror(errno));
 		exit(7);
 	    }
 	    if (fgets(b, BUFSIZE, fp) == NULL) {
-		prerror(errnone, "can't read newsserver from %s: %s",
+		fprintf(stderr, "can't read newsserver from %s: %s",
 			NNTPHOSTFILE, strerror(errno));
 		exit(7);
 	    }
@@ -218,7 +216,7 @@ main(int argc, char **argv)
 	    if (b[strlen(b)-1]=='\n')
 		b[strlen(b)-1]='\0';
 	    if ((nntp_host=strdup(b)) == NULL) {
-		prerror(errnone,
+		fprintf(stderr,
 			"can't strdup nntp_host from `%s': shoot me", b);
 		exit(77);
 	    }

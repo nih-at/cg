@@ -19,9 +19,6 @@
 static FILE *debug_file;
 static int do_debug_file, do_debug_stdout;
 
-char errfilename[ERRFILESIZE+1];
-int errpartno, errlineno;
-
 
 
 void *
@@ -95,33 +92,6 @@ expand(char *path)
 
 
 
-void
-prerror(enum errtype type, char *fmt, ...)
-{
-    va_list argp;
-
-    fprintf(stderr, "%s: ", prg);
-
-    if (type >= errfile) {
-	if (errfilename) {
-	    fprintf(stderr, "%s", errfilename);
-	    if (type >= errpart) {
-		fprintf(stderr, ":%d", errpartno);
-		if (type == errline)
-		    fprintf(stderr, ":%d", errlineno);
-	    }
-	    fprintf(stderr, ": ");
-	}
-    }
-
-    va_start(argp, fmt);
-    vfprintf(stderr, fmt, argp);
-    va_end(argp);
-    fputc('\n', stderr);
-}
-
-
-
 FILE *
 fopen_uniq(char **fnp)
 {
@@ -183,7 +153,7 @@ getline(FILE *f)
 	/* line too long */
 	bsize += BUFSIZE;
 	if (bsize >= HOUSENUMBER) {
-	    prerror(errline, "line longer than %d", HOUSENUMBER);
+	    /* prerror(errline, "line longer than %d", HOUSENUMBER); */
 	    bsize -= BUFSIZE;
 	    return b;
 	}
@@ -203,11 +173,11 @@ getline(FILE *f)
     if (b[0] == '.') {
 	if (b[1] == '\0')
 	    return NULL;
-	errlineno++;
+	/* errlineno++; */
 	return b+1;
     }
 
-    errlineno++;
+    /* errlineno++; */
     return b;    
 }
 
