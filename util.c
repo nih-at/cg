@@ -176,5 +176,11 @@ getline(FILE *f)
     else
 	b[len-1] = '\0';
 
+
+    if (b[0] == '.') {
+	if (b[1] == '\0')
+	    return NULL;
+	return b+1;
+    }
     return b;    
 }
