@@ -1,5 +1,5 @@
 /*
-  globals -- global variables
+  start -- start iteration
   Copyright (C) 1996 Dieter Baron
 
   This file is part of libmap, a library for associative arrays.
@@ -21,21 +21,17 @@
 
 
 
-#include <string.h>
 #include <stdlib.h>
 #include "map.h"
-#include "config.h"
-
-#ifndef HAVE_STRDUP
-char *map__strdup(const char *s);
-#define strdup map__strdup
-#endif
 
 
 
-int map_def_size = 1024;
-int (*map_def_equal)(void *key1, void *key2) = strcmp;
-unsigned int (*map_def_hash)(void *key, int size) = map_strhash;
-void *(*map_def_cpykey)(void *key) = strdup;
-void (*map_def_delkey)(void *key) = free;
-void (*map_def_delval)(void *value) = NULL;
+map_iter *
+map_start(map *m)
+{
+    map_iter *mi = (map_iter *)malloc(sizeof(map_iter));
+
+    mi->m = m;
+    mi->index = -1;
+    mi->entry = NULL;
+}

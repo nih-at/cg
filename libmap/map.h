@@ -71,6 +71,6 @@ extern int (*map_def_equal)(void *key1, void *key2);
 extern unsigned int (*map_def_hash)(void *key, int size);
 extern void *(*map_def_cpykey)(void *key);
 extern void (*map_def_delkey)(void *key);
-extern void (*map_def_delval)(void *value));
+extern void (*map_def_delval)(void *value);
 
 #endif /* map.h */
