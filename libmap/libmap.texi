@@ -337,6 +337,10 @@ The global variables and their values upon startup:
 @code{map_def_size} specifies the default size of a map's hash table
 @pxref{Creating}.  For a description of the helper functions, see
 @ref{Helper}.
+
+On systems without @code{strdup}, a replacement function (with the same
+functionality but a different name) is included in the library and used
+in @code{map_def_cpykey}.
 @iftex
 @page
 @end iftex
