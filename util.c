@@ -10,7 +10,6 @@
 #include <pwd.h>
 
 #include "util.h"
-#include "stream.h"
 
 #define HOUSENUMBER 102400
 
@@ -352,4 +351,24 @@ str2hex(char *s)
 		       
     return (HEX_DIGIT(s[0])<<4) | HEX_DIGIT(s[1]);
 #undef HEX_DIGIT
+}
+
+
+
+void
+output_header(out_state *out, symbol name, struct header *h)
+{
+    token t;
+    char *value;
+    char buffer[8192];
+
+    value = header_get(h, name);
+    if (value == NULL) {
+	output(out, token_set(&t, TOK_DEBUG, "cannot find header value"));
+	return;
+    }
+
+    /* XXX: split line if too long */
+    snprintf(buffer, sizeof(buffer), "%s: %s", name, value);
+    output(out, token_set(&t, TOK_LINE, buffer));
 }

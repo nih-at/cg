@@ -165,16 +165,30 @@ decode_mime(stream *in, out_state *out, struct header *h,
 	    copy_stream(stm, out);
 	    stream_close(stm);
 	}
-	else
+	else {
+	    if (te->type != MIME_TE_7BIT && te->type != MIME_TE_8BIT) {
+		/* create header for external decoder */
+#if 0
+		/* XXX: MIME version? */
+		output_header(out, HDR_MIME_VERSION, h);
+#endif
+		output_header(out, HDR_CONTENT_TYPE, h);
+		output_header(out, HDR_CONTENT_TRENC, h);
+		output(out, token_set(&t, TOK_LINE, ""));
+	    }
+
 	    copy_stream(in, out);
+	}
+
 	output(out, TOKEN_EOF);
 
 	ret = decode_acum_ret(ret, 1);
     }
-    else
-	debug(out, "no filename, unknown MIME transfer encoding: %s",
-	      te->type);
-
+    else {
+	if (te->type != MIME_TE_7BIT && te->type != MIME_TE_8BIT)
+	    debug(out, "no filename, unknown MIME transfer encoding: %s",
+		  te->type);
+    }
     mime_free(cd);
 
     return ret;

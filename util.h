@@ -4,6 +4,8 @@
 #include <stdlib.h>
 
 #include "decode.h"
+#include "header.h"
+#include "output.h"
 #include "stream.h"
 
 #define BUFSIZE 8192
@@ -32,6 +34,7 @@ void debug(out_state *out, char *fmt, ...);
 char *expand(char *path);
 FILE *fopen_uniq(char **s);
 char *getline(FILE *f);
+void output_header(out_state *out, symbol name, struct header *h);
 void prdebug(int level, char *fmt, ...);
 void prdebug_init(int do_file, int do_stdout);
 void skip_rest(FILE *f);

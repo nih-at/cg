@@ -8,12 +8,14 @@ void _mime_lws(char **s);
 symbol _mime_token(char **s);
 char * _mime_value(char **s);
 
-#define MIME_MAX 12
+#define MIME_MAX 14
 
 char *mime_string[MIME_MAX] = {
     "message/partial",
     "message/multipart",
     "multipart/mixed",
+    "7bit",
+    "8bit",
     "base64",
     "quoted-printable",
     "x-uuencode",
