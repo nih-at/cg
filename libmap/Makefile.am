@@ -9,7 +9,7 @@ libmap_a_SOURCES=new.c new2.c free.c lookup.c insert.c delete.c \
 	start.c next.c stop.c globals.c strhash.c lookup-int.c \
 	version.c
 
-libmap_a_LIBADD=@LIBOBJS@
+#libmap_a_LIBADD=$(LIBOBJS)
 
 include_HEADERS=map.h
 

@@ -24,6 +24,7 @@ dnl structures
 dnl compiler characteristics
 dnl library functions
 
+AC_SUBST(LIBOBJS)
 AC_CHECK_FUNCS(strdup, , [LIBOBJS="$LIBOBJS $ac_func"])
 
 dnl system services
