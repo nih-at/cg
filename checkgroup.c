@@ -553,7 +553,8 @@ parse(map *parts, FILE *f)
 	    continue;
 	}
 
-	if ((npart == 0) || (npart > 10000) || (part > 10000)) {
+	if ((npart == 0) || (npart > 10000) || (part > 10000)
+	    || (part > npart)) {
 	    /* DEBUG */ fprintf(dfile,"%s: ignored: part %d of %d\n",
 				subj, part, part);
 	    free(key);
