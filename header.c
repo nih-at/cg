@@ -36,7 +36,6 @@ header_read(stream *in, out_state *out)
     struct header h, *act;
     token *t;
     char *p;
-    int len;
 
     act = &h;
     h.next = NULL;

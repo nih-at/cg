@@ -33,6 +33,12 @@ stream_get(stream *st)
     }
     if (t->type == TOK_EOF)
 	st->eof = 1;
+
+#if STREAM_TRACE
+    printf("stream_get(%p) = %d [%s]\n", st, t->type, t->line);
+    fflush(stdout);
+#endif
+    
     return t;
 }
 
@@ -115,7 +121,8 @@ stream_dequeue(stream *st)
 
     e = st->queue.next;
     st->queue.next = e->next;
-    --st->queue_len;
+    if (--st->queue_len == 0)
+	st->queue_tail = &st->queue;
 
     free(e);
 }

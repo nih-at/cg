@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <errno.h>
 #include <stddef.h>
 
@@ -7,10 +8,12 @@
 #include "stream_types.h"
 #include "util.h"
 
+enum art_state { AR_EMPTY, AR_HEADER, AR_BODY };
+
 struct stream_art {
     stream st;
 
-    int inheader;	/* are we in the article's header */
+    enum art_state state;
     int kept;		/* have we kept (part of) a header */
     int bufno;		/* buffer number to use for next header */
     char *buf[2];	/* buffers */
@@ -20,7 +23,7 @@ struct stream_art {
 
 static int art_close(struct stream_art *st);
 static token *art_get(struct stream_art *st);
-static void grow_buffer(struct stream_art *this, int bufno);
+static void grow_buffer(struct stream_art *this, int bufno, int size);
 
 
 
@@ -32,7 +35,7 @@ stream_article_open(struct stream *source)
     this = (struct stream_art *)stream_new(sizeof(struct stream_art),
 					       art_get, art_close, source);
 
-    this->inheader = 1;
+    this->state = AR_EMPTY;
     this->bufno = this->kept = 0;
     this->buflen[0] = this->buflen[1] = 0;
     this->buf_alen[0] = this->buf_alen[1] = 0;
@@ -66,43 +69,67 @@ art_get(struct stream_art *this)
     for (;;) {
 	t=stream_get(this->st.source);
 
-	if (this->inheader) {
-	    if (t->type == TOK_LINE && isspace(t->line[0])) {
+	if (this->state != AR_BODY) {
+	    if (t->type == TOK_LINE) {
 		len = strlen(t->line);
-		if (this->buflen[this->bufno]+len+1
-		    >= this->buf_alen[this->bufno])
-		    grow_buffer(this, this->bufno);
-		strcpy(this->buf[this->bufno]+this->buflen[this->bufno],
-		       t->line);
-		this->buflen[this->bufno] += len;
+
+		if (len == 0) {
+		    if (this->kept) {
+			token_set(stream_enqueue((stream *)this),
+				  TOK_LINE, this->buf[this->bufno]);
+			this->kept = 0;
+			this->bufno = 1-this->bufno;
+		    }
+
+		    this->state = AR_BODY;
+		    return token_set(&this->st.tok, TOK_EOH, NULL);
+		}
+		else if (!isspace(t->line[0])) {
+		    /* XXX: check if valid header line */
+
+		    this->state = AR_HEADER;
+		    this->bufno = 1-this->bufno;
+		    
+		    if (len+1 >= this->buf_alen[this->bufno])
+			grow_buffer(this, this->bufno, len+1);
+		    strcpy(this->buf[this->bufno], t->line);
+		    this->buflen[this->bufno] = len;
+
+		    if (this->kept) {
+			return token_set(&this->st.tok,
+					 TOK_LINE, this->buf[1-this->bufno]);
+		    }
+		    else
+			this->kept = 1;
+		}
+		else {
+		    if (this->buflen[this->bufno]+len+1
+			>= this->buf_alen[this->bufno])
+			grow_buffer(this, this->bufno,
+				    this->buflen[this->bufno]+len+1);
+		    strcpy(this->buf[this->bufno]+this->buflen[this->bufno],
+			   t->line);
+		    this->buflen[this->bufno] += len;
+		}
 	    }
-	    else if (this->kept) {
-		token_set(stream_enqueue((stream *)this),
-			  TOK_LINE, this->buf[this->bufno]);
-		this->kept = 0;
-		this->bufno = 1-this->bufno;
-	    }
-	    
-	    if (t->type == TOK_EOA || t->type == TOK_EOF) {
-		token_set(stream_enqueue((stream *)this), TOK_EOH, NULL);
+	    else if (t->type == TOK_EOA || t->type == TOK_EOF) {
+		if (this->kept) {
+		    token_set(stream_enqueue((stream *)this),
+			      TOK_LINE, this->buf[this->bufno]);
+		    this->kept = 0;
+		    this->bufno = 1-this->bufno;
+		}
+
+		if (this->state == AR_HEADER)
+		    token_set(stream_enqueue((stream *)this), TOK_EOH, NULL);
 		return t;
-	    }
-	    else if (t->type == TOK_LINE) {
-		len = strlen(t->line);
-
-		/* XXX: check if valid header line */
-
-		if (len+1 >= this->buf_alen[this->bufno])
-		    grow_buffer(this, this->bufno);
-		strcpy(this->buf[this->bufno], t->line);
-		this->buflen[this->bufno] += len;
 	    }
 	    else
 		return t;
 	}
 	else {
 	    if (t->type == TOK_EOA)
-		this->inheader = 1;
+		this->state = AR_EMPTY;
 	    return t;
 	}
     }
@@ -111,12 +138,12 @@ art_get(struct stream_art *this)
 
 
 static void
-grow_buffer(struct stream_art *this, int bufno)
+grow_buffer(struct stream_art *this, int bufno, int size)
 {
     if (this->buf_alen[bufno] == 0)
 	this->buf_alen[bufno] = 64;
-    else
+    while (this->buf_alen[bufno] <= size)
 	this->buf_alen[bufno] *= 2;
-
+	
     this->buf[bufno] = xrealloc(this->buf[bufno], this->buf_alen[bufno]);
 }

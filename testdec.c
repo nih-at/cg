@@ -12,7 +12,7 @@ char *prg;
 int
 main(int argc, char *argv[])
 {
-    stream *stm;
+    stream *stm, *st2;
     out_state *out;
     int ret;
 
@@ -22,9 +22,13 @@ main(int argc, char *argv[])
     mime_init();
 
     stm = stream_fcat_open(argc-1, argv+1);
+    st2 = stream_article_open(stm);
     out = output_new();
 
-    ret = decode(stm, out) ? 1 : 0;
+    ret = decode(st2, out) ? 1 : 0;
+
+    stream_close(st2);
+    stream_close(stm);
 
     output_free(out);
 
