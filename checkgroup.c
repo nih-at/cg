@@ -49,7 +49,8 @@ int pat_part[MAX_PATTERNS] =    { 3,  4, 2, 3, 2 /* 1 */, 0 };
 int pat_npart[MAX_PATTERNS] =   { 4,  5, 3, 4, 3 /* 3 */, 0 };
 
 char *prg;
-char *nntp_response, *nntp_group, *nntp_host;
+char *nntp_response, *nntp_group;
+char *nntp_host, *nntp_user, *nntp_pass;
 char *decoder = DECODER;
 struct range *rcmap;
 
@@ -72,7 +73,7 @@ PACKAGE " under the terms of the GNU General Public License.\n\
 For more information about these matters, see the files named COPYING.\n";
 
 char usage_string[] = "\
-Usage: %s [-cm] [-n rcfile] group ...\n";
+Usage: %s [-cm] [-s server] [-n rcfile] [-u user] [-p passwd] group ...\n";
 
 char help_string[] = "\
 \n\
@@ -81,11 +82,14 @@ char help_string[] = "\
 \n\
   -m, --mac             call hexbin decoder\n\
   -n, --newsrc FILE     use FILE as newsrc file\n\
+  -u, --user USER       specify user for authentication\n\
+  -p, --pass PASS       specify password for authentication\n\
+  -s, --server SERVER   NNTP server\n\
   -c, --mark-complete   mark only parts of complete files as read\n\
 \n\
 Report bugs to <cg-bugs@giga.or.at>.\n";
 
-#define OPTIONS	"hVmn:c"
+#define OPTIONS	"hVmn:cu:p:s:"
 
 struct option options[] = {
     { "help",          0, 0, 'h' },
@@ -93,10 +97,14 @@ struct option options[] = {
     { "mac",           0, 0, 'm' },
     { "newsrc",        1, 0, 'n' },
     { "mark-complete", 0, 0, 'c' },
+    { "user",          1, 0, 'u' },
+    { "pass",          1, 0, 'p' },
+    { "server",        1, 0, 's' },
     { NULL,            0, 0, 0   }
 };
 
 
+
 /* extern */
 int sopen(char *host, char *service);
 
@@ -135,6 +143,8 @@ main(int argc, char **argv)
     mime_init();
     header_init();
 
+    nntp_host = nntp_user = nntp_pass = NULL;
+
     opterr = 0;
     while ((c=getopt_long(argc, argv, OPTIONS, options, 0)) != EOF) {
 	switch (c) {
@@ -146,6 +156,15 @@ main(int argc, char **argv)
 	    break;
 	case 'c':
 	    mark_complete = 1;
+	    break;
+	case 'u':
+	    nntp_user = optarg;
+	    break;
+	case 'p':
+	    nntp_pass = optarg;
+	    break;
+	case 's':
+	    nntp_host = optarg;
 	    break;
 	case 'h':
 	    printf(usage_string, prg);
@@ -181,26 +200,28 @@ main(int argc, char **argv)
     
     err = 0;
 
-    if ((nntp_host=getenv("NNTPSERVER")) == NULL) {
-	if ((fp=fopen(NNTPHOSTFILE, "r")) == NULL) {
-	    prerror(errnone, "can't open %s: %s", NNTPHOSTFILE,
-		    strerror(errno));
-	    exit(7);
-	}
-	if (fgets(b, BUFSIZE, fp) == NULL) {
-	    prerror(errnone, "can't read newsserver from %s: %s",
-		    NNTPHOSTFILE, strerror(errno));
-	    exit(7);
-	}
-	fclose(fp);
-	if (b[strlen(b)-1]=='\n')
-	    b[strlen(b)-1]='\0';
-	if ((nntp_host=strdup(b)) == NULL) {
-	    prerror(errnone, "can't strdup nntp_host from `%s': shoot me", b);
-	    exit(77);
+    if (nntp_host == NULL) {
+	if ((nntp_host=getenv("NNTPSERVER")) == NULL) {
+	    if ((fp=fopen(NNTPHOSTFILE, "r")) == NULL) {
+		prerror(errnone, "can't open %s: %s", NNTPHOSTFILE,
+			strerror(errno));
+		exit(7);
+	    }
+	    if (fgets(b, BUFSIZE, fp) == NULL) {
+		prerror(errnone, "can't read newsserver from %s: %s",
+			NNTPHOSTFILE, strerror(errno));
+		exit(7);
+	    }
+	    fclose(fp);
+	    if (b[strlen(b)-1]=='\n')
+		b[strlen(b)-1]='\0';
+	    if ((nntp_host=strdup(b)) == NULL) {
+		prerror(errnone,
+			"can't strdup nntp_host from `%s': shoot me", b);
+		exit(77);
+	    }
 	}
     }
-    
     
     /* talk to server */
     if ((fd=sopen(nntp_host, "nntp")) == -1)
@@ -704,8 +725,9 @@ nntp_put(char *fmt, ...)
 	else 
 	    ret = nntp_resp();
 	
-	/* connection to server closed -- reconnect */
 	if (writeerr || (ret == 400) || (ret == 503)) {
+	    /* connection to server closed -- reconnect */
+	    
 	    writeerr = 0;
 	    if (tries == 0) {
 		tries++;
@@ -749,6 +771,48 @@ nntp_put(char *fmt, ...)
 		return -1;
 	    }
 	}
+	else if (ret == 480) {
+	    /* authentication required */
+
+	    if (nntp_user == NULL) {
+		/* XXX prompt for user */
+		fprintf(stderr,
+			"%s: authentication required but no user given\n",
+			prg);
+		return -1;
+	    }
+
+	    fprintf(conout, "authinfo user %s\r\n", nntp_user);
+	    if (fflush(conout) || ferror(conout)) {
+                /* XXX retry? */
+		fprintf(stderr, "%s: write error in authentication: %s\n",
+			prg, strerror(errno));
+		return -1;
+	    }
+		    
+	    if (nntp_resp() == 381) {
+		if (nntp_pass == NULL) {
+		    /* XXX prompt for user */
+		    fprintf(stderr,
+			    "%s: authentication required but no pass given\n",
+			    prg);
+		    return -1;
+		}
+
+		fprintf(conout, "authinfo pass %s\r\n", nntp_pass);
+		if (fflush(conout) || ferror(conout)) {
+		    /* XXX retry? */
+		    fprintf(stderr, "%s: write error in authentication: %s\n",
+			    prg, strerror(errno));
+		    return -1;
+		}
+	    }
+	    if (nntp_resp() != 281) {
+		fprintf(stderr, "%s: authentication as %s failed: %s\n",
+			prg, nntp_user, nntp_response);
+		return -1;
+	    }
+	}
 	else
 	    break;
     }
@@ -767,7 +831,7 @@ int
 nntp_resp(void)
 {
     char line[BUFSIZE];
-    int resp;
+    int resp, l;
     
     if (conin == NULL)
 	return -1;
@@ -777,6 +841,11 @@ nntp_resp(void)
 	return -1;
 
     resp = atoi(line);
+    l = strlen(line);
+    if (line[l-2] == '\r')
+	line[l-2] = '\0';
+    else 
+	line[l-1] = '\0';
     free (nntp_response);
     nntp_response = strdup(line);
 
