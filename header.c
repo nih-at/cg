@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "util.h"
 #include "header.h"
 
 #define HDR_MAX 5
@@ -33,8 +35,7 @@ header_read(FILE *f, int dotp)
 {
     struct header h, *act;
     char *line, *p;
-    static char *b;
-    static int bsize;
+    int len;
 
     act = &h;
     h.next = NULL;
@@ -52,16 +53,17 @@ header_read(FILE *f, int dotp)
 	    break;
 	else if (line[0] == ' ') {
 	    /* continued header */
-	    if (act->value)
-		act->value = (char *)xrealloc(act->value, strlen(act->value)+
-					      strlen(line));
+	    if (act->value) {
+		len = strlen(act->value);
+		act->value = (char *)xrealloc(act->value,
+					      len+strlen(line)+1);
+		strcpy(act->value+len, line);
+	    }
 	    else {
-		if (act != &h) {
-		    act->value = (char *)xmalloc(strlen(act->value)+
-						 strlen(line));
-		}
-		else
+		if (act == &h)
 		    break;
+
+		act->value = strdup(line);
 	    }
 	}
 
@@ -69,17 +71,19 @@ header_read(FILE *f, int dotp)
 	    if (*p == ':') {
 		if ((*(p+1) == ' ') || (*(p+1) == '\t')) {
 		    *p = '\0';
-		    /* make room for symbol */
-		    act->next = (struct header *)xmalloc(sizeof(struct header));
+		    act->next
+			= (struct header *)xmalloc(sizeof(struct header));
 		    act = act->next;
-		    if ((act.type=intern_caps(line)) == NULL) {
+		    act->next = NULL;
+		    act->value = NULL;
+		    if ((act->type=intern_caps(line)) == NULL) {
 			/* XXX: better handling */
 			break;
 		    }
 		    p = p + strspn (p, " \t");
 		    if (strlen(p) > 0)
 			if ((act->value=strdup(p)) == NULL) {
-			    error("strdup failure");
+			    prerror("strdup failure");
 			    exit(1);
 			}
 		    break;
@@ -92,13 +96,7 @@ header_read(FILE *f, int dotp)
 	}
     }
 	
-	    
-
-
-    }
-
-    return h;
-    
+    return h.next;
 }
 
 
