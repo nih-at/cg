@@ -1,5 +1,5 @@
 /*
-  $NiH$
+  $NiH: sockets.c,v 1.5 2002/04/17 17:46:29 dillo Exp $
   (cftp: NiH: sockets.c,v 1.24 2001/12/20 05:44:15 dillo Exp)
 
   sockets -- auxiliary socket functions
@@ -79,7 +79,7 @@ sopen(char *host, char *service, int family)
 	break;
     }
     if (s < 0)
-	fprintf(stderr, "%s: cannot %s: %s",
+	fprintf(stderr, "%s: cannot %s: %s\n",
 		prg, cause, strerror(errno));
 
     freeaddrinfo(res0);

@@ -1,0 +1,4 @@
+2002-05-23  Thomas Klausner  <wiz@danbala.tuwien.ac.at>
+
+	* sockets.c (sopen): add '\n' to error message.
+
