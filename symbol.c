@@ -1,6 +1,10 @@
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
 #include "symbol.h"
 
-#define TBLSIZE 2048
+#define TBLSIZE 2047
 
 struct entry {
     struct entry *next;
@@ -21,25 +25,25 @@ intern(char *s)
     
     i = yourhash(s);
 
-    if (table[i].symbol) {
+    if (table[i].s) {
 	for (e=&table[i]; e->next; e = e->next) {
-	    if (strcmp(e->symbol, s) == 0)
-		return e->symbol;
+	    if (strcmp(e->s, s) == 0)
+		return e->s;
 	}
 	if ((e->next=(struct entry *)malloc(sizeof(struct entry))) == NULL)
 	    return NULL;
 
-	if ((e->next->symbol=strdup(s)) == NULL) {
+	if ((e->next->s=strdup(s)) == NULL) {
 	    free(e->next);
 	    e->next = NULL;
 	    return NULL;
 	}
 	e=e->next;
 	e->next = NULL;
-	return e->symbol;
+	return e->s;
     }
-    else
-	return table[i].symbol = strdup(s);
+
+    return table[i].s = strdup(s);
 }
 
 
