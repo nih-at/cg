@@ -1,3 +1,4 @@
+add flag that saves XOVER records to file for remote debugging
 test cases: mime: unknown CTE, errors
 save additional file with meta information so that one can restart
   cg later and tell it to download the files selected earlier easily
