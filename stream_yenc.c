@@ -120,7 +120,7 @@ yenc_get(struct stream_yenc *this)
 	    else if (strncmp(t->line, "=ybegin ", 8) == 0) {
 		if (old_state != Y_PRE) {
 		    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			       "unexpeced =ybegin line");
+			       "unexpected =ybegin line");
 		    break;
 		}
 
@@ -131,7 +131,7 @@ yenc_get(struct stream_yenc *this)
 	    else if (strncmp(t->line, "=ypart ", 7) == 0) {
 		if (old_state != Y_BEGIN) {
 		    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			       "unexpeced =ypart line");
+			       "unexpected =ypart line");
 		    break;
 		}
 		
@@ -142,7 +142,7 @@ yenc_get(struct stream_yenc *this)
 	    else if (strncmp(t->line, "=yend ", 6) == 0) {
 		if (old_state != Y_DATA && old_state != Y_BEGIN) {
 		    token_set3(stream_enqueue((stream *)this), TOK_ERR, 1,
-			       "unexpeced =yend line");
+			       "unexpected =yend line");
 		    break;
 		}
 

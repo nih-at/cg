@@ -1,9 +1,9 @@
+#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -125,6 +125,30 @@ fopen_uniq(char **fnp)
 	}
 
 	sprintf(b, (*fnp) ? "%s.%d" : "%s.%03d", s, ++i);
+    }
+}
+
+
+
+int
+rename_uniq(const char *from, char **to)
+{
+    char b[8192];
+    int i;
+
+    strcpy(b, *to);
+    i = 0;
+
+    for (;;) {
+	if (link(from, b) == 0) {
+	    unlink(from);
+	    *to = strdup(b);
+	    return 0;
+	}
+	else if (errno != EEXIST)
+	    return -1;
+
+	sprintf(b, "%s.%d", *to, ++i);
     }
 }
 

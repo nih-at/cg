@@ -37,6 +37,7 @@ char *getline(FILE *f);
 void output_header(out_state *out, symbol name, struct header *h);
 void prdebug(int level, char *fmt, ...);
 void prdebug_init(int do_file, int do_stdout);
+int rename_uniq(const char *from, char **to);
 void skip_rest(FILE *f);
 token *skip_to(stream *in, enum token_type type);
 int str2hex(char *s);
