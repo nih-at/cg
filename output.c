@@ -116,7 +116,7 @@ output(out_state *out, token *t)
 	    }
 	}
 	if (out->do_debug) {
-	    if (fputs(t->line, out->debug) != 0) {
+	    if (fprintf(out->debug, "%s\n", t->line) != 0) {
 		fprintf(stderr, "SYSERR: cannot write to debug file `%s': "
 			"%s\n", debugfilename, strerror(errno));
 		out->do_debug = 0;
