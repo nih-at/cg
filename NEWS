@@ -1,0 +1,10 @@
+0.4:
+o CTRL-C/SIGINT handling: write rc file and quit after completely decoding
+  current file.
+o segfault fix (for postings of the type [422/7])
+o ignore some uninteresting comment lines (no .desc file)
+o don't assume last line before 'end' is not allowed to contain data in
+  uu data
+
+0.3:
+First semi-released version
