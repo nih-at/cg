@@ -68,6 +68,8 @@ mime_parse(char *h)
 
     _mime_lws(&h);
     while (*h == ';') {
+	h++;
+	
 	if ((o[i].name=_mime_token(&h)) == NULL) {
 	    break;
 	}
