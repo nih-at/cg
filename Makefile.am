@@ -15,7 +15,7 @@ cg_LDADD=libmap/libmap.a @LIBOBJS@ @LEXLIB@
 testdec_SOURCES=testdec.c decode.c util.c mime.c tables.c header.c symbol.c \
 	stream_fcat.c stream_decode.c stream.c stream_msg_multi.c token.c \
 	stream_file.c stream_section.c output.c stream_uuextract.c \
-	stream_msg_partial.c
+	stream_msg_partial.c stream_article.c
 
 #stest_SOURCES=stest.c util.c stream.c token.c stream_file.c stream_section.c
 
