@@ -10,12 +10,14 @@
 #include <regex.h>
 #include <map.h>
 
+#include "checkgroup.h"
 #include "stream.h"
 #include "ranges.h"
 #include "util.h"
 #include "decode.h"
 #include "mime.h"
 #include "header.h"
+#include "stream_types.h"
 
 #define NNTPHOSTFILE "/etc/nntpserver"
 #define DEFAULTEDITOR "vi"
@@ -24,15 +26,6 @@
 #define BUFSIZE 8192
 #define RCNAME ".decoderc"
 
-struct file {
-    char *tag;
-    char *comment;
-    int npart;
-    long *artno;
-    int new;
-    long size;
-    int part0;
-};
 
 #define MAX_PATTERNS 6
 
@@ -119,7 +112,7 @@ long complete (map *parts, long no_file, struct file **todec);
 long *choose (struct file **todec, long no_complete, char *group);
 int parse(map *parts, FILE *f);
 char *extract(char *s, regmatch_t m);
-int do_decode(struct file *value);
+int do_decode(struct file *value, out_state *out);
 int nntp_resp(void);
 int nntp_put(char *fmt, ...);
 int writerc(char *group);
@@ -147,6 +140,7 @@ main(int argc, char **argv)
     char b[BUFSIZE];
     struct file **todec;
     FILE *fp;
+    out_state *out;
 
     prg = argv[0];
 
@@ -323,9 +317,10 @@ main(int argc, char **argv)
 	}
 	
 	gute=0;
+	out = output_new();
 	
 	for (j=0; toget[j]!=-1;j++) {
-	    if (save_and_quit || (do_decode(todec[toget[j]]) == 0)) {
+	    if (save_and_quit || (do_decode(todec[toget[j]], out) == 0)) {
 		for (k=0; k<todec[toget[j]]->npart; k++)
 		    range_clear(rcmap, todec[toget[j]]->artno[k]);
 		if (todec[toget[j]]->part0 != -1)
@@ -335,6 +330,8 @@ main(int argc, char **argv)
 		gute++;
 	}
 		
+	output_free(out);
+    
 	no_file = j;
 
 	for (j=0; j<no_complete; j++) {
@@ -685,9 +682,21 @@ save_comment(FILE *fin)
 
 
 int
-do_decode(struct file *val)
+do_decode(struct file *val, out_state *out)
 {
-    /* XXX: adapt to new decode routines */
+    int err;
+    stream *stm, *st2;
+
+    printf("decoding `%s'\n", val->tag);
+
+    stm = stream_cat_open(val);
+    st2 = stream_article_open(stm);
+    err = decode(st2, out);
+    stream_close(st2);
+    stream_close(stm);
+    
+    return err;
+
 #if 0
     enum enctype type, oldtype;
     FILE *fout;

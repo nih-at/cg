@@ -52,10 +52,26 @@ file_close(struct stream_file *this)
 static token *
 file_get(struct stream_file *this)
 {
+    int off, len;
+
     /* XXX: preliminary version only */
     if (fgets(this->buf, this->buf_len, this->f) == NULL)
 	return TOKEN_EOF;
 
-    this->buf[strlen(this->buf)-1] = '\0';
-    return token_set(&this->st.tok, TOK_LINE, this->buf);
+    len = strlen(this->buf);
+    if (this->buf[len-2] == '\r') {
+	this->buf[len-2] = '\0';
+	--len;
+    }
+    else
+	this->buf[len-1] = '\0';
+    --len;
+
+    off = 0;
+    if (this->is_nntp && this->buf[0] == '.') {
+	off = 1;
+	if (len == 1)
+	    return TOKEN_EOF;
+    }
+    return token_set(&this->st.tok, TOK_LINE, this->buf+off);
 }

@@ -4,9 +4,11 @@
 #include <stdio.h>
 
 #include "stream.h"
+#include "checkgroup.h"
 #include "mime.h"
 
 stream *stream_article_open(struct stream *source);
+stream *stream_cat_open(struct file *file);
 stream *stream_decode_open(stream *source, int *tbl);
 stream *stream_fcat_open(int n, char **names);
 stream *stream_file_open(FILE *f, int is_nntp);
