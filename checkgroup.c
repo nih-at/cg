@@ -1,5 +1,5 @@
 /*
-  $NiH: checkgroup.c,v 1.49 2003/12/06 08:45:48 wiz Exp $
+  $NiH: checkgroup.c,v 1.50 2004/07/10 13:01:16 wiz Exp $
 
   checkgroup.c -- main program
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -504,10 +504,9 @@ parse(map *parts, FILE *f)
     struct file *val, **valp;
     char *key, *s, *subj, *comment;
     char b[8192];
-    int npart, part, i, end, l, lines;
+    int npart, part, i, l, lines;
     long artno, no_file, size;
 
-    end = 0;
     no_file = 0;
 
     while (fgets(b, 8192, f)) {
@@ -519,10 +518,8 @@ parse(map *parts, FILE *f)
 	if (b[l-1] == '\r')
 	    b[--l] = '\0';
 
-	if (b[0] == '.' && b[1] == '\0') {
-	    end = 1;
+	if (b[0] == '.' && b[1] == '\0')
 	    break;
-	}
 
 	s = strtok(b, "\t");
 	artno = strtol(s, NULL, 10);
