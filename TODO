@@ -1,3 +1,18 @@
+Does not compile on Solaris 2.9:
+In file included from sockets.c:40:
+sockets.h:51: warning: `AI_PASSIVE' redefined
+/usr/include/netdb.h:141: warning: this is the location of the previous definition
+In file included from sockets.c:40:
+sockets.h:40: redefinition of `struct addrinfo'
+
+Linker warnings on IRIX 6.5:
+        cc  -g   -o cg  checkgroup.o crc.o decode.o  header.o mime.o newsrc.o  output.o parserc.o ranges.o  sockets.o stream.o stream_article.o  stream_cat.o stream_decode.o  stream_file.o stream_quot_print.o  stream_msg_multi.o stream_msg_partial.o  stream_section.o stream_uuextract.o  stream_yenc.o symbol.o tables.o  token.o util.o libmap/libmap.a  getopt1.o getopt.o snprintf.o -ll -lsocket
+ld64: WARNING 84 : /usr/lib64/libl.a is not used for resolving any symbol.
+ld64: WARNING 84 : /usr/lib64/libsocket.so is not used for resolving any symbol.
+        cc  -g   -o testdec  testdec.o crc.o decode.o  util.o mime.o tables.o  header.o stream_fcat.o stream_decode.o  stream.o stream_msg_multi.o token.o  stream_file.o stream_section.o  output.o stream_uuextract.o  stream_msg_partial.o stream_article.o  stream_quot_print.o stream_yenc.o  symbol.o getopt1.o getopt.o snprintf.o -lsocket
+ld64: WARNING 84 : /usr/lib64/libsocket.so is not used for resolving any symbol.
+
+
 when articles go missing between selection and download, do not
   download the parts of the articles that are still there
 add flag that saves XOVER records to file for remote debugging
