@@ -1,6 +1,8 @@
+.\" Converted with mdoc2man 0.2
+.\" from NiH: cg.mdoc,v 1.4 2002/04/19 01:00:11 wiz Exp 
 .\" $NiH: cg.mdoc,v 1.4 2002/04/19 01:00:11 wiz Exp $
 .\"
-.\" cg.mdoc \-\- mdoc man page for cg
+.\" cg.mdoc \-- mdoc man page for cg
 .\" Copyright (C) 2002 Dieter Baron and Thomas Klausner
 .\"
 .\" This file is part of cg, a program to assemble and decode binary Usenet
@@ -25,65 +27,65 @@
 cg \- semi-automatic newsgroup binary downloader
 .SH "SYNOPSIS"
 .B cg
-[\fB\-chmV\fR]
-[\fB\-n\fR \fBrcfile\fR]
-[\fB\-p\fR \fBpasswd\fR]
-[\fB\-s\fR \fBserver\fR]
-[\fB\-u\fR \fBuser\fR]
+[\fB-chmV\fR]
+[\fB-n\fR \fBrcfile\fR]
+[\fB-p\fR \fBpasswd\fR]
+[\fB-s\fR \fBserver\fR]
+[\fB-u\fR \fBuser\fR]
 \fBgroup ...\fR
 .SH "DESCRIPTION"
 .B cg
-is a semi\-automatic newsgroup binary downloader.
+is a semi-automatic newsgroup binary downloader.
 It assembles parts based on subject headers and then offers them in an
 editor for the user to choose which files he really wants.
 .PP
 It supports decoding data in the following formats:
-
+.RS
 .TP 10
 MIME
 The following message formats are supported: multipart/mixed,
 message/partial; the following encodings are supported:
-base64, quoted printable, x\-uuencode.
+base64, quoted printable, x-uuencode.
 .TP 10
 uuencode
-Both single\- and multi\-posting binaries.
+Both single- and multi-posting binaries.
 .TP 10
 yEnc
-Both single\- and multi\-posting binaries.
-
+Both single- and multi-posting binaries.
+.RE
 .PP
 The following flags are supported:
-
+.RS
 .TP 22
-\fB\-c\fR, \fB\-\-mark\-complete\fR
+\fB-c\fR, \fB--mark-complete\fR
 Mark only parts of complete files as read.
 .TP 22
-\fB\-h\fR, \fB\-\-help\fR
+\fB-h\fR, \fB--help\fR
 Show a short usage.
 .TP 22
-\fB\-n\fR, \fB\-\-newsrc\fR \fBFILE\fR
+\fB-n\fR, \fB--newsrc\fR \fBFILE\fR
 Use
 \fBFILE\fR
 as newsrc file.
 .TP 22
-\fB\-p\fR, \fB\-\-pass\fR \fBPASS\fR
+\fB-p\fR, \fB--pass\fR \fBPASS\fR
 Use
 \fBPASS\fR
 as password for authentication.
 .TP 22
-\fB\-s\fR, \fB\-\-server\fR \fBSERVER\fR
+\fB-s\fR, \fB--server\fR \fBSERVER\fR
 Use
 \fBSERVER\fR
 as NNTP server.  Both IPv4 and IPv6 are supported.
 .TP 22
-\fB\-u\fR, \fB\-\-user\fR \fBUSER\fR
+\fB-u\fR, \fB--user\fR \fBUSER\fR
 Use
 \fBUSER\fR
 as user for authentication.
 .TP 22
-\fB\-V\fR, \fB\-\-version\fR
+\fB-V\fR, \fB--version\fR
 Show release information.
-
+.RE
 .PP
 .B cg
 reads the XOVER record from the news server for each group given on
@@ -101,7 +103,7 @@ where the user can delete all lines of unwanted binaries.
 After leaving the editor, the binaries corresponding to undelete lines
 are decoded and saved in the current directory.
 .PP
-Comments in 0\-parts or around the encoded data are saved in the file
+Comments in 0-parts or around the encoded data are saved in the file
 ``filename.desc'';
 broken files (problems during decoding, missing parts due to
 expiration) are saved as
@@ -121,7 +123,7 @@ Set the
 \fBNNTPSERVER\fR
 environment variable to choose your newsserver (which must support
 xover records), or use the
-\fB\-s\fR
+\fB-s\fR
 flag.  Both IPv4 and IPv6 are supported.
 .SH "BUGS"
 Mail suggestions and bug reports to <nih@giga.or.at>.
