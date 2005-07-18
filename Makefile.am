@@ -30,3 +30,11 @@ testdec_SOURCES=testdec.c crc.c decode.c util.c mime.c tables.c header.c \
 noinst_HEADERS=checkgroup.h crc.h decode.h getopt.h globals.h header.h mime.h \
 	newsrc.h output.h ranges.h sockets.h stream.h stream_types.h symbol.h \
 	util.h
+
+SUFFIXES=.man .mdoc .html
+.mdoc.man:
+	mdoc2man $< > $@.$$$$ && diff -I NiH $@.$$$$ $@ || mv $@.$$$$ $@; \
+	rm -f $@.$$$$
+
+.mdoc.html:
+	nroff -mdoc2html $< | sed -e "s,../html1/,," > $@.$$$$ && mv $@.$$$$ $@
