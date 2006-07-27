@@ -1,11 +1,13 @@
 AUTOMAKE_OPTIONS=dist-bzip2
 
-INCLUDES=-I$(srcdir)/libmap
+AM_CPPFLAGS=-I$(srcdir)/libmap
 
 SUBDIRS=libmap regress
 
+MAN1=	cg.mdoc
 bin_PROGRAMS=cg
-man_MANS=cg.1
+MANFMT=@MANFMT@
+man1_MANS=${MAN1:.mdoc=.${MANFMT}}
 noinst_PROGRAMS=testdec
 
 EXTRA_DIST=cg.mdoc cg.man

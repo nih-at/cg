@@ -1,6 +1,7 @@
-AC_INIT(checkgroup.c)
+AC_INIT
+AC_CONFIG_SRCDIR([checkgroup.c])
 AM_INIT_AUTOMAKE(cg, 0.4b)
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SUBDIRS(libmap)
 
 # We want these before the checks, so the checks can modify their values.
@@ -14,7 +15,7 @@ AC_PROG_CC
 AM_PROG_LEX
 
 # covered by LEX test above
-# AC_DECL_YYTEXT
+# AC_PROG_LEX
 
 dnl libraries
 
@@ -25,7 +26,10 @@ AC_CHECK_LIB(resolv, main)
 dnl headers
 
 AC_CHECK_HEADERS([stdarg.h])
-NIH_CHECK_DECL([#include "netdb.h"], h_errno)
+AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM([[#include <netdb.h>]],
+			 [[h_errno = 0;]])],
+        [AC_DEFINE([HAVE_DECL_H_ERRNO], [1], [Define to 1 if netdb.h provides a declaration for h_errno.])])
 
 dnl functions
 
@@ -43,7 +47,7 @@ in
 	*bsd*) MANFMT=mdoc;;
 	*) MANFMT=man;;
 esac
+AC_SUBST([MANFMT])
 
-AC_LINK_FILES(cg.${MANFMT}, cg.1)
-
-AC_OUTPUT(Makefile regress/Makefile)
+AC_CONFIG_FILES([Makefile regress/Makefile])
+AC_OUTPUT
