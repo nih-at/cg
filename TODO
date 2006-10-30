@@ -1,3 +1,5 @@
+- add regex.h replacement
+
 Does not compile on Solaris 2.9:
 In file included from sockets.c:40:
 sockets.h:51: warning: `AI_PASSIVE' redefined
