@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_file.c,v 1.4 2002/04/10 16:23:34 wiz Exp $
+  $NiH: stream_file.c,v 1.5 2002/04/16 22:46:13 wiz Exp $
 
   stream_file.c -- read single file
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -23,6 +23,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "stream.h"
 #include "util.h"

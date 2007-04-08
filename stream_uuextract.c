@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_uuextract.c,v 1.7 2002/04/16 22:46:15 wiz Exp $
+  $NiH: stream_uuextract.c,v 1.8 2002/05/10 21:09:22 wiz Exp $
 
   stream_uuextract.c -- extrace uuencode data
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -23,6 +23,7 @@
 */
 
 #include <stddef.h>
+#include <string.h>
 
 #include "header.h"
 #include "stream.h"

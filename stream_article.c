@@ -1,5 +1,5 @@
 /*
-  $NiH: stream_article.c,v 1.4 2002/04/10 16:23:32 wiz Exp $
+  $NiH: stream_article.c,v 1.5 2002/04/16 22:46:11 wiz Exp $
 
   stream_article.c -- read article
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -25,6 +25,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "header.h"
 #include "mime.h"
