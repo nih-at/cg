@@ -1,5 +1,5 @@
 /*
-  $NiH: util.c,v 1.26 2002/04/16 22:46:18 wiz Exp $
+  $NiH: util.c,v 1.27 2002/05/13 16:27:29 wiz Exp $
 
   util.c -- miscellaneous functions
   Copyright (C) 2002 Dieter Baron and Thomas Klausner
@@ -120,9 +120,10 @@ FILE *
 fopen_uniq(char **fnp)
 {
     char *s, b[8192];
-    int fd, i;
+    int fd, i, baselen;
     FILE *f;
-
+    const char *ext;
+    
     s=*fnp;
     if (s == NULL) {
 	s = "UNKNOWN";
@@ -130,6 +131,9 @@ fopen_uniq(char **fnp)
 	i = 1;
     }
     else {
+	baselen = strlen(s);
+	if ((ext=strrchr(s, '.')) != NULL)
+	    baselen = ext - s;
 	strcpy(b, s);
 	i = 0;
     }
@@ -149,7 +153,7 @@ fopen_uniq(char **fnp)
 	    return f;
 	}
 
-	sprintf(b, (*fnp) ? "%s.%d" : "%s.%03d", s, ++i);
+	sprintf(b+baselen, ".%03d%s", ++i, ext ? ext : "");
     }
 }
 
