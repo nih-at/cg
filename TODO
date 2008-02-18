@@ -1,3 +1,5 @@
+- add progress bar/spinner for parts which can take a long time (getting
+  groups, getting headers)
 - add regex.h replacement
 
 Does not compile on Solaris 2.9:
