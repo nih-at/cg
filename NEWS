@@ -1,3 +1,6 @@
+current:
+o build fix for systems with POSIX getline()
+
 0.4:
 o yenc support
 o rename broken files to filename.broken
