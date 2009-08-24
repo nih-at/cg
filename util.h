@@ -57,7 +57,6 @@ void copy_stream(stream *in, out_state *out);
 void debug(out_state *out, char *fmt, ...);
 char *expand(char *path);
 FILE *fopen_uniq(char **s);
-char *getline(FILE *f);
 void output_header(out_state *out, symbol name, struct header *h);
 void prdebug(int level, char *fmt, ...);
 void prdebug_init(int do_file, int do_stdout);

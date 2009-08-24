@@ -40,6 +40,7 @@
 
 #define DEBUG_FILE_NAME ".debug"
 
+static char *fgetline(FILE *);
 static FILE *debug_file;
 static int do_debug_file, do_debug_stdout;
 
@@ -183,8 +184,8 @@ rename_uniq(const char *from, char **to)
 
 
 
-char *
-getline(FILE *f)
+static char *
+fgetline(FILE *f)
 {
     static char *b;
     static int bsize;
@@ -238,7 +239,7 @@ getline(FILE *f)
 void
 skip_rest(FILE *f)
 {
-    while (getline(f) != NULL)
+    while (fgetline(f) != NULL)
 	;
 }
 
