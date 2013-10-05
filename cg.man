@@ -1,102 +1,89 @@
-.\" Converted with mdoc2man 0.2
-.\" from NiH: cg.mdoc,v 1.4 2002/04/19 01:00:11 wiz Exp 
-.\" $NiH: cg.mdoc,v 1.4 2002/04/19 01:00:11 wiz Exp $
-.\"
-.\" cg.mdoc \-- mdoc man page for cg
-.\" Copyright (C) 2002 Dieter Baron and Thomas Klausner
-.\"
-.\" This file is part of cg, a program to assemble and decode binary Usenet
-.\" postings.  The authors can be contacted at <nih@giga.or.at>
-.\"
-.\" This program is free software; you can redistribute it and/or modify
-.\" it under the terms of the GNU General Public License as published by
-.\" the Free Software Foundation; either version 2 of the License, or
-.\" (at your option) any later version.
-.\"
-.\" This program is distributed in the hope that it will be useful,
-.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
-.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-.\" GNU General Public License for more details.
-.\"
-.\" You should have received a copy of the GNU General Public License
-.\" along with this program; if not, write to the Free Software
-.\" Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-.\"
-.TH CG 1 "April 17, 2002" NiH
+.TH "CG" "1" "April 17, 2002" "NiH" "General Commands Manual"
+.nh
+.if n .ad l
 .SH "NAME"
-cg \- semi-automatic newsgroup binary downloader
+\fBcg\fR
+\- semi-automatic newsgroup binary downloader
 .SH "SYNOPSIS"
-.B cg
-[\fB-chmV\fR]
-[\fB-n\fR \fBrcfile\fR]
-[\fB-p\fR \fBpasswd\fR]
-[\fB-s\fR \fBserver\fR]
-[\fB-u\fR \fBuser\fR]
-\fBgroup ...\fR
+.HP 3n
+\fBcg\fR
+[\fB\-chmV\fR]
+[\fB\-n\fR\ \fIrcfile\fR]
+[\fB\-p\fR\ \fIpasswd\fR]
+[\fB\-s\fR\ \fIserver\fR]
+[\fB\-u\fR\ \fIuser\fR]
+\fIgroup\ ...\fR
 .SH "DESCRIPTION"
-.B cg
+\fBcg\fR
 is a semi-automatic newsgroup binary downloader.
 It assembles parts based on subject headers and then offers them in an
 editor for the user to choose which files he really wants.
 .PP
 It supports decoding data in the following formats:
-.RS
-.TP 10
+.RS 6n
+.PD 0
+.TP 10n
 MIME
 The following message formats are supported: multipart/mixed,
 message/partial; the following encodings are supported:
 base64, quoted printable, x-uuencode.
-.TP 10
+.TP 10n
 uuencode
 Both single- and multi-posting binaries.
-.TP 10
+.TP 10n
 yEnc
 Both single- and multi-posting binaries.
 .RE
+.PD
 .PP
 The following flags are supported:
-.RS
-.TP 22
-\fB-c\fR, \fB--mark-complete\fR
+.RS 6n
+.PD 0
+.TP 22n
+\fB\-c\fR, \fB\--mark-complete\fR
+.br
 Mark only parts of complete files as read.
-.TP 22
-\fB-h\fR, \fB--help\fR
+.TP 22n
+\fB\-h\fR, \fB\--help\fR
 Show a short usage.
-.TP 22
-\fB-n\fR, \fB--newsrc\fR \fBFILE\fR
+.TP 22n
+\fB\-n\fR, \fB\--newsrc\fR \fIFILE\fR
 Use
-\fBFILE\fR
+\fIFILE\fR
 as newsrc file.
-.TP 22
-\fB-p\fR, \fB--pass\fR \fBPASS\fR
+.TP 22n
+\fB\-p\fR, \fB\--pass\fR \fIPASS\fR
 Use
-\fBPASS\fR
+\fIPASS\fR
 as password for authentication.
-.TP 22
-\fB-s\fR, \fB--server\fR \fBSERVER\fR
+.TP 22n
+\fB\-s\fR, \fB\--server\fR \fISERVER\fR
+.br
 Use
-\fBSERVER\fR
-as NNTP server.  Both IPv4 and IPv6 are supported.
-.TP 22
-\fB-u\fR, \fB--user\fR \fBUSER\fR
+\fISERVER\fR
+as NNTP server.
+Both IPv4 and IPv6 are supported.
+.TP 22n
+\fB\-u\fR, \fB\--user\fR \fIUSER\fR
 Use
-\fBUSER\fR
+\fIUSER\fR
 as user for authentication.
-.TP 22
-\fB-V\fR, \fB--version\fR
+.TP 22n
+\fB\-V\fR, \fB\--version\fR
 Show release information.
 .RE
+.PD
 .PP
-.B cg
+\fBcg\fR
 reads the XOVER record from the news server for each group given on
 the command line and tries to assemble all unread binaries in this
 group.
 Then
-.B cg
+\fBcg\fR
 spawns an editor (taken from the
-\fBVISUAL\fR
+\fRVISUAL\fR
 or
-\fBEDITOR\fR
+\fREDITOR\fR
 environment variables, or defaulting to
 vi(1))
 where the user can delete all lines of unwanted binaries.
@@ -104,26 +91,28 @@ After leaving the editor, the binaries corresponding to undelete lines
 are decoded and saved in the current directory.
 .PP
 Comments in 0-parts or around the encoded data are saved in the file
-``filename.desc'';
+\(lqfilename.desc\(rq;
 broken files (problems during decoding, missing parts due to
 expiration) are saved as
-``filename.broken''.
+\(lqfilename.broken\(rq.
 Files are not overwritten, rather
-``.1'',
-``.2'',
+\(lq.1\(rq,
+\(lq.2\(rq,
 \&... is appended to the filename to make it unique.
 .SH "ENVIRONMENT"
 The
-\fBVISUAL\fR
+\fRVISUAL\fR
 and
-\fBEDITOR\fR
+\fREDITOR\fR
 environment variables are honored in this order.
 .PP
 Set the
-\fBNNTPSERVER\fR
+\fRNNTPSERVER\fR
 environment variable to choose your newsserver (which must support
 xover records), or use the
-\fB-s\fR
-flag.  Both IPv4 and IPv6 are supported.
+\fB\-s\fR
+flag.
+Both IPv4 and IPv6 are supported.
 .SH "BUGS"
-Mail suggestions and bug reports to <nih@giga.or.at>.
+Mail suggestions and bug reports to
+<\fInih@giga.or.at\fR>.
