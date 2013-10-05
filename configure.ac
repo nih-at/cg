@@ -1,6 +1,6 @@
-AC_INIT
+AC_INIT([cg], [0.4b])
 AC_CONFIG_SRCDIR([checkgroup.c])
-AM_INIT_AUTOMAKE(cg, 0.4b)
+AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SUBDIRS(libmap)
 

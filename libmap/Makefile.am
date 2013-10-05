@@ -25,6 +25,6 @@ CLEANFILES=testmap
 TESTS=testmap
 
 
-version.c: configure.in
+version.c: configure.ac
 	echo 'const char map_version[] = "$(PACKAGE) (version $(VERSION))";' \
 		> version.c

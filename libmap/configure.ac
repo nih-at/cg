@@ -2,9 +2,10 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl init
 
-AC_INIT(strhash.c)
+AC_INIT([libmap], [0.2])
+AC_CONFIG_SRCDIR(strhash.c)
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(libmap, 0.2)
+AM_INIT_AUTOMAKE
 
 # We want these before the checks, so the checks can modify their values.
 test -z "$CFLAGS" && CFLAGS=-g auto_cflags=1
