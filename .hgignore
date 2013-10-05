@@ -1,6 +1,6 @@
 (^|/)Makefile$
 (^|/)Makefile.in$
-/.deps/
+(^|/).deps/
 /.libs/
 \.DS_Store$
 \.la$
@@ -31,5 +31,14 @@
 ^regress/.*log$
 ^regress/.*trs$
 ^(libmap/|)stamp-h1$
-^test-driver$
+^(libmap/|)test-driver$
+^cg$
+^testdec$
 ~$
+^libmap/libmap.a$
+^libmap/test-suite.log$
+^libmap/testmap$
+^libmap/testmap.log$
+^libmap/testmap.trs$
+#libmap/version.c$
+#parserc.c$
