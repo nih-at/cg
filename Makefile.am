@@ -37,8 +37,8 @@ CLEANFILES=	parserc.c
 
 SUFFIXES=.man .mdoc .html
 .mdoc.man:
-	mdoc2man $< > $@.$$$$ && diff -I NiH $@.$$$$ $@ || mv $@.$$$$ $@; \
+	mandoc -T man $< | sed '/TH/s,"NetBSD [^"]*","NiH",' > $@.$$$$ && diff -I NiH $@.$$$$ $@ || mv $@.$$$$ $@; \
 	rm -f $@.$$$$
 
 .mdoc.html:
-	nroff -mdoc2html $< | sed -e "s,../html[0-9]/,," > $@.$$$$ && mv $@.$$$$ $@
+	mandoc -Thtml -Oman="%N.html",style=../nih-man.css $< > $@.$$$$ && mv $@.$$$$ $@
