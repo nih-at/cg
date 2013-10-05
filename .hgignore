@@ -40,5 +40,5 @@
 ^libmap/testmap$
 ^libmap/testmap.log$
 ^libmap/testmap.trs$
-#libmap/version.c$
-#parserc.c$
+^libmap/version.c$
+^parserc.c$
