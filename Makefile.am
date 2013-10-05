@@ -33,6 +33,8 @@ noinst_HEADERS=checkgroup.h crc.h decode.h getopt.h globals.h header.h mime.h \
 	newsrc.h output.h ranges.h sockets.h stream.h stream_types.h symbol.h \
 	util.h
 
+CLEANFILES=	parserc.c
+
 SUFFIXES=.man .mdoc .html
 .mdoc.man:
 	mdoc2man $< > $@.$$$$ && diff -I NiH $@.$$$$ $@ || mv $@.$$$$ $@; \

@@ -21,6 +21,7 @@ testmap_SOURCES=testmap.c
 testmap_LDADD=libmap.a
 
 CLEANFILES=testmap
+DISTCLEANFILES=version.c
 
 TESTS=testmap
 
