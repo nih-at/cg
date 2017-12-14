@@ -16,4 +16,4 @@ If you make a binary distribution, please include a pointer to the
 distribution site:
 >    https://nih.at/cg/
 
-Mail suggestions and bug reports to <nih@giga.or.at>.
+Mail suggestions and bug reports to cg@nih.at.
