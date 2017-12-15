@@ -1,5 +1,3 @@
-AUTOMAKE_OPTIONS=dist-bzip2
-
 AM_CPPFLAGS=-I$(srcdir)/libmap
 
 SUBDIRS=libmap regress
